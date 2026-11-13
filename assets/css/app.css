@@ -1,0 +1,20 @@
+/* Source Tailwind. Compiler avec : uv run python scripts/tailwind.py build */
+@import "tailwindcss" source(none);
+
+@source "../../templates";
+@source "../../*/templates";
+@source "../../*/*.py";
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Zones tactiles de 44 px au moins. */
+  button,
+  [type="button"],
+  [type="submit"],
+  select {
+    min-height: 2.75rem;
+  }
+}

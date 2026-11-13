@@ -1,2 +1,25 @@
 docs/*
 CLAUDE.md
+
+# Secrets et données locales
+.env
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Django
+staticfiles/
+
+# Outils téléchargés (exécutable Tailwind)
+.tools/
+
+# Éditeurs et système
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,37 @@
+[project]
+name = "tcf-so"
+version = "0.1.0"
+description = "Plateforme personnelle d'entraînement au TCF tout public sur ordinateur"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "django>=5.2,<5.3",
+    "django-environ>=0.14",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0",
+    "pytest-django>=4.11",
+    "ruff>=0.15",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["test_*.py"]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["static", "staticfiles", "data", ".tools"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "DJ", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"*/migrations/*" = ["E501"]
