@@ -61,3 +61,15 @@
     @apply font-medium text-blue-800 underline underline-offset-2;
   }
 }
+
+@layer components {
+  .bo-tab {
+    @apply flex min-h-11 shrink-0 items-center border-b-2 border-transparent px-3 font-medium text-slate-700 hover:text-blue-900;
+  }
+  .bo-tab-active {
+    @apply border-blue-800 text-blue-900;
+  }
+  .form-stack input[type="file"] {
+    @apply py-2;
+  }
+}

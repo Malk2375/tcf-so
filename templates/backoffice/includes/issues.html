@@ -1,0 +1,9 @@
+<ul class="mt-3 space-y-1 text-sm">
+  {% for issue in issues %}
+    <li class="break-words">
+      {% if show_files and issue.file %}<span class="font-mono">{{ issue.file }}</span>{% endif %}
+      {% if issue.slot %}<span class="font-semibold">Emplacement {{ issue.slot }}</span> —{% endif %}
+      {{ issue.message }}
+    </li>
+  {% endfor %}
+</ul>

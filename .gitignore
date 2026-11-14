@@ -3,7 +3,7 @@ CLAUDE.md
 
 # Secrets et données locales
 .env
-data/
+/data/
 
 # Python
 __pycache__/

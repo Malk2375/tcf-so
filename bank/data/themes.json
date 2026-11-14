@@ -1,0 +1,290 @@
+[
+  {
+    "id": "vie_quotidienne",
+    "label": "Vie quotidienne"
+  },
+  {
+    "id": "famille",
+    "label": "Famille"
+  },
+  {
+    "id": "rencontres",
+    "label": "Rencontres et amitié"
+  },
+  {
+    "id": "souvenirs_enfance",
+    "label": "Souvenirs d'enfance"
+  },
+  {
+    "id": "logement",
+    "label": "Logement"
+  },
+  {
+    "id": "voisinage",
+    "label": "Voisinage"
+  },
+  {
+    "id": "ville",
+    "label": "Ville et quartier"
+  },
+  {
+    "id": "urbanisme",
+    "label": "Urbanisme"
+  },
+  {
+    "id": "campagne",
+    "label": "Vie à la campagne"
+  },
+  {
+    "id": "commerces",
+    "label": "Commerces"
+  },
+  {
+    "id": "achats",
+    "label": "Achats et consommation"
+  },
+  {
+    "id": "alimentation",
+    "label": "Alimentation"
+  },
+  {
+    "id": "restaurant",
+    "label": "Restaurant et cuisine"
+  },
+  {
+    "id": "sante",
+    "label": "Santé"
+  },
+  {
+    "id": "sport",
+    "label": "Sport"
+  },
+  {
+    "id": "bien_etre",
+    "label": "Bien-être"
+  },
+  {
+    "id": "travail",
+    "label": "Travail"
+  },
+  {
+    "id": "recherche_emploi",
+    "label": "Recherche d'emploi"
+  },
+  {
+    "id": "entreprise",
+    "label": "Entreprise"
+  },
+  {
+    "id": "teletravail",
+    "label": "Télétravail"
+  },
+  {
+    "id": "etudes",
+    "label": "Études"
+  },
+  {
+    "id": "ecole",
+    "label": "École"
+  },
+  {
+    "id": "formation",
+    "label": "Formation continue"
+  },
+  {
+    "id": "langue",
+    "label": "Langue et langues"
+  },
+  {
+    "id": "transports",
+    "label": "Transports"
+  },
+  {
+    "id": "voyages",
+    "label": "Voyages"
+  },
+  {
+    "id": "tourisme",
+    "label": "Tourisme"
+  },
+  {
+    "id": "vacances",
+    "label": "Vacances"
+  },
+  {
+    "id": "meteo",
+    "label": "Météo et climat"
+  },
+  {
+    "id": "environnement",
+    "label": "Environnement"
+  },
+  {
+    "id": "energie",
+    "label": "Énergie"
+  },
+  {
+    "id": "animaux",
+    "label": "Animaux"
+  },
+  {
+    "id": "nature",
+    "label": "Nature"
+  },
+  {
+    "id": "agriculture",
+    "label": "Agriculture"
+  },
+  {
+    "id": "culture",
+    "label": "Culture"
+  },
+  {
+    "id": "cinema",
+    "label": "Cinéma"
+  },
+  {
+    "id": "musique",
+    "label": "Musique"
+  },
+  {
+    "id": "litterature",
+    "label": "Littérature"
+  },
+  {
+    "id": "arts",
+    "label": "Arts et musées"
+  },
+  {
+    "id": "patrimoine",
+    "label": "Patrimoine"
+  },
+  {
+    "id": "fetes",
+    "label": "Fêtes et traditions"
+  },
+  {
+    "id": "loisirs",
+    "label": "Loisirs"
+  },
+  {
+    "id": "sorties",
+    "label": "Sorties"
+  },
+  {
+    "id": "medias",
+    "label": "Médias"
+  },
+  {
+    "id": "numerique",
+    "label": "Numérique"
+  },
+  {
+    "id": "reseaux_sociaux",
+    "label": "Réseaux sociaux"
+  },
+  {
+    "id": "sciences",
+    "label": "Sciences"
+  },
+  {
+    "id": "technologie",
+    "label": "Technologie"
+  },
+  {
+    "id": "innovation",
+    "label": "Innovation"
+  },
+  {
+    "id": "administration",
+    "label": "Démarches administratives"
+  },
+  {
+    "id": "vie_publique",
+    "label": "Vie publique"
+  },
+  {
+    "id": "citoyennete",
+    "label": "Citoyenneté"
+  },
+  {
+    "id": "justice",
+    "label": "Justice et droit"
+  },
+  {
+    "id": "economie",
+    "label": "Économie"
+  },
+  {
+    "id": "argent",
+    "label": "Argent et banque"
+  },
+  {
+    "id": "societe",
+    "label": "Société"
+  },
+  {
+    "id": "solidarite",
+    "label": "Solidarité et bénévolat"
+  },
+  {
+    "id": "generations",
+    "label": "Générations"
+  },
+  {
+    "id": "egalite",
+    "label": "Égalité"
+  },
+  {
+    "id": "immigration",
+    "label": "Immigration et intégration"
+  },
+  {
+    "id": "histoire",
+    "label": "Histoire"
+  },
+  {
+    "id": "philosophie",
+    "label": "Idées et philosophie"
+  },
+  {
+    "id": "mode",
+    "label": "Mode"
+  },
+  {
+    "id": "architecture",
+    "label": "Architecture"
+  },
+  {
+    "id": "gastronomie",
+    "label": "Gastronomie"
+  },
+  {
+    "id": "securite",
+    "label": "Sécurité routière"
+  },
+  {
+    "id": "services_publics",
+    "label": "Services publics"
+  },
+  {
+    "id": "associations",
+    "label": "Vie associative"
+  },
+  {
+    "id": "jardinage",
+    "label": "Jardinage"
+  },
+  {
+    "id": "bricolage",
+    "label": "Bricolage"
+  },
+  {
+    "id": "evenements",
+    "label": "Événements"
+  },
+  {
+    "id": "psychologie",
+    "label": "Psychologie"
+  }
+]

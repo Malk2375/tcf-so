@@ -1,15 +1,23 @@
 from django.shortcuts import redirect, render
 
-# Durées et nombres de questions affichés sur l'accueil (SPEC 4.1).
-# Ils seront lus dans les formats en base une fois `seed_formats` en place (étape 2).
-MODES = [
-    {"label": "Rapide", "questions": 24, "minutes": 26},
-    {"label": "Moyen", "questions": 46, "minutes": 48},
-    {"label": "Réel", "questions": 91, "minutes": 95},
-]
+from bank.models import ExamFormat
+
+
+def mode_cards() -> list[dict]:
+    """Nombre de questions et durée de chaque mode, lus dans les formats en base (SPEC 4.1)."""
+    formats = ExamFormat.objects.filter(is_active=True).prefetch_related("sections")
+    return [
+        {
+            "format": exam_format,
+            "label": exam_format.get_mode_display(),
+            "questions": exam_format.n_items,
+            "minutes": round(exam_format.duration_seconds / 60),
+        }
+        for exam_format in formats
+    ]
 
 
 def home(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
-    return render(request, "home.html", {"modes": MODES})
+    return render(request, "home.html", {"modes": mode_cards()})

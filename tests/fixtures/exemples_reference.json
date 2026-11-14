@@ -1,0 +1,1026 @@
+{
+  "schema_version": 1,
+  "format": "tcf_tp_so_reel",
+  "brief_id": "exemples-reference",
+  "items": [
+    {
+      "slot": 1,
+      "section": "CO",
+      "level": "A1",
+      "subtype": "question_reponse",
+      "stimulus_text": null,
+      "audio_script": {
+        "style": "question posée lors d'une première rencontre, ton aimable",
+        "speakers": {
+          "F1": {
+            "gender": "F"
+          }
+        },
+        "lines": [
+          {
+            "speaker": "F1",
+            "text": "Bonjour ! Vous vous appelez comment ?"
+          }
+        ]
+      },
+      "question": "Choisissez la réponse qui convient.",
+      "options": [
+        "J'ai vingt-cinq ans.",
+        "Je m'appelle Karim.",
+        "Je vais très bien.",
+        "J'habite à Lille."
+      ],
+      "correct_index": 1,
+      "options_mode": "audio_letters",
+      "explanation": "La femme demande un nom : seule la réponse « Je m'appelle Karim » convient. Les autres réponses donnent l'âge, l'état de santé ou la ville.",
+      "tags": {
+        "skill": "explicite",
+        "theme": "rencontres"
+      }
+    },
+    {
+      "slot": 2,
+      "section": "CO",
+      "level": "A1",
+      "subtype": "annonce",
+      "stimulus_text": null,
+      "audio_script": {
+        "style": "annonce au micro dans un magasin, ton neutre",
+        "speakers": {
+          "F1": {
+            "gender": "F"
+          }
+        },
+        "lines": [
+          {
+            "speaker": "F1",
+            "text": "Chers clients, votre magasin ferme dans dix minutes. Merci de vous diriger vers les caisses. Bonne soirée !"
+          }
+        ]
+      },
+      "question": "Que doivent faire les clients ?",
+      "options": [
+        "Aller aux caisses pour payer.",
+        "Attendre dix minutes dehors.",
+        "Revenir le lendemain matin.",
+        "Demander de l'aide à un vendeur."
+      ],
+      "correct_index": 0,
+      "options_mode": "text",
+      "explanation": "L'annonce demande de « se diriger vers les caisses » avant la fermeture. Elle ne parle ni d'attendre dehors, ni de revenir, ni d'un vendeur.",
+      "tags": {
+        "skill": "explicite",
+        "theme": "commerces"
+      }
+    },
+    {
+      "slot": 3,
+      "section": "CO",
+      "level": "A2",
+      "subtype": "message_vocal",
+      "stimulus_text": null,
+      "audio_script": {
+        "style": "message laissé sur un répondeur, ton amical et un peu gêné",
+        "speakers": {
+          "M1": {
+            "gender": "M"
+          }
+        },
+        "lines": [
+          {
+            "speaker": "M1",
+            "text": "Salut Inès, c'est Hugo. Je suis désolé, je ne peux pas venir au cinéma ce soir, je dois travailler tard. On peut y aller samedi après-midi, si tu veux ? Rappelle-moi !"
+          }
+        ]
+      },
+      "question": "Pourquoi Hugo appelle-t-il Inès ?",
+      "options": [
+        "Pour l'inviter à dîner samedi.",
+        "Pour lui demander du travail.",
+        "Pour annuler une sortie prévue.",
+        "Pour lui raconter un film."
+      ],
+      "correct_index": 2,
+      "options_mode": "text",
+      "explanation": "Hugo dit qu'il ne peut pas venir au cinéma ce soir : il annule la sortie et propose une autre date. Il ne parle pas de dîner, ne cherche pas de travail et n'a pas vu le film.",
+      "tags": {
+        "skill": "global",
+        "theme": "sorties"
+      }
+    },
+    {
+      "slot": 4,
+      "section": "CO",
+      "level": "A2",
+      "subtype": "dialogue",
+      "stimulus_text": null,
+      "audio_script": {
+        "style": "conversation téléphonique, ton poli",
+        "speakers": {
+          "F1": {
+            "gender": "F"
+          },
+          "M1": {
+            "gender": "M"
+          }
+        },
+        "lines": [
+          {
+            "speaker": "F1",
+            "text": "Bonjour, j'appelle pour l'appartement à louer. Il est toujours libre ?"
+          },
+          {
+            "speaker": "M1",
+            "text": "Oui, madame. Il y a deux chambres et un balcon."
+          },
+          {
+            "speaker": "F1",
+            "text": "Très bien. Est-ce que je peux le visiter demain ?"
+          },
+          {
+            "speaker": "M1",
+            "text": "Demain, non. Mais jeudi à dix-huit heures, c'est possible."
+          }
+        ]
+      },
+      "question": "Quand la visite est-elle possible ?",
+      "options": [
+        "Demain matin.",
+        "Ce soir.",
+        "Samedi à dix heures.",
+        "Jeudi en fin de journée."
+      ],
+      "correct_index": 3,
+      "options_mode": "text",
+      "explanation": "L'homme refuse pour demain et propose « jeudi à dix-huit heures », donc jeudi en fin de journée. Ni ce soir ni samedi ne sont mentionnés.",
+      "tags": {
+        "skill": "explicite",
+        "theme": "logement"
+      }
+    },
+    {
+      "slot": 5,
+      "section": "CO",
+      "level": "B1",
+      "subtype": "dialogue",
+      "stimulus_text": null,
+      "audio_script": {
+        "style": "conversation entre deux amis, ton détendu",
+        "speakers": {
+          "F1": {
+            "gender": "F"
+          },
+          "M1": {
+            "gender": "M"
+          }
+        },
+        "lines": [
+          {
+            "speaker": "F1",
+            "text": "Alors, ce nouveau poste, ça se passe comment ?"
+          },
+          {
+            "speaker": "M1",
+            "text": "Plutôt bien. L'équipe est sympa et le travail m'intéresse. Le seul problème, c'est le trajet : une heure et demie matin et soir."
+          },
+          {
+            "speaker": "F1",
+            "text": "Ah oui, c'est long. Tu ne peux pas travailler de chez toi ?"
+          },
+          {
+            "speaker": "M1",
+            "text": "Si, à partir du mois prochain, deux jours par semaine. Ça va tout changer."
+          }
+        ]
+      },
+      "question": "Qu'est-ce qui dérange cet homme dans son nouveau travail ?",
+      "options": [
+        "Le temps passé dans les transports.",
+        "L'ambiance avec ses collègues.",
+        "Le manque d'intérêt des tâches.",
+        "L'obligation de travailler chez lui."
+      ],
+      "correct_index": 0,
+      "options_mode": "text",
+      "explanation": "Il dit que « le seul problème, c'est le trajet ». Il trouve au contraire l'équipe sympathique et le travail intéressant, et le travail à domicile est pour lui une bonne nouvelle.",
+      "tags": {
+        "skill": "explicite",
+        "theme": "travail"
+      }
+    },
+    {
+      "slot": 6,
+      "section": "CO",
+      "level": "B1",
+      "subtype": "interview",
+      "stimulus_text": null,
+      "audio_script": {
+        "style": "interview pour une radio locale, ton chaleureux",
+        "speakers": {
+          "F1": {
+            "gender": "F"
+          },
+          "M1": {
+            "gender": "M"
+          }
+        },
+        "lines": [
+          {
+            "speaker": "F1",
+            "text": "Vous courez tous les matins depuis dix ans. Qu'est-ce qui vous motive ?"
+          },
+          {
+            "speaker": "M1",
+            "text": "Au début, je voulais simplement perdre du poids. Mais aujourd'hui, ce n'est plus la raison. Courir, c'est mon moment à moi : je ne pense à rien, je respire, et j'arrive au bureau de bonne humeur. Si je ne cours pas, mes collègues le remarquent tout de suite !"
+          }
+        ]
+      },
+      "question": "Pourquoi cet homme court-il aujourd'hui ?",
+      "options": [
+        "Pour préparer une compétition.",
+        "Pour maigrir rapidement.",
+        "Pour se sentir bien dans sa tête.",
+        "Pour retrouver ses collègues."
+      ],
+      "correct_index": 2,
+      "options_mode": "text",
+      "explanation": "Il explique que courir est « son moment à lui » et qu'il arrive de bonne humeur : il court pour son bien-être. Maigrir était sa raison au début, plus maintenant ; il ne parle d'aucune compétition.",
+      "tags": {
+        "skill": "inference",
+        "theme": "sport"
+      }
+    },
+    {
+      "slot": 7,
+      "section": "CO",
+      "level": "B2",
+      "subtype": "interview",
+      "stimulus_text": null,
+      "audio_script": {
+        "style": "interview d'une élue à la radio, ton posé",
+        "speakers": {
+          "M1": {
+            "gender": "M"
+          },
+          "F1": {
+            "gender": "F"
+          }
+        },
+        "lines": [
+          {
+            "speaker": "M1",
+            "text": "Votre ville a décidé d'éteindre l'éclairage public entre minuit et cinq heures. Les habitants ont-ils bien réagi ?"
+          },
+          {
+            "speaker": "F1",
+            "text": "Pas tous, et je le comprends. Certains ont eu peur pour leur sécurité, surtout les personnes qui rentrent tard du travail. Mais après un an, les chiffres de la police ne montrent aucune hausse des vols ni des agressions. En revanche, la facture d'électricité de la commune a baissé d'un tiers, et on revoit des espèces d'oiseaux qui avaient disparu du centre. Aujourd'hui, les critiques sont devenues rares. Je crois que les gens avaient surtout besoin de preuves."
+          }
+        ]
+      },
+      "question": "Selon cette élue, pourquoi l'opposition à la mesure a-t-elle diminué ?",
+      "options": [
+        "Parce que la mairie a rallumé certaines rues.",
+        "Parce que les résultats ont rassuré les habitants.",
+        "Parce que la police a renforcé ses patrouilles.",
+        "Parce que les opposants ont quitté le centre-ville."
+      ],
+      "correct_index": 1,
+      "options_mode": "text",
+      "explanation": "Elle conclut que « les gens avaient surtout besoin de preuves » : ce sont les chiffres obtenus après un an qui ont rassuré. Elle ne dit pas que des rues ont été rallumées ni que la police patrouille davantage.",
+      "tags": {
+        "skill": "inference",
+        "theme": "environnement"
+      }
+    },
+    {
+      "slot": 8,
+      "section": "CO",
+      "level": "B2",
+      "subtype": "emission_radio",
+      "stimulus_text": null,
+      "audio_script": {
+        "style": "chronique économique à la radio, ton vif",
+        "speakers": {
+          "F1": {
+            "gender": "F"
+          }
+        },
+        "lines": [
+          {
+            "speaker": "F1",
+            "text": "On l'annonçait mort, et pourtant le livre de poche se porte à merveille. L'an dernier, ses ventes ont progressé de huit pour cent, alors que celles des grands formats reculaient. Le prix joue, bien sûr : en période d'inflation, on hésite à dépenser vingt-deux euros pour un roman. Mais les libraires avancent une autre explication. Les jeunes lecteurs, très présents sur les réseaux sociaux, s'y recommandent des titres parfois anciens, que l'on ne trouve plus qu'en poche. Résultat : des romans publiés il y a quinze ans reviennent en tête des ventes."
+          }
+        ]
+      },
+      "question": "D'après cette chronique, qu'est-ce qui explique en partie le succès du livre de poche ?",
+      "options": [
+        "La baisse générale du prix des romans.",
+        "La fermeture de nombreuses librairies.",
+        "La publication de nouveaux auteurs.",
+        "Les conseils de lecture échangés en ligne."
+      ],
+      "correct_index": 3,
+      "options_mode": "text",
+      "explanation": "Les libraires expliquent que les jeunes lecteurs se recommandent des titres sur les réseaux sociaux. Le prix des romans n'a pas baissé, aucune fermeture de librairie n'est évoquée, et il s'agit de titres anciens, pas de nouveaux auteurs.",
+      "tags": {
+        "skill": "explicite",
+        "theme": "culture"
+      }
+    },
+    {
+      "slot": 9,
+      "section": "CO",
+      "level": "C1",
+      "subtype": "emission_radio",
+      "stimulus_text": null,
+      "audio_script": {
+        "style": "billet d'humeur à la radio, ton mesuré et légèrement ironique",
+        "speakers": {
+          "M1": {
+            "gender": "M"
+          }
+        },
+        "lines": [
+          {
+            "speaker": "M1",
+            "text": "La semaine de quatre jours fait rêver, et les premières expériences menées en entreprise semblent donner raison à ses défenseurs : moins d'absences, des salariés plus fidèles, une productivité qui se maintient. Je voudrais pourtant inviter à un peu de prudence. Ces expériences reposent presque toutes sur le volontariat : les entreprises qui s'y engagent sont celles qui y étaient déjà prêtes, avec des équipes motivées et une organisation souple. On peut douter que les mêmes effets se retrouvent dans un hôpital ou sur une chaîne de montage. Autrement dit, ce que l'on mesure aujourd'hui, c'est moins l'efficacité de la semaine de quatre jours que la bonne santé des entreprises qui l'ont choisie."
+          }
+        ]
+      },
+      "question": "Quelle réserve ce chroniqueur exprime-t-il ?",
+      "options": [
+        "Les salariés concernés travaillent en réalité davantage.",
+        "Les entreprises testées ne sont pas représentatives.",
+        "Les gains de productivité sont restés très faibles.",
+        "Les études ont été financées par les employeurs."
+      ],
+      "correct_index": 1,
+      "options_mode": "text",
+      "explanation": "Il souligne que les expériences reposent sur le volontariat : les entreprises qui testent étaient déjà prêtes, donc on ne peut pas généraliser. Il ne conteste pas les résultats mesurés et ne parle ni d'heures supplémentaires ni du financement des études.",
+      "tags": {
+        "skill": "opinion",
+        "theme": "travail"
+      }
+    },
+    {
+      "slot": 10,
+      "section": "CO",
+      "level": "C1",
+      "subtype": "expose",
+      "stimulus_text": null,
+      "audio_script": {
+        "style": "extrait de conférence, ton pédagogique",
+        "speakers": {
+          "F1": {
+            "gender": "F"
+          }
+        },
+        "lines": [
+          {
+            "speaker": "F1",
+            "text": "On présente souvent la mémoire comme un entrepôt où les souvenirs seraient rangés, intacts, en attendant qu'on vienne les chercher. Rien n'est plus faux. Chaque fois que nous nous rappelons un événement, nous le reconstruisons à partir de fragments, et nous comblons les vides avec ce que nous savons aujourd'hui. Un souvenir que l'on raconte souvent est donc, paradoxalement, un souvenir que l'on a beaucoup modifié. Les tribunaux commencent à en tirer les conséquences : un témoin parfaitement sincère, et très sûr de lui, peut décrire avec précision une scène qui ne s'est jamais déroulée ainsi. La certitude n'est pas une preuve d'exactitude."
+          }
+        ]
+      },
+      "question": "Que veut montrer la conférencière ?",
+      "options": [
+        "La mémoire se transforme à chaque rappel.",
+        "Les témoins mentent souvent sans raison.",
+        "Les souvenirs anciens s'effacent les premiers.",
+        "La justice se méfie à tort des témoignages."
+      ],
+      "correct_index": 0,
+      "options_mode": "text",
+      "explanation": "Toute l'intervention explique que l'on reconstruit un souvenir chaque fois qu'on se le rappelle. Le témoin cité est sincère, il ne ment pas ; elle ne dit rien de l'effacement des souvenirs anciens et approuve la prudence des tribunaux.",
+      "tags": {
+        "skill": "global",
+        "theme": "sciences"
+      }
+    },
+    {
+      "slot": 11,
+      "section": "CO",
+      "level": "C2",
+      "subtype": "expose",
+      "stimulus_text": null,
+      "audio_script": {
+        "style": "extrait de conférence d'un linguiste, ton érudit et un peu malicieux",
+        "speakers": {
+          "M1": {
+            "gender": "M"
+          }
+        },
+        "lines": [
+          {
+            "speaker": "M1",
+            "text": "Il est de bon ton de déplorer l'appauvrissement de la langue, et chaque génération croit assister à son agonie. Les puristes du dix-septième siècle s'alarmaient déjà de tournures que nous tenons aujourd'hui pour classiques. Ce que l'on prend pour un déclin n'est le plus souvent qu'un déplacement : des mots sortent de l'usage, d'autres y entrent, et la somme reste remarquablement stable. Ce qui change, en revanche, c'est la visibilité des écarts. Autrefois, l'immense majorité des échanges quotidiens ne laissait aucune trace ; aujourd'hui, ils s'écrivent et se conservent. Nous ne parlons pas plus mal que nos aïeux : nous lisons désormais ce qu'eux se contentaient de dire. La nostalgie compare donc l'écrit soigné d'hier à l'oral transcrit d'aujourd'hui, ce qui revient à opposer un portrait officiel à une photographie prise sur le vif."
+          }
+        ]
+      },
+      "question": "Selon ce linguiste, sur quoi repose l'impression d'un déclin de la langue ?",
+      "options": [
+        "Sur la disparition rapide du vocabulaire soutenu.",
+        "Sur l'influence croissante des langues étrangères.",
+        "Sur une comparaison entre des usages de nature différente.",
+        "Sur l'abandon de l'enseignement de la grammaire."
+      ],
+      "correct_index": 2,
+      "options_mode": "text",
+      "explanation": "Il explique que l'on compare l'écrit soigné d'autrefois à l'oral transcrit d'aujourd'hui, deux usages qui ne sont pas comparables. Il affirme au contraire que le vocabulaire reste stable, et ne mentionne ni les langues étrangères ni l'école.",
+      "tags": {
+        "skill": "inference",
+        "theme": "langue"
+      }
+    },
+    {
+      "slot": 12,
+      "section": "CO",
+      "level": "C2",
+      "subtype": "debat",
+      "stimulus_text": null,
+      "audio_script": {
+        "style": "débat radiophonique, échange courtois mais ferme",
+        "speakers": {
+          "F1": {
+            "gender": "F"
+          },
+          "M1": {
+            "gender": "M"
+          }
+        },
+        "lines": [
+          {
+            "speaker": "F1",
+            "text": "Vous défendez l'idée que les villes devraient cesser de vouloir attirer toujours plus d'habitants. N'est-ce pas renoncer à toute ambition ?"
+          },
+          {
+            "speaker": "M1",
+            "text": "C'est renoncer à une ambition bien particulière, celle qui confond la taille et la réussite. Depuis trente ans, les élus mesurent leur bilan au nombre de nouveaux arrivants, comme un chef d'entreprise compterait ses clients. Or une ville n'est pas une marque. Passé un certain seuil, chaque habitant supplémentaire coûte plus qu'il ne rapporte : il faut des écoles, des réseaux, des transports, que l'on finance en construisant encore, donc en attirant encore. C'est une fuite en avant que l'on habille du nom flatteur d'attractivité."
+          },
+          {
+            "speaker": "F1",
+            "text": "Mais une ville qui ne grandit plus ne finit-elle pas par vieillir, puis par se vider ?"
+          },
+          {
+            "speaker": "M1",
+            "text": "C'est l'argument que l'on m'oppose toujours, et il suppose qu'il n'existe que deux états : l'expansion ou le déclin. Je plaide pour un troisième, plus difficile à vendre aux électeurs, qui s'appelle l'entretien."
+          }
+        ]
+      },
+      "question": "Quelle position cet invité défend-il ?",
+      "options": [
+        "Il faut limiter la construction de nouvelles écoles.",
+        "Les villes moyennes sont condamnées à se vider.",
+        "Les élus devraient gérer leur ville comme une entreprise.",
+        "La croissance démographique ne devrait plus être un objectif."
+      ],
+      "correct_index": 3,
+      "options_mode": "text",
+      "explanation": "Il critique la course au nombre d'habitants et plaide pour « l'entretien » plutôt que l'expansion. Il rejette la comparaison avec l'entreprise, refuse l'idée que l'absence de croissance mène au déclin, et ne cite les écoles que comme exemple de coût.",
+      "tags": {
+        "skill": "opinion",
+        "theme": "urbanisme"
+      }
+    },
+    {
+      "slot": 13,
+      "section": "MSL",
+      "level": "A1",
+      "subtype": "phrase_a_trou",
+      "stimulus_text": "Le matin, je ___ un café avec du lait avant de partir.",
+      "audio_script": null,
+      "question": "",
+      "options": [
+        "prends",
+        "prend",
+        "prenez",
+        "prennent"
+      ],
+      "correct_index": 0,
+      "options_mode": "text",
+      "explanation": "Avec « je », le verbe prendre au présent s'écrit « prends ». « Prend » va avec il ou elle, « prenez » avec vous, « prennent » avec ils ou elles.",
+      "tags": {
+        "skill": "grammaire",
+        "theme": "vie_quotidienne",
+        "language_point": "present"
+      }
+    },
+    {
+      "slot": 14,
+      "section": "MSL",
+      "level": "A1",
+      "subtype": "phrase_a_trou",
+      "stimulus_text": "Ma sœur habite ___ Canada depuis deux ans avec sa famille.",
+      "audio_script": null,
+      "question": "",
+      "options": [
+        "en",
+        "au",
+        "à",
+        "chez"
+      ],
+      "correct_index": 1,
+      "options_mode": "text",
+      "explanation": "Devant un nom de pays masculin comme le Canada, on emploie « au ». « En » s'emploie devant un pays féminin, « à » devant une ville, « chez » devant une personne.",
+      "tags": {
+        "skill": "grammaire",
+        "theme": "famille",
+        "language_point": "prepositions_lieu"
+      }
+    },
+    {
+      "slot": 15,
+      "section": "MSL",
+      "level": "A2",
+      "subtype": "phrase_a_trou",
+      "stimulus_text": "Hier soir, nous ___ au restaurant pour l'anniversaire de Paul.",
+      "audio_script": null,
+      "question": "",
+      "options": [
+        "avons allé",
+        "allons",
+        "sommes allés",
+        "irons"
+      ],
+      "correct_index": 2,
+      "options_mode": "text",
+      "explanation": "« Hier soir » demande un temps du passé, et le verbe aller se conjugue avec l'auxiliaire être : « sommes allés ». « Allons » est un présent, « irons » un futur, et « avons allé » n'existe pas.",
+      "tags": {
+        "skill": "grammaire",
+        "theme": "sorties",
+        "language_point": "passe_compose"
+      }
+    },
+    {
+      "slot": 16,
+      "section": "MSL",
+      "level": "A2",
+      "subtype": "phrase_a_trou",
+      "stimulus_text": "Ce téléphone est moins cher ___ l'autre, mais il est aussi moins solide.",
+      "audio_script": null,
+      "question": "",
+      "options": [
+        "de",
+        "comme",
+        "à",
+        "que"
+      ],
+      "correct_index": 3,
+      "options_mode": "text",
+      "explanation": "Après « moins… », « plus… » ou « aussi… », la comparaison se construit avec « que ». Les trois autres mots ne s'emploient pas dans cette structure.",
+      "tags": {
+        "skill": "grammaire",
+        "theme": "achats",
+        "language_point": "comparatif"
+      }
+    },
+    {
+      "slot": 17,
+      "section": "MSL",
+      "level": "B1",
+      "subtype": "phrase_a_trou",
+      "stimulus_text": "Je ___ tranquillement un film quand quelqu'un a sonné à la porte.",
+      "audio_script": null,
+      "question": "",
+      "options": [
+        "regardais",
+        "ai regardé",
+        "regarderai",
+        "regarde"
+      ],
+      "correct_index": 0,
+      "options_mode": "text",
+      "explanation": "L'action en cours, interrompue par un événement soudain (« a sonné »), se met à l'imparfait : « regardais ». Le passé composé présenterait deux actions successives ; le futur et le présent ne s'accordent pas avec « a sonné ».",
+      "tags": {
+        "skill": "grammaire",
+        "theme": "vie_quotidienne",
+        "language_point": "passe_compose_imparfait"
+      }
+    },
+    {
+      "slot": 18,
+      "section": "MSL",
+      "level": "B1",
+      "subtype": "phrase_a_trou",
+      "stimulus_text": "C'est un quartier ___ je connais très bien, car j'y ai grandi.",
+      "audio_script": null,
+      "question": "",
+      "options": [
+        "dont",
+        "où",
+        "que",
+        "qui"
+      ],
+      "correct_index": 2,
+      "options_mode": "text",
+      "explanation": "« Quartier » est le complément d'objet direct de « je connais » : il faut « que ». « Qui » serait sujet, « où » indiquerait le lieu d'une action (« où j'habite »), et « dont » remplace un complément introduit par « de ».",
+      "tags": {
+        "skill": "grammaire",
+        "theme": "ville",
+        "language_point": "pronoms_relatifs_simples"
+      }
+    },
+    {
+      "slot": 19,
+      "section": "MSL",
+      "level": "B2",
+      "subtype": "phrase_a_trou",
+      "stimulus_text": "Bien qu'il ___ beaucoup d'expérience, sa candidature n'a pas été retenue.",
+      "audio_script": null,
+      "question": "",
+      "options": [
+        "a",
+        "ait",
+        "aura",
+        "avait"
+      ],
+      "correct_index": 1,
+      "options_mode": "text",
+      "explanation": "« Bien que » est toujours suivi du subjonctif : « ait ». Les trois autres formes sont à l'indicatif.",
+      "tags": {
+        "skill": "grammaire",
+        "theme": "travail",
+        "language_point": "subjonctif_emplois"
+      }
+    },
+    {
+      "slot": 20,
+      "section": "MSL",
+      "level": "B2",
+      "subtype": "phrase_a_trou",
+      "stimulus_text": "Voici le dossier ___ je faisais allusion pendant la réunion de ce matin.",
+      "audio_script": null,
+      "question": "",
+      "options": [
+        "dont",
+        "lequel",
+        "duquel",
+        "auquel"
+      ],
+      "correct_index": 3,
+      "options_mode": "text",
+      "explanation": "On dit « faire allusion à quelque chose » : le relatif doit contenir la préposition « à », donc « auquel ». « Dont » et « duquel » correspondent à la préposition « de », et « lequel » seul ne contient aucune préposition.",
+      "tags": {
+        "skill": "grammaire",
+        "theme": "travail",
+        "language_point": "pronoms_relatifs_composes"
+      }
+    },
+    {
+      "slot": 21,
+      "section": "MSL",
+      "level": "C1",
+      "subtype": "phrase_a_trou",
+      "stimulus_text": "___ terminé son rapport plus tôt que prévu, elle a pu quitter le bureau avant la fermeture.",
+      "audio_script": null,
+      "question": "",
+      "options": [
+        "Ayant",
+        "Étant",
+        "Avoir",
+        "Eut"
+      ],
+      "correct_index": 0,
+      "options_mode": "text",
+      "explanation": "Le participe passé composé exprime ici la cause et l'antériorité ; « terminer » se conjugue avec avoir : « Ayant terminé ». « Étant » supposerait l'auxiliaire être, l'infinitif « Avoir » et le passé simple « Eut » ne peuvent pas ouvrir cette proposition.",
+      "tags": {
+        "skill": "grammaire",
+        "theme": "travail",
+        "language_point": "participe_gerondif"
+      }
+    },
+    {
+      "slot": 22,
+      "section": "MSL",
+      "level": "C1",
+      "subtype": "phrase_a_trou",
+      "stimulus_text": "Le projet a été validé, ___ certains membres du comité aient exprimé de sérieuses réserves sur son financement.",
+      "audio_script": null,
+      "question": "",
+      "options": [
+        "alors que",
+        "quoique",
+        "puisque",
+        "tandis que"
+      ],
+      "correct_index": 1,
+      "options_mode": "text",
+      "explanation": "Le verbe « aient exprimé » est au subjonctif, et l'idée est une concession : seul « quoique » convient. « Alors que », « tandis que » et « puisque » sont suivis de l'indicatif.",
+      "tags": {
+        "skill": "grammaire",
+        "theme": "vie_publique",
+        "language_point": "connecteurs_avances"
+      }
+    },
+    {
+      "slot": 23,
+      "section": "MSL",
+      "level": "C2",
+      "subtype": "phrase_a_trou",
+      "stimulus_text": "Loin d'apaiser les tensions, sa déclaration n'a fait qu'___ la polémique née de ses premiers propos.",
+      "audio_script": null,
+      "question": "",
+      "options": [
+        "éteindre",
+        "atténuer",
+        "attiser",
+        "éviter"
+      ],
+      "correct_index": 2,
+      "options_mode": "text",
+      "explanation": "« Loin d'apaiser » annonce l'effet contraire : la déclaration a ravivé la polémique, ce que dit « attiser ». « Éteindre » et « atténuer » iraient dans le sens de l'apaisement, et l'on ne peut « éviter » une polémique déjà née.",
+      "tags": {
+        "skill": "lexique",
+        "theme": "vie_publique",
+        "language_point": "nuances_lexicales"
+      }
+    },
+    {
+      "slot": 24,
+      "section": "MSL",
+      "level": "C2",
+      "subtype": "phrase_a_trou",
+      "stimulus_text": "Il eût fallu qu'elle ___ plus tôt pour que l'affaire prît une autre tournure.",
+      "audio_script": null,
+      "question": "",
+      "options": [
+        "intervient",
+        "intervienne",
+        "intervint",
+        "intervînt"
+      ],
+      "correct_index": 3,
+      "options_mode": "text",
+      "explanation": "Dans un registre soutenu, après « il eût fallu que », la concordance des temps demande le subjonctif imparfait : « intervînt », comme « prît » plus loin. « Intervint » est un passé simple, « intervienne » un subjonctif présent et « intervient » un indicatif présent.",
+      "tags": {
+        "skill": "grammaire",
+        "theme": "litterature",
+        "language_point": "temps_litteraires"
+      }
+    },
+    {
+      "slot": 25,
+      "section": "CE",
+      "level": "A1",
+      "subtype": "affiche_annonce",
+      "stimulus_text": "PISCINE MUNICIPALE\nOuverte tous les jours de 10 h à 20 h.\nEntrée : 4 euros. Gratuit pour les enfants de moins de 6 ans.\nBonnet de bain obligatoire.",
+      "audio_script": null,
+      "question": "Qui peut entrer sans payer ?",
+      "options": [
+        "Les habitants de la ville.",
+        "Les jeunes enfants.",
+        "Les étudiants.",
+        "Les nageurs avec un bonnet."
+      ],
+      "correct_index": 1,
+      "options_mode": "text",
+      "explanation": "L'affiche indique « Gratuit pour les enfants de moins de 6 ans ». Elle ne prévoit rien pour les habitants ni pour les étudiants, et le bonnet est obligatoire pour tous.",
+      "tags": {
+        "skill": "explicite",
+        "theme": "loisirs"
+      }
+    },
+    {
+      "slot": 26,
+      "section": "CE",
+      "level": "A1",
+      "subtype": "message",
+      "stimulus_text": "Coucou Léa,\nJe suis au supermarché. Il n'y a plus de pain à la maison. Tu peux en acheter à la boulangerie avant de rentrer ?\nMerci, à ce soir !\nMaman",
+      "audio_script": null,
+      "question": "Que demande la mère de Léa ?",
+      "options": [
+        "D'acheter du pain.",
+        "De venir au supermarché.",
+        "De rentrer plus tôt.",
+        "De préparer le dîner."
+      ],
+      "correct_index": 0,
+      "options_mode": "text",
+      "explanation": "La mère écrit « Tu peux en acheter à la boulangerie » en parlant du pain. Elle ne demande à Léa ni de la rejoindre, ni de rentrer plus tôt, ni de cuisiner.",
+      "tags": {
+        "skill": "explicite",
+        "theme": "famille"
+      }
+    },
+    {
+      "slot": 27,
+      "section": "CE",
+      "level": "A2",
+      "subtype": "courrier",
+      "stimulus_text": "Objet : Votre réservation\n\nMadame, Monsieur,\nNous confirmons votre réservation d'une chambre double pour deux nuits, du 12 au 14 mai. Le petit-déjeuner est compris dans le prix. La chambre sera prête à partir de 15 heures. Si vous arrivez après 22 heures, merci de nous téléphoner avant : la réception sera fermée.\nCordialement,\nHôtel du Port",
+      "audio_script": null,
+      "question": "Que doivent faire les clients s'ils arrivent tard le soir ?",
+      "options": [
+        "Payer un supplément.",
+        "Réserver une autre nuit.",
+        "Prévenir l'hôtel par téléphone.",
+        "Prendre le petit-déjeuner ailleurs."
+      ],
+      "correct_index": 2,
+      "options_mode": "text",
+      "explanation": "Le message demande de téléphoner avant en cas d'arrivée après 22 heures, car la réception sera fermée. Il ne parle ni de supplément ni d'une nuit de plus, et le petit-déjeuner est compris.",
+      "tags": {
+        "skill": "explicite",
+        "theme": "voyages"
+      }
+    },
+    {
+      "slot": 28,
+      "section": "CE",
+      "level": "A2",
+      "subtype": "affiche_annonce",
+      "stimulus_text": "À VENDRE\nVélo de ville pour femme, couleur rouge, acheté il y a un an. Très bon état, peu utilisé. Vendu avec un panier et un antivol. Prix : 120 euros, à discuter. Je peux le livrer dans le centre-ville le week-end. Contactez Sophie par message après 18 heures.",
+      "audio_script": null,
+      "question": "Quelle information donne cette annonce ?",
+      "options": [
+        "Le vélo a besoin de réparations.",
+        "Sophie répond le matin.",
+        "Le vélo est neuf.",
+        "Le prix peut être négocié."
+      ],
+      "correct_index": 3,
+      "options_mode": "text",
+      "explanation": "« 120 euros, à discuter » signifie que le prix peut être négocié. Le vélo est en très bon état mais il a un an, donc il n'est pas neuf, et Sophie demande d'être contactée après 18 heures.",
+      "tags": {
+        "skill": "explicite",
+        "theme": "achats"
+      }
+    },
+    {
+      "slot": 29,
+      "section": "CE",
+      "level": "B1",
+      "subtype": "courrier",
+      "stimulus_text": "Chère Camille,\n\nÇa y est, j'ai commencé ma formation de cuisinier ! Les premières semaines ont été difficiles : je me levais à cinq heures et je rentrais épuisé. J'ai même pensé à tout arrêter. Heureusement, le chef m'a encouragé et m'a confié de vraies responsabilités. Depuis, je prépare seul les desserts du midi et les clients en redemandent. Je ne regrette plus du tout d'avoir quitté mon emploi à la banque, même si je gagne beaucoup moins qu'avant. Viens déjeuner au restaurant un de ces jours, je te ferai goûter ma tarte au citron.\n\nJe t'embrasse,\nJulien",
+      "audio_script": null,
+      "question": "Que ressent Julien aujourd'hui ?",
+      "options": [
+        "Il est satisfait de son changement de métier.",
+        "Il hésite à abandonner sa formation.",
+        "Il regrette son ancien salaire.",
+        "Il se plaint de son chef."
+      ],
+      "correct_index": 0,
+      "options_mode": "text",
+      "explanation": "Julien écrit qu'il ne regrette « plus du tout » d'avoir quitté la banque : il est satisfait. Il a pensé à arrêter au début seulement, il accepte de gagner moins, et son chef l'a encouragé.",
+      "tags": {
+        "skill": "global",
+        "theme": "travail"
+      }
+    },
+    {
+      "slot": 30,
+      "section": "CE",
+      "level": "B1",
+      "subtype": "article",
+      "stimulus_text": "Covoiturage : la ville teste une voie réservée\n\nDepuis lundi, la voie de gauche de l'avenue de la République est réservée, aux heures de pointe, aux voitures transportant au moins deux personnes. Des caméras comptent le nombre d'occupants de chaque véhicule. Pendant le premier mois, les conducteurs seuls recevront un simple message de rappel ; ensuite, ils devront payer une amende de 135 euros. La mairie espère ainsi réduire les embouteillages de 15 %. Les associations d'automobilistes, elles, demandent d'abord plus de parkings à l'entrée de la ville.",
+      "audio_script": null,
+      "question": "Que se passera-t-il après le premier mois ?",
+      "options": [
+        "La voie sera ouverte à tous.",
+        "Les caméras seront retirées.",
+        "Les conducteurs seuls seront sanctionnés.",
+        "De nouveaux parkings ouvriront."
+      ],
+      "correct_index": 2,
+      "options_mode": "text",
+      "explanation": "Après le premier mois, les conducteurs seuls « devront payer une amende ». L'article ne dit pas que la voie sera rouverte ni que les caméras seront retirées, et les parkings ne sont qu'une demande des associations.",
+      "tags": {
+        "skill": "explicite",
+        "theme": "transports"
+      }
+    },
+    {
+      "slot": 31,
+      "section": "CE",
+      "level": "B2",
+      "subtype": "article",
+      "stimulus_text": "Écrans : et si le problème venait des parents ?\n\nOn s'inquiète beaucoup du temps que les enfants passent devant les écrans. Une étude menée auprès de 2 000 familles invite à regarder ailleurs. Selon ses auteurs, le facteur qui pèse le plus sur le développement du langage chez les moins de trois ans n'est pas l'écran de l'enfant, mais celui de l'adulte. Un parent absorbé par son téléphone parle moins, répond plus tard et regarde moins son enfant. Or c'est dans ces échanges ordinaires, pendant le repas ou le bain, que les tout-petits apprennent à parler.\n\nLes chercheurs ne demandent pas aux parents de renoncer à leur téléphone. Ils recommandent plutôt de préserver quelques moments de la journée sans aucun appareil. Une conclusion qui dérange : il est plus facile d'interdire la tablette à un enfant que de poser son propre téléphone.",
+      "audio_script": null,
+      "question": "Que met en évidence cette étude ?",
+      "options": [
+        "Les enfants parlent mieux sans aucun écran à la maison.",
+        "Les parents sous-estiment le temps d'écran de leurs enfants.",
+        "Les tablettes retardent l'apprentissage de la lecture.",
+        "L'usage du téléphone par les parents freine le langage des enfants."
+      ],
+      "correct_index": 3,
+      "options_mode": "text",
+      "explanation": "L'étude montre que le facteur principal est l'écran de l'adulte : un parent absorbé par son téléphone parle moins à son enfant. Elle ne recommande pas de supprimer tous les écrans et ne traite ni de la lecture ni de l'estimation du temps d'écran.",
+      "tags": {
+        "skill": "global",
+        "theme": "famille"
+      }
+    },
+    {
+      "slot": 32,
+      "section": "CE",
+      "level": "B2",
+      "subtype": "texte_argumentatif",
+      "stimulus_text": "Faut-il rendre les musées gratuits ?\n\nL'idée séduit : supprimer le billet d'entrée ouvrirait la culture à tous. L'expérience montre pourtant que la gratuité ne suffit pas. Dans les musées qui l'ont adoptée, la fréquentation augmente, mais ce sont surtout les habitués qui viennent plus souvent. Ceux qui n'entraient jamais continuent de rester dehors, parce que l'obstacle n'est pas le prix : c'est le sentiment que ces lieux ne sont pas faits pour eux.\n\nLa gratuité a par ailleurs un coût, que les musées compensent en réduisant leurs activités pour les écoles ou les quartiers éloignés, c'est-à-dire précisément celles qui touchent de nouveaux publics. Plutôt qu'une mesure spectaculaire, mieux vaudrait financer des médiateurs, des visites hors les murs et des horaires adaptés. C'est moins visible, mais c'est là que se joue l'accès à la culture.",
+      "audio_script": null,
+      "question": "Quelle est la position de l'auteur ?",
+      "options": [
+        "La gratuité devrait être réservée aux scolaires.",
+        "La gratuité ne règle pas le vrai problème d'accès.",
+        "Les musées doivent augmenter leurs tarifs.",
+        "Les habitués des musées sont trop nombreux."
+      ],
+      "correct_index": 1,
+      "options_mode": "text",
+      "explanation": "Pour l'auteur, l'obstacle n'est pas le prix mais le sentiment de ne pas être à sa place : la gratuité passe à côté du problème. Il ne propose ni de la réserver aux scolaires ni d'augmenter les tarifs, et ne reproche rien aux habitués.",
+      "tags": {
+        "skill": "opinion",
+        "theme": "culture"
+      }
+    },
+    {
+      "slot": 33,
+      "section": "CE",
+      "level": "C1",
+      "subtype": "texte_argumentatif",
+      "stimulus_text": "Salaires : la transparence, vertu ou illusion ?\n\nÀ compter de l'an prochain, les entreprises devront indiquer une fourchette de rémunération dans leurs offres d'emploi et communiquer aux salariés les écarts de salaire constatés à poste équivalent. La mesure est présentée comme une avancée décisive pour l'égalité entre les femmes et les hommes. Elle l'est sans doute, mais pas pour les raisons que l'on croit.\n\nOn imagine volontiers que la simple publication des chiffres suffira à corriger les injustices, comme si l'inégalité ne prospérait que dans l'ombre. Les pays qui ont précédé le nôtre sur cette voie livrent un enseignement plus nuancé. Les écarts s'y sont effectivement réduits, mais moins parce que les bas salaires ont été relevés que parce que les augmentations des mieux payés ont été freinées. Les employeurs, craignant les comparaisons, préfèrent désormais refuser une hausse individuelle plutôt que d'avoir à la justifier devant tous.\n\nFaut-il s'en désoler ? Pas nécessairement. Une entreprise où chacun sait ce que gagne son voisin est une entreprise où la négociation cesse d'être un talent réservé à quelques-uns. Encore faut-il ne pas promettre aux salariés ce que la transparence ne peut leur offrir : elle rend les règles lisibles, elle ne les rend pas généreuses.",
+      "audio_script": null,
+      "question": "Que veut dire l'auteur dans le dernier paragraphe ?",
+      "options": [
+        "La transparence clarifie les règles sans garantir de meilleurs salaires.",
+        "La négociation individuelle doit rester la règle.",
+        "Les entreprises refuseront d'appliquer la loi.",
+        "Les salariés les mieux payés quitteront leur entreprise."
+      ],
+      "correct_index": 0,
+      "options_mode": "text",
+      "explanation": "La dernière phrase oppose des règles « lisibles » à des règles « généreuses » : la transparence éclaire sans augmenter les salaires. L'auteur se réjouit au contraire que la négociation ne soit plus réservée à quelques-uns, et n'évoque ni refus d'appliquer la loi ni départs.",
+      "tags": {
+        "skill": "inference",
+        "theme": "travail"
+      }
+    },
+    {
+      "slot": 34,
+      "section": "CE",
+      "level": "C1",
+      "subtype": "texte_specialise",
+      "stimulus_text": "L'efficacité énergétique et son paradoxe\n\nDepuis un demi-siècle, les moteurs consomment moins, les logements sont mieux isolés et les appareils électriques n'ont jamais été aussi sobres. La consommation totale d'énergie aurait donc dû reculer. Il n'en est rien, et les économistes désignent ce phénomène sous le nom d'effet rebond.\n\nLe mécanisme est simple. Lorsqu'un service devient moins coûteux, on en use davantage. L'automobiliste dont la voiture consomme moins parcourt plus de kilomètres ; le ménage dont le logement est mieux isolé chauffe une pièce de plus, ou d'un degré de plus. Une partie du gain technique est ainsi absorbée par un changement de comportement. Le constat vaut aussi pour l'éclairage : les ampoules consomment dix fois moins qu'autrefois, mais les villes n'ont jamais été aussi illuminées. À cet effet direct s'ajoute un effet indirect : l'argent économisé sur la facture est dépensé ailleurs, dans des biens ou des voyages qui exigent eux-mêmes de l'énergie.\n\nLes estimations divergent sur l'ampleur du phénomène, mais rares sont les études qui le jugent négligeable. Il ne condamne pas le progrès technique, sans lequel la consommation serait bien plus élevée encore. Il rappelle seulement qu'une politique fondée sur la seule performance des équipements, sans réflexion sur les usages, court le risque de courir après son propre objectif.",
+      "audio_script": null,
+      "question": "Quelle conclusion peut-on tirer de ce texte ?",
+      "options": [
+        "Le progrès technique augmente la consommation d'énergie.",
+        "Les ménages devraient renoncer à isoler leur logement.",
+        "Les économistes s'accordent sur l'ampleur de l'effet rebond.",
+        "Améliorer les équipements ne suffit pas à réduire la consommation."
+      ],
+      "correct_index": 3,
+      "options_mode": "text",
+      "explanation": "Le texte conclut qu'une politique fondée sur la seule performance des équipements manque son objectif si l'on ne réfléchit pas aux usages. Il précise que le progrès technique n'est pas en cause, ne déconseille pas l'isolation, et indique que les estimations divergent.",
+      "tags": {
+        "skill": "inference",
+        "theme": "environnement"
+      }
+    },
+    {
+      "slot": 35,
+      "section": "CE",
+      "level": "C2",
+      "subtype": "texte_specialise",
+      "stimulus_text": "Éloge prudent de l'ennui\n\nNotre époque a déclaré la guerre à l'ennui avec une ardeur que n'aurait pas reniée un hygiéniste du siècle dernier traquant les miasmes. Il n'est plus de file d'attente, de trajet ou de salle d'attente qui ne soit aussitôt comblé par un écran, et l'on tient pour une victoire d'avoir supprimé ces temps que l'on disait morts. Il se pourrait pourtant que nous ayons confondu le vide et l'inutile.\n\nCar l'ennui n'est pas l'absence de pensée ; il en est bien souvent l'antichambre. C'est lorsque rien ne sollicite l'esprit que celui-ci se met à vagabonder, à rapprocher des idées qui n'avaient aucune raison de se rencontrer, à reprendre un problème laissé en suspens. Nombre de savants et d'écrivains ont raconté que leurs intuitions les plus fécondes leur étaient venues non pas à leur table de travail, mais en marchant, en attendant, en ne faisant rien. On aurait tort d'y voir une simple coquetterie.\n\nIl ne s'agit pas pour autant de sanctifier l'ennui. Celui de l'élève enfermé dans une classe où rien ne lui parle, celui du salarié rivé à une tâche dépourvue de sens n'ont rien de fertile : ils usent, ils n'inspirent pas. Ce qui mérite d'être défendu, c'est l'ennui choisi, ou du moins consenti, cet intervalle que l'on s'accorde sans chercher à le rentabiliser. Or c'est précisément celui-là que nous avons rendu presque impossible, non par contrainte, mais par une sollicitude de chaque instant, qui nous épargne jusqu'à l'effort de nous demander à quoi nous pourrions bien penser.",
+      "audio_script": null,
+      "question": "Quelle distinction l'auteur établit-il ?",
+      "options": [
+        "Entre l'ennui des savants et celui des écrivains.",
+        "Entre l'ennui subi, stérile, et l'ennui accepté, fécond.",
+        "Entre l'ennui d'autrefois et celui d'aujourd'hui.",
+        "Entre l'ennui des enfants et celui des adultes."
+      ],
+      "correct_index": 1,
+      "options_mode": "text",
+      "explanation": "Le troisième paragraphe oppose l'ennui de l'élève ou du salarié, qui « use », à l'ennui « choisi, ou du moins consenti », seul digne d'être défendu. Savants et écrivains sont cités ensemble, et le texte ne compare ni les époques ni les âges.",
+      "tags": {
+        "skill": "inference",
+        "theme": "societe"
+      }
+    },
+    {
+      "slot": 36,
+      "section": "CE",
+      "level": "C2",
+      "subtype": "texte_litteraire",
+      "stimulus_text": "Mon oncle Anselme avait pour les opinions d'autrui la considération qu'un jardinier accorde aux limaces : il en constatait l'existence, déplorait leur nombre, et s'employait sans haine à en limiter les ravages. On ne le contredisait pas ; on lui soumettait, tout au plus, un point de vue, comme on présente un plat à un convive dont on sait qu'il ne se resservira pas. Les repas de famille en devenaient reposants, à défaut d'être jamais vraiment animés. Il écoutait alors, la tête légèrement inclinée, avec cette patience des gens qui ont déjà préparé leur réponse, puis il disait « Certes », et chacun comprenait que la discussion venait de s'achever.\n\nIl serait injuste, pourtant, de le peindre en tyran. Anselme ne tenait nullement à avoir raison ; il tenait à ce que les choses fussent dites une fois pour toutes, et il lui importait assez peu qu'elles le fussent par lui. Qu'un neveu de douze ans énonçât, par accident, une vérité qu'il jugeait définitive, et il s'en emparait avec une reconnaissance bruyante, la répétait aux repas pendant des semaines et en attribuait scrupuleusement la paternité à son auteur, lequel n'en demandait pas tant.\n\nJe crois aujourd'hui que ce n'était pas l'erreur qu'il redoutait, mais l'inachevé. Une conversation qui restait ouverte lui causait le même malaise qu'une porte battant dans le vent. Il est mort, comme on pouvait s'y attendre, au milieu d'une phrase, et ma tante, qui le connaissait mieux que personne, a longtemps soutenu qu'il ne le lui pardonnerait pas.",
+      "audio_script": null,
+      "question": "Quel trait de caractère le narrateur prête-t-il à son oncle ?",
+      "options": [
+        "Un mépris profond pour les enfants de la famille.",
+        "Une volonté constante d'imposer ses propres idées.",
+        "Un besoin de voir toute discussion définitivement close.",
+        "Une peur maladive de commettre des erreurs."
+      ],
+      "correct_index": 2,
+      "options_mode": "text",
+      "explanation": "Le narrateur écrit que l'oncle redoutait « l'inachevé » et voulait que les choses soient dites « une fois pour toutes ». Il précise qu'Anselme ne tenait pas à avoir raison, qu'il reprenait volontiers l'idée d'un neveu, et que ce n'était pas l'erreur qu'il craignait.",
+      "tags": {
+        "skill": "inference",
+        "theme": "litterature"
+      }
+    }
+  ]
+}

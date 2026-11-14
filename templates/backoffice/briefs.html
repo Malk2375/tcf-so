@@ -1,0 +1,43 @@
+{% extends "backoffice/base.html" %}
+{% block head_title %}Briefs · Back-office{% endblock %}
+{% block bo_content %}
+<h1 class="text-2xl font-bold sm:text-3xl">Briefs de génération</h1>
+<p class="mt-3 max-w-2xl text-slate-700">
+  Le brief liste les questions à rédiger : épreuve, niveau, sous-type, thème, lettre de la bonne réponse, longueur.
+  Joignez-le à une conversation du Projet Claude « rédaction », puis importez le ou les fichiers obtenus.
+</p>
+
+<form method="post" class="card mt-6 max-w-xl">
+  {% csrf_token %}
+  <fieldset>
+    <legend class="font-semibold">Mode</legend>
+    {% for error in form.exam_format.errors %}<p class="mt-1 text-sm text-red-700">{{ error }}</p>{% endfor %}
+    <div class="mt-3 space-y-2">
+      {% for radio in form.exam_format %}
+        <label class="flex min-h-11 cursor-pointer items-center gap-3 rounded-md border border-slate-200 px-4 has-checked:border-blue-700 has-checked:bg-blue-50">
+          {{ radio.tag }}
+          <span>{{ radio.choice_label }}</span>
+        </label>
+      {% endfor %}
+    </div>
+  </fieldset>
+  <button type="submit" class="btn btn-primary mt-5 w-full sm:w-auto">Générer et télécharger le brief</button>
+</form>
+
+<section class="mt-8" aria-labelledby="titre-recents">
+  <h2 id="titre-recents" class="text-xl font-semibold">Briefs récents</h2>
+  <ul class="mt-3 space-y-2">
+    {% for brief in briefs %}
+      <li class="card flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p class="font-mono text-sm">{{ brief.brief_id }}</p>
+          <p class="text-sm text-slate-600">{{ brief.format.label }} · {{ brief.created_at|date:"j F Y à H:i" }}</p>
+        </div>
+        <a href="{% url 'backoffice:brief_download' brief.pk %}" class="btn btn-secondary">Télécharger</a>
+      </li>
+    {% empty %}
+      <li class="text-slate-600">Aucun brief pour le moment.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

@@ -32,15 +32,6 @@ def is_logged_in(client):
     return "_auth_user_id" in client.session
 
 
-@pytest.fixture
-def staff_client(client):
-    User.objects.create_user(
-        username="admin", email="admin@example.com", password=PASSWORD, is_staff=True
-    )
-    client.post(reverse("account_login"), {"login": "admin@example.com", "password": PASSWORD})
-    return client
-
-
 # --- Parcours principal ---------------------------------------------------------------------
 
 

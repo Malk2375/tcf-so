@@ -18,6 +18,28 @@ uv run python manage.py runserver     # lancer le site sur http://localhost:8000
 
 Par défaut, `TTS_PROVIDER=fake` et `LLM_PROVIDER=fake` : aucun service externe n'est appelé.
 
+## Données de départ
+
+```bash
+uv run python manage.py seed_formats                   # crée ou remet à jour les 3 formats et leurs 9 épreuves
+uv run python manage.py make_dev_test --mode rapide    # test factice publié, audio factice (développement seulement)
+```
+
+`make_dev_test` accepte `--mode rapide|moyen|reel` et refuse de tourner si `DJANGO_DEBUG=false`.
+Ses textes sont faits de pseudo-mots : ils ont la bonne longueur, pas de sens.
+
+## Produire un test (back-office)
+
+1. `/bo/briefs/` : choisir un mode, télécharger le brief (`brief_<format>_<numéro>.json`).
+2. Le joindre à une conversation du Projet Claude « rédaction », récupérer le ou les fichiers JSON.
+3. `/bo/import/` : envoyer 1 à 3 fichiers. La plateforme valide tout (schéma, nombre d'items par niveau,
+   bonne réponse imposée par le brief, longueurs, doublons…). Une seule erreur et rien n'est enregistré :
+   le rapport est à coller dans la conversation de rédaction. Sinon, le test est créé en brouillon.
+
+Le schéma utilisé par l'application est `bank/data/schema-import.json`, copie de `docs/schema-import.json`.
+Les exemples de `docs/exemples/` sont recopiés dans `tests/fixtures/`. Un test signale toute différence
+quand `docs/` est présent : après une modification de `docs/`, recopier les fichiers.
+
 ## Commandes
 
 ```bash

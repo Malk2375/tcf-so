@@ -1,0 +1,169 @@
+"""Règles de contenu des questions (SPEC 4.3, 4.4, 6.1 et 6.3), regroupées en un seul endroit."""
+
+SECTIONS = ["CO", "MSL", "CE"]
+SECTION_LABELS = {
+    "CO": "Compréhension orale",
+    "MSL": "Maîtrise des structures de la langue",
+    "CE": "Compréhension écrite",
+}
+LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"]
+LETTERS = ["A", "B", "C", "D"]
+
+# --- Longueurs cibles (4.3) ----------------------------------------------------------------------
+
+# Audio de CO hors question, en secondes.
+CO_SECONDS = {
+    "A1": (5, 10),
+    "A2": (10, 15),
+    "B1": (15, 30),
+    "B2": (30, 45),
+    "C1": (40, 60),
+    "C2": (45, 70),
+}
+# Sous-type « question_reponse » : une simple question, quel que soit le niveau.
+QUESTION_REPONSE_SECONDS = (2, 8)
+# Texte de CE, en mots.
+CE_WORDS = {
+    "A1": (20, 40),
+    "A2": (40, 80),
+    "B1": (80, 130),
+    "B2": (130, 200),
+    "C1": (200, 280),
+    "C2": (250, 350),
+}
+# Phrase de MSL, en mots (le blanc « ___ » compte pour un mot).
+MSL_WORDS = {
+    "A1": (6, 12),
+    "A2": (8, 15),
+    "B1": (8, 20),
+    "B2": (8, 25),
+    "C1": (10, 30),
+    "C2": (10, 35),
+}
+LENGTH_TOLERANCE = 0.15
+# Durée estimée d'un script avant synthèse : caractères des répliques / 15.
+CHARS_PER_SECOND = 15
+
+# --- Sous-types et étiquettes (4.4) --------------------------------------------------------------
+
+CO_SUBTYPES = {
+    "A1": ["question_reponse", "annonce"],
+    "A2": ["annonce", "message_vocal", "dialogue"],
+    "B1": ["dialogue", "message_vocal", "interview"],
+    "B2": ["interview", "emission_radio"],
+    "C1": ["emission_radio", "expose"],
+    "C2": ["expose", "debat"],
+}
+CE_SUBTYPES = {
+    "A1": ["affiche_annonce", "message"],
+    "A2": ["message", "courrier", "affiche_annonce"],
+    "B1": ["courrier", "article"],
+    "B2": ["article", "texte_argumentatif"],
+    "C1": ["texte_argumentatif", "texte_specialise"],
+    "C2": ["texte_specialise", "texte_litteraire"],
+}
+MSL_SUBTYPE = "phrase_a_trou"
+MSL_BLANK = "___"
+
+QUESTION_REPONSE = "question_reponse"
+QUESTION_REPONSE_TEXT = "Choisissez la réponse qui convient."
+# Niveaux où les options d'une question-réponse sont lues à voix haute (6.1).
+AUDIO_LETTERS_LEVELS = ["A1", "A2"]
+
+LANGUAGE_POINTS = {
+    "A1": [
+        "present",
+        "articles",
+        "negation",
+        "prepositions_lieu",
+        "possessifs",
+        "lexique_quotidien",
+    ],
+    "A2": [
+        "passe_compose",
+        "futur_proche",
+        "pronoms_cod_coi",
+        "comparatif",
+        "imperatif",
+        "lexique_courant",
+    ],
+    "B1": [
+        "passe_compose_imparfait",
+        "pronoms_relatifs_simples",
+        "futur_conditionnel",
+        "pronoms_y_en",
+        "connecteurs_logiques",
+        "subjonctif_present",
+    ],
+    "B2": [
+        "subjonctif_emplois",
+        "plus_que_parfait",
+        "conditionnel_passe",
+        "pronoms_relatifs_composes",
+        "voix_passive",
+        "discours_rapporte",
+        "registre",
+    ],
+    "C1": [
+        "concordance_des_temps",
+        "participe_gerondif",
+        "connecteurs_avances",
+        "expressions_idiomatiques",
+        "nominalisation",
+        "registre_soutenu",
+    ],
+    "C2": ["temps_litteraires", "nuances_lexicales", "figures_de_style", "collocations_rares"],
+}
+
+SKILLS = {
+    "CO": ["explicite", "global", "inference", "opinion"],
+    "CE": ["explicite", "global", "inference", "opinion"],
+    "MSL": ["grammaire", "lexique", "registre"],
+}
+
+DOC_LENGTH = {
+    "A1": "court",
+    "A2": "court",
+    "B1": "moyen",
+    "B2": "moyen",
+    "C1": "long",
+    "C2": "long",
+}
+
+MAX_SPEAKERS = 3
+
+# --- Import (6.2, 6.3) ---------------------------------------------------------------------------
+
+MAX_IMPORT_FILES = 3
+MAX_IMPORT_FILE_BYTES = 2 * 1024 * 1024
+NEAR_DUPLICATE_RATIO = 85
+# Avertissement : une option dépasse de plus de 60 % la longueur moyenne des trois autres.
+OPTION_LENGTH_EXCESS = 0.60
+# Avertissement : la bonne réponse est la plus longue dans plus de 40 % des items d'une épreuve.
+CORRECT_LONGEST_SHARE = 0.40
+
+# --- Brief (6.1) ---------------------------------------------------------------------------------
+
+AVOID_MAX_LINES = 40
+AVOID_SUPPORT_CHARS = 60
+
+
+def subtypes_for(section: str, level: str) -> list[str]:
+    if section == "MSL":
+        return [MSL_SUBTYPE]
+    return (CO_SUBTYPES if section == "CO" else CE_SUBTYPES)[level]
+
+
+def length_target(section: str, level: str, subtype: str) -> dict:
+    """Fourchette cible telle qu'elle figure dans le brief (`target`)."""
+    if section == "CO":
+        low, high = QUESTION_REPONSE_SECONDS if subtype == QUESTION_REPONSE else CO_SECONDS[level]
+        return {"audio_seconds": [low, high]}
+    low, high = (CE_WORDS if section == "CE" else MSL_WORDS)[level]
+    return {"words": [low, high]}
+
+
+def expected_options_mode(section: str, level: str, subtype: str) -> str:
+    if section == "CO" and subtype == QUESTION_REPONSE and level in AUDIO_LETTERS_LEVELS:
+        return "audio_letters"
+    return "text"

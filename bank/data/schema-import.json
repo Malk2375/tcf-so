@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tcf-so/import-v1",
+  "title": "Fichier d'import de questions TCF SO",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "format", "brief_id", "items"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "format": {
+      "enum": ["tcf_tp_so_rapide", "tcf_tp_so_moyen", "tcf_tp_so_reel"]
+    },
+    "brief_id": { "type": "string", "minLength": 1 },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/item" }
+    }
+  },
+  "$defs": {
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slot", "section", "level", "subtype", "question", "options",
+        "correct_index", "options_mode", "explanation", "tags"
+      ],
+      "properties": {
+        "slot": { "type": "integer", "minimum": 1 },
+        "section": { "enum": ["CO", "MSL", "CE"] },
+        "level": { "enum": ["A1", "A2", "B1", "B2", "C1", "C2"] },
+        "subtype": {
+          "enum": [
+            "question_reponse", "annonce", "message_vocal", "dialogue", "interview",
+            "emission_radio", "expose", "debat",
+            "phrase_a_trou",
+            "affiche_annonce", "message", "courrier", "article",
+            "texte_argumentatif", "texte_specialise", "texte_litteraire"
+          ]
+        },
+        "stimulus_text": { "type": ["string", "null"] },
+        "audio_script": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/audio_script" }]
+        },
+        "question": { "type": "string" },
+        "options": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "correct_index": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "options_mode": { "enum": ["text", "audio_letters"] },
+        "explanation": { "type": "string", "minLength": 20 },
+        "tags": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["skill", "theme"],
+          "properties": {
+            "skill": {
+              "enum": ["explicite", "global", "inference", "opinion", "grammaire", "lexique", "registre"]
+            },
+            "theme": { "type": "string", "minLength": 1 },
+            "language_point": { "type": "string" }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "section": { "const": "CO" } } },
+          "then": {
+            "required": ["audio_script"],
+            "properties": {
+              "audio_script": { "$ref": "#/$defs/audio_script" },
+              "question": { "minLength": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "section": { "const": "CE" } } },
+          "then": {
+            "required": ["stimulus_text"],
+            "properties": {
+              "stimulus_text": { "type": "string", "minLength": 1 },
+              "question": { "minLength": 1 },
+              "options_mode": { "const": "text" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "section": { "const": "MSL" } } },
+          "then": {
+            "required": ["stimulus_text"],
+            "properties": {
+              "stimulus_text": { "type": "string", "pattern": "___" },
+              "subtype": { "const": "phrase_a_trou" },
+              "options_mode": { "const": "text" },
+              "tags": { "required": ["skill", "theme", "language_point"] }
+            }
+          }
+        }
+      ]
+    },
+    "audio_script": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["style", "speakers", "lines"],
+      "properties": {
+        "style": { "type": "string", "minLength": 1 },
+        "speakers": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 3,
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["gender"],
+            "properties": { "gender": { "enum": ["F", "M"] } }
+          }
+        },
+        "lines": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["speaker", "text"],
+            "properties": {
+              "speaker": { "type": "string", "minLength": 1 },
+              "text": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    }
+  }
+}

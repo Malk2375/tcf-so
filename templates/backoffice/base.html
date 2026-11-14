@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+{% with current=request.resolver_match.url_name %}
+<nav aria-label="Back-office" class="-mx-4 mb-6 flex gap-1 overflow-x-auto border-b border-slate-200 px-4">
+  <a href="{% url 'backoffice:briefs' %}" class="bo-tab {% if current == 'briefs' %}bo-tab-active{% endif %}">Briefs</a>
+  <a href="{% url 'backoffice:import' %}" class="bo-tab {% if current == 'import' %}bo-tab-active{% endif %}">Import</a>
+  <a href="{% url 'backoffice:users' %}" class="bo-tab {% if current == 'users' %}bo-tab-active{% endif %}">Comptes</a>
+  <a href="{% url 'admin:index' %}" class="bo-tab">Admin</a>
+</nav>
+{% endwith %}
+{% block bo_content %}{% endblock %}
+{% endblock %}

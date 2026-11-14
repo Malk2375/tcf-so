@@ -1,0 +1,33 @@
+{% extends "backoffice/base.html" %}
+{% block head_title %}Import · Back-office{% endblock %}
+{% block bo_content %}
+<h1 class="text-2xl font-bold sm:text-3xl">Import de questions</h1>
+
+{% if result %}
+  {% if result.test %}
+    <section class="mt-6 rounded-md border border-green-200 bg-green-50 p-4 text-green-950" role="status">
+      <h2 class="font-semibold">Import accepté</h2>
+      <p class="mt-1">{{ result.test }} créé en brouillon, {{ result.test.test_items.count }} questions.</p>
+    </section>
+  {% else %}
+    <section class="mt-6 rounded-md border border-red-200 bg-red-50 p-4 text-red-950" role="alert">
+      <h2 class="font-semibold">Import refusé : {{ result.report.errors|length }} erreur{{ result.report.errors|length|pluralize }}</h2>
+      <p class="mt-1 text-sm">Rien n'a été enregistré. Collez ce rapport dans la conversation de rédaction et demandez le fichier corrigé complet.</p>
+      {% include "backoffice/includes/issues.html" with issues=result.report.errors %}
+    </section>
+  {% endif %}
+  {% if result.report.warnings %}
+    <section class="mt-4 rounded-md border border-amber-200 bg-amber-50 p-4 text-amber-950">
+      <h2 class="font-semibold">{{ result.report.warnings|length }} avertissement{{ result.report.warnings|length|pluralize }}</h2>
+      <p class="mt-1 text-sm">Non bloquants : ils seront rappelés à la relecture.</p>
+      {% include "backoffice/includes/issues.html" with issues=result.report.warnings %}
+    </section>
+  {% endif %}
+{% endif %}
+
+<form method="post" enctype="multipart/form-data" class="form-stack card mt-6 max-w-xl space-y-5">
+  {% csrf_token %}
+  {% include "includes/form_fields.html" %}
+  <button type="submit" class="btn btn-primary w-full sm:w-auto">Valider et importer</button>
+</form>
+{% endblock %}

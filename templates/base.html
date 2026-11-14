@@ -41,7 +41,7 @@
         {% if user.is_authenticated %}
           <a href="{% url 'dashboard' %}" class="nav-link">Tableau de bord</a>
           {% if user.is_staff %}
-            <a href="{% url 'backoffice:users' %}" class="nav-link">Back-office</a>
+            <a href="{% url 'backoffice:briefs' %}" class="nav-link">Back-office</a>
           {% endif %}
           <a href="{% url 'profile' %}" class="nav-link">Profil</a>
           <form method="post" action="{% url 'account_logout' %}">
