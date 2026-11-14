@@ -24,8 +24,25 @@ Par défaut, `TTS_PROVIDER=fake` et `LLM_PROVIDER=fake` : aucun service externe 
 uv run pytest                         # tests (aucun appel réseau)
 uv run ruff check .                   # analyse du code
 uv run ruff format .                  # mise en forme
-uv run python manage.py createsuperuser   # créer un compte administrateur
 ```
+
+### Compte administrateur
+
+```bash
+uv run python manage.py createsuperuser
+```
+
+La commande demande un nom d'utilisateur (interne, jamais affiché), une adresse e-mail et un mot de passe.
+On se connecte ensuite avec **l'adresse e-mail** sur `/accounts/login/`. Le compte a accès à l'admin Django (`/admin/`)
+et au back-office (`/bo/`). Pour donner l'accès au back-office à un autre compte, cocher « Statut équipe » dans l'admin.
+
+### Comptes et mots de passe
+
+- Inscription libre, ou réservée aux personnes qui connaissent `SIGNUP_CODE` si cette variable est renseignée.
+- Avec `EMAIL_ENABLED=false` (valeur par défaut), « Mot de passe oublié » invite à contacter l'administrateur.
+  L'administrateur ouvre `/bo/users/`, clique sur « Générer un lien de réinitialisation » et transmet le lien lui-même.
+  Le lien ne sert qu'une fois (il devient invalide dès que le mot de passe change) et expire après 3 jours.
+- Avec `EMAIL_ENABLED=true` et les variables SMTP renseignées, le lien est envoyé par e-mail.
 
 ### Styles (Tailwind CSS)
 

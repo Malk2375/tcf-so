@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
 # Durées et nombres de questions affichés sur l'accueil (SPEC 4.1).
 # Ils seront lus dans les formats en base une fois `seed_formats` en place (étape 2).
@@ -10,4 +10,6 @@ MODES = [
 
 
 def home(request):
+    if request.user.is_authenticated:
+        return redirect("dashboard")
     return render(request, "home.html", {"modes": MODES})

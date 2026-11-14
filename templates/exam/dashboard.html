@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block head_title %}Tableau de bord{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold sm:text-3xl">Tableau de bord</h1>
+<section class="mt-6" aria-labelledby="modes-titre">
+  <h2 id="modes-titre" class="text-xl font-semibold">Choisir un mode</h2>
+  <ul class="mt-4 grid gap-4 sm:grid-cols-3">
+    {% for mode in modes %}
+    <li class="card">
+      <h3 class="text-lg font-semibold text-blue-900">{{ mode.label }}</h3>
+      <p class="mt-2 text-slate-700">{{ mode.questions }} questions</p>
+      <p class="text-slate-700">{{ mode.minutes }} minutes</p>
+      <p class="mt-3 text-sm text-slate-600">Aucun test disponible pour le moment.</p>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

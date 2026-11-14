@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block head_title %}Profil{% endblock %}
+{% block main_width %}max-w-2xl{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold sm:text-3xl">Profil</h1>
+
+<section class="card mt-6" aria-labelledby="titre-email">
+  <h2 id="titre-email" class="text-lg font-semibold">Adresse e-mail</h2>
+  <p class="mt-2 break-all text-slate-700">{{ user.email }}</p>
+</section>
+
+<section class="card mt-4" aria-labelledby="titre-mdp">
+  <h2 id="titre-mdp" class="text-lg font-semibold">Mot de passe</h2>
+  <p class="mt-4"><a href="{% url 'account_change_password' %}" class="btn btn-secondary">Changer le mot de passe</a></p>
+</section>
+
+<section class="card mt-4 border-red-200" aria-labelledby="titre-suppression">
+  <h2 id="titre-suppression" class="text-lg font-semibold">Supprimer le compte</h2>
+  <p class="mt-2 text-slate-700">Vos passages, résultats et conseils seront supprimés définitivement.</p>
+  <p class="mt-4"><a href="{% url 'delete_account' %}" class="btn btn-danger">Supprimer mon compte</a></p>
+</section>
+{% endblock %}

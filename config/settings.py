@@ -78,6 +78,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "allauth",
+    "allauth.account",
     "accounts",
     "bank",
     "exam",
@@ -95,6 +97,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -181,9 +184,22 @@ else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="webmaster@localhost")
 
-# --- Comptes ------------------------------------------------------------------------------------
+# --- Comptes (django-allauth) -------------------------------------------------------------------
 
 SIGNUP_CODE = env.str("SIGNUP_CODE", default="")
+
+# Seul le backend d'allauth : connexion par e-mail, avec limitation des tentatives.
+AUTHENTICATION_BACKENDS = ["allauth.account.auth_backends.AuthenticationBackend"]
+LOGIN_URL = "account_login"
+LOGIN_REDIRECT_URL = "dashboard"
+ACCOUNT_LOGOUT_REDIRECT_URL = "home"
+
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
+ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_SESSION_REMEMBER = True
+ACCOUNT_SIGNUP_FORM_CLASS = "accounts.forms.SignupCodeForm"
 
 # --- Sécurité en production ---------------------------------------------------------------------
 

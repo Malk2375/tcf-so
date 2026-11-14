@@ -1,0 +1,26 @@
+{% comment %}Champs d'un formulaire Django, mis en forme pour le téléphone (étiquette au-dessus, erreurs en dessous).{% endcomment %}
+{% if form.non_field_errors %}
+  <div class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-red-900" role="alert">
+    {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+  </div>
+{% endif %}
+{% for field in form.hidden_fields %}{{ field }}{% endfor %}
+{% for field in form.visible_fields %}
+  <div>
+    {% if field.widget_type == "checkbox" %}
+      <label class="flex min-h-11 items-start gap-3">
+        {{ field }}
+        <span>{{ field.label }}</span>
+      </label>
+    {% else %}
+      <label for="{{ field.id_for_label }}" class="block font-medium">{{ field.label }}</label>
+      {{ field }}
+    {% endif %}
+    {% if field.help_text %}
+      <div class="mt-1 text-sm text-slate-600">{{ field.help_text|safe }}</div>
+    {% endif %}
+    {% for error in field.errors %}
+      <p class="mt-1 text-sm text-red-700">{{ error }}</p>
+    {% endfor %}
+  </div>
+{% endfor %}
