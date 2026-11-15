@@ -22,11 +22,12 @@ SCORE_LEVELS = [
 
 
 def round_half_up(value: Fraction) -> int:
+    """Arrondi au demi supérieur (SPEC 9), utilisé partout à la place de `round()`."""
     return floor(value + Fraction(1, 2))
 
 
 def weighted_score(correct_weight: Fraction | int, total_weight: int) -> int:
-    """round(699 × poids des bonnes réponses / poids de tous les items)."""
+    """Arrondi au demi supérieur de (699 × poids des bonnes réponses / poids de tous les items)."""
     if not total_weight:
         return 0
     return round_half_up(Fraction(MAX_SCORE) * Fraction(correct_weight) / total_weight)

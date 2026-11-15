@@ -361,6 +361,7 @@ def record_answer(
             answer.change_count += 1
         if answer.selected_index != selected_index:
             answer.answered_at = now
+            answer.choice_history.append({"index": selected_index, "at": now.isoformat()})
         answer.selected_index = selected_index
     answer.flagged = bool(flagged)
     # Temps cumulé par le client, plafonné au temps écoulé depuis la première apparition.

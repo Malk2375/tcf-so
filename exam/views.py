@@ -1,4 +1,5 @@
 from collections import defaultdict
+from fractions import Fraction
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -13,7 +14,7 @@ from config.views import mode_cards
 from exam import services
 from exam.charts import score_chart
 from exam.models import Answer, Attempt
-from exam.scoring import LEVEL_MARGIN
+from exam.scoring import LEVEL_MARGIN, round_half_up
 from exam.services import AttemptError
 
 
@@ -142,7 +143,7 @@ def attempt_results(request, pk):
                         "level": level,
                         "correct": correct,
                         "total": len(at_level),
-                        "percent": round(100 * correct / len(at_level)),
+                        "percent": round_half_up(Fraction(100 * correct, len(at_level))),
                     }
                 )
         sections.append(
@@ -152,8 +153,10 @@ def attempt_results(request, pk):
                 "total": len(answers),
                 "unanswered": sum(a.selected_index is None for a in answers),
                 "by_level": by_level,
-                "seconds_used": round(
-                    (attempt_section.finished_at - attempt_section.started_at).total_seconds()
+                "seconds_used": round_half_up(
+                    Fraction(
+                        (attempt_section.finished_at - attempt_section.started_at).total_seconds()
+                    )
                 )
                 if attempt_section.started_at and attempt_section.finished_at
                 else None,

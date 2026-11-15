@@ -10,6 +10,7 @@ from exam.scoring import (
     global_score,
     level_for,
     level_range,
+    round_half_up,
     section_score,
     weighted_score,
 )
@@ -102,3 +103,12 @@ def test_global_score_is_rounded_mean():
 )
 def test_level_range_margin_by_mode(score, mode, low, high):
     assert level_range(score, mode) == (low, high)
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [(Fraction(5, 2), 3), (Fraction(1, 2), 1), (Fraction(25, 2), 13), (Fraction(249, 100), 2)],
+)
+def test_round_half_up_everywhere(value, expected):
+    # round() de Python arrondit 2,5 à 2 et 12,5 à 12 : la spec impose le demi supérieur.
+    assert round_half_up(value) == expected

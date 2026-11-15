@@ -2,8 +2,12 @@
 {% block content %}
 {% with current=request.resolver_match.url_name %}
 <nav aria-label="Back-office" class="-mx-4 mb-6 flex gap-1 overflow-x-auto border-b border-slate-200 px-4">
+  <a href="{% url 'backoffice:home' %}" class="bo-tab {% if current == 'home' %}bo-tab-active{% endif %}">Accueil</a>
+  <a href="{% url 'backoffice:tests' %}" class="bo-tab {% if current == 'tests' or current == 'test_review' or current == 'item_edit' %}bo-tab-active{% endif %}">Tests</a>
   <a href="{% url 'backoffice:briefs' %}" class="bo-tab {% if current == 'briefs' %}bo-tab-active{% endif %}">Briefs</a>
-  <a href="{% url 'backoffice:import' %}" class="bo-tab {% if current == 'import' %}bo-tab-active{% endif %}">Import</a>
+  <a href="{% url 'backoffice:import' %}" class="bo-tab {% if current == 'import' or current == 'import_report' %}bo-tab-active{% endif %}">Import</a>
+  <a href="{% url 'backoffice:voices' %}" class="bo-tab {% if current == 'voices' %}bo-tab-active{% endif %}">Voix</a>
+  <a href="{% url 'backoffice:usage' %}" class="bo-tab {% if current == 'usage' %}bo-tab-active{% endif %}">Consommation</a>
   <a href="{% url 'backoffice:users' %}" class="bo-tab {% if current == 'users' %}bo-tab-active{% endif %}">Comptes</a>
   <a href="{% url 'admin:index' %}" class="bo-tab">Admin</a>
 </nav>

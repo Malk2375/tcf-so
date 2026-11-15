@@ -1,0 +1,46 @@
+{% extends "backoffice/base.html" %}
+{% load exam_tags %}
+{% block head_title %}Consommation · Back-office{% endblock %}
+{% block bo_content %}
+<h1 class="text-2xl font-bold sm:text-3xl">Journal des consommations</h1>
+
+<section class="mt-6" aria-labelledby="totaux-titre">
+  <h2 id="totaux-titre" class="text-xl font-semibold">Totaux par mois</h2>
+  {% if totals %}
+    <ul class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {% for row in totals %}
+        <li class="card">
+          <p class="text-sm text-slate-600">{{ row.month }}</p>
+          <p class="font-semibold">{{ row.label }}</p>
+          <p class="mt-1 text-sm text-slate-700">
+            {{ row.count }} opération{{ row.count|fr_plural }}
+            {% if row.chars %} · {{ row.chars|floatformat:"g" }} caractères{% endif %}
+            {% if row.input_tokens or row.output_tokens %} · {{ row.input_tokens|floatformat:"g" }} tokens en entrée, {{ row.output_tokens|floatformat:"g" }} en sortie{% endif %}
+            · {{ row.cost|floatformat:4 }} $
+          </p>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="mt-2 text-slate-600">Aucune consommation enregistrée.</p>
+  {% endif %}
+</section>
+
+{% if entries %}
+<section class="mt-8" aria-labelledby="journal-titre">
+  <h2 id="journal-titre" class="text-xl font-semibold">Dernières opérations</h2>
+  <ul class="mt-3 divide-y divide-slate-200 rounded-md border border-slate-200 bg-white text-sm">
+    {% for entry in entries %}
+      <li class="flex flex-wrap gap-x-4 gap-y-1 px-4 py-2">
+        <span class="text-slate-500">{{ entry.created_at|date:"j M Y H:i" }}</span>
+        <span class="font-medium">{{ entry.get_kind_display }}</span>
+        <span>{{ entry.provider }}</span>
+        {% if entry.chars %}<span>{{ entry.chars|floatformat:"g" }} car.</span>{% endif %}
+        <span>{{ entry.cost_usd|floatformat:4 }} $</span>
+        <span class="break-words text-slate-600">{{ entry.ref }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

@@ -384,6 +384,33 @@ def test_change_count_and_time_cap(user_client, attempt, frozen):
     assert answer.time_spent_ms == 20_000  # plafonné au temps écoulé depuis la première apparition
 
 
+def test_choice_history_records_each_choice_in_order(user_client, attempt, frozen):
+    start_msl(user_client, attempt)
+    item = section_items(attempt.test, "MSL")[0]
+    right, wrong = item.item.correct_index, wrong_index(item)
+    t0 = timezone.now()
+    post_answer(user_client, attempt, item.pk, right)
+    frozen.shift(timedelta(seconds=5))
+    post_answer(user_client, attempt, item.pk, right, flagged=True)  # même choix : rien de neuf
+    post_answer(user_client, attempt, item.pk, wrong)
+    post_answer(user_client, attempt, item.pk, None)  # pas de choix : rien de neuf
+    answer = Answer.objects.get(attempt=attempt, test_item=item)
+    assert [c["index"] for c in answer.choice_history] == [right, wrong]
+    assert answer.choice_history[0]["at"] == t0.isoformat()
+    assert answer.choice_history[1]["at"] == (t0 + timedelta(seconds=5)).isoformat()
+    assert answer.change_count == len(answer.choice_history) - 1
+    # Un changement d'une bonne réponse vers une mauvaise se lit dans l'historique (SPEC 12.2).
+    assert answer.choice_history[0]["index"] == right and answer.selected_index == wrong
+
+
+def test_choice_history_is_never_sent_to_the_browser(user_client, attempt):
+    start_msl(user_client, attempt)
+    item = section_items(attempt.test, "MSL")[0]
+    _, data = post_answer(user_client, attempt, item.pk, 1)
+    _, again = api(user_client, attempt, "api_section_start", 2)
+    assert "choice_history" not in keys(data) | keys(again)
+
+
 def test_invalid_answer_payloads(user_client, attempt):
     start_msl(user_client, attempt)
     item = section_items(attempt.test, "MSL")[0]

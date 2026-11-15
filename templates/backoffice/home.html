@@ -1,0 +1,68 @@
+{% extends "backoffice/base.html" %}
+{% load exam_tags %}
+{% block head_title %}Back-office{% endblock %}
+{% block bo_content %}
+<h1 class="text-2xl font-bold sm:text-3xl">Back-office</h1>
+
+<section class="mt-6" aria-labelledby="stock-titre">
+  <h2 id="stock-titre" class="text-xl font-semibold">Stock de tests</h2>
+  <ul class="mt-3 grid gap-4 sm:grid-cols-3">
+    {% for row in stock %}
+      <li class="card">
+        <h3 class="font-semibold text-blue-900">{{ row.format.label }}</h3>
+        <p class="mt-2"><span class="text-2xl font-bold">{{ row.published }}</span> publié{{ row.published|fr_plural }}</p>
+        <p class="text-slate-700">{{ row.drafts }} brouillon{{ row.drafts|fr_plural }}</p>
+      </li>
+    {% endfor %}
+  </ul>
+  <p class="mt-3"><a href="{% url 'backoffice:tests' %}" class="link inline-flex min-h-11 items-center">Tous les tests</a></p>
+</section>
+
+<section class="card mt-6" aria-labelledby="quota-titre">
+  <h2 id="quota-titre" class="text-xl font-semibold">Quota vocal du mois ({{ month }})</h2>
+  <p class="mt-1 text-sm text-slate-600">Fournisseur : {% if provider == "google" %}Google Chirp 3 HD{% else %}factice (aucun appel réseau){% endif %}.</p>
+  <div class="mt-4 h-3 w-full overflow-hidden rounded-full bg-slate-200" role="progressbar"
+       aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ tts.percent }}" aria-label="Part du quota utilisée">
+    <div class="h-full bg-blue-800" style="width: {{ tts.percent }}%"></div>
+  </div>
+  <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
+    <div><dt class="text-sm text-slate-600">Utilisés</dt><dd class="font-semibold tabular-nums">{{ tts.used|floatformat:"g" }}</dd></div>
+    <div><dt class="text-sm text-slate-600">Restants</dt><dd class="font-semibold tabular-nums">{{ tts.remaining|floatformat:"g" }}</dd></div>
+    <div><dt class="text-sm text-slate-600">Limite (95 %)</dt><dd class="tabular-nums">{{ tts.limit|floatformat:"g" }}</dd></div>
+    <div><dt class="text-sm text-slate-600">Quota gratuit</dt><dd class="tabular-nums">{{ tts.quota|floatformat:"g" }}</dd></div>
+  </dl>
+  <h3 class="mt-5 font-semibold">Équivalent en tests</h3>
+  <ul class="mt-2 space-y-1">
+    {% for row in stock %}
+      <li>{{ row.format.label }} : <span class="font-semibold">{{ row.tests_left }}</span> test{{ row.tests_left|fr_plural }}
+        <span class="text-sm text-slate-600">(environ {{ row.chars_per_test|floatformat:"g" }} caractères par test)</span></li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="card mt-6" aria-labelledby="api-titre">
+  <h2 id="api-titre" class="text-xl font-semibold">API Claude du mois</h2>
+  <p class="mt-2"><span class="text-2xl font-bold">{{ api.spent|floatformat:2 }} $</span> dépensés sur un plafond de {{ api.budget|floatformat:2 }} $.</p>
+  <p class="mt-1"><a href="{% url 'backoffice:usage' %}" class="link inline-flex min-h-11 items-center">Journal des consommations</a></p>
+</section>
+
+<section class="mt-6" aria-labelledby="imports-titre">
+  <h2 id="imports-titre" class="text-xl font-semibold">Derniers imports</h2>
+  {% if recent %}
+    <ul class="mt-3 divide-y divide-slate-200 rounded-md border border-slate-200 bg-white">
+      {% for batch in recent %}
+        <li>
+          <a href="{% url 'backoffice:import_report' batch.pk %}" class="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 hover:bg-slate-50">
+            <span class="font-medium">n° {{ batch.pk }}</span>
+            <span class="{% if batch.status == 'accepted' %}text-green-700{% else %}text-red-700{% endif %}">{{ batch.get_status_display }}</span>
+            <span class="text-sm text-slate-600">{% if batch.brief %}{{ batch.brief.brief_id }}{% elif batch.format %}{{ batch.format.code }}{% else %}format inconnu{% endif %}</span>
+            <span class="text-sm text-slate-500">{{ batch.created_at|date:"j M Y H:i" }}</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="mt-2 text-sm text-slate-600">Aucun import pour l'instant.</p>
+  {% endif %}
+</section>
+{% endblock %}

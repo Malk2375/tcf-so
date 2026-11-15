@@ -222,6 +222,9 @@ class Test(models.Model):
         ImportBatch, on_delete=models.SET_NULL, null=True, blank=True, related_name="tests"
     )
     published_at = models.DateTimeField(null=True, blank=True)
+    # Contrôle à l'aveugle (6.4) : {"answers": {"<slot>": index}, "doubts": {"<slot>": "raison"},
+    # "received_at": "…"} ; vide tant que les réponses du relecteur n'ont pas été envoyées.
+    blind_check = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

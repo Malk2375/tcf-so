@@ -1,5 +1,6 @@
 import json
 import random
+import socket
 from pathlib import Path
 
 import pytest
@@ -16,6 +17,20 @@ PASSWORD = "Entrainement-TCF-2026"
 @pytest.fixture(autouse=True)
 def _media_root(settings, tmp_path):
     settings.MEDIA_ROOT = tmp_path / "media"
+
+
+@pytest.fixture(autouse=True)
+def _no_network(settings, monkeypatch):
+    """Aucun appel réseau pendant les tests : fournisseurs factices, connexions refusées."""
+    settings.TTS_PROVIDER = "fake"
+    settings.GOOGLE_TTS_API_KEY = ""
+    settings.LLM_PROVIDER = "fake"
+
+    def refuse(*args, **kwargs):
+        raise RuntimeError("Appel réseau interdit pendant les tests.")
+
+    monkeypatch.setattr(socket.socket, "connect", refuse)
+    monkeypatch.setattr(socket, "create_connection", refuse)
 
 
 @pytest.fixture

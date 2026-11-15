@@ -1,6 +1,7 @@
 """Réglages Django. Toutes les valeurs variables sont lues dans `.env` (voir `.env.example`)."""
 
 import os
+import sys
 from pathlib import Path
 
 import environ
@@ -10,7 +11,10 @@ from django.core.management.utils import get_random_secret_key
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 
-environ.Env.read_env(BASE_DIR / ".env")
+# Les tests automatisés ignorent `.env` : ils tournent toujours avec les valeurs par défaut
+# (fournisseurs factices, aucune clé), même si le propriétaire a renseigné ses clés.
+if "pytest" not in sys.modules:
+    environ.Env.read_env(BASE_DIR / ".env")
 
 ENV_VARIABLES = [
     "DJANGO_SECRET_KEY",

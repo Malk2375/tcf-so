@@ -26,6 +26,8 @@ uv run python manage.py make_dev_test --mode rapide    # test factice publié, a
 ```
 
 `make_dev_test` accepte `--mode rapide|moyen|reel` et refuse de tourner si `DJANGO_DEBUG=false`.
+Avec `--draft`, il passe par le vrai circuit (brief, fichier d'import, validation) et laisse un test **en brouillon,
+sans audio**, prêt à être relu dans le back-office.
 Ses textes sont faits de pseudo-mots : ils ont la bonne longueur, pas de sens.
 
 ## Produire un test (back-office)
@@ -36,6 +38,22 @@ Ses textes sont faits de pseudo-mots : ils ont la bonne longueur, pas de sens.
    bonne réponse imposée par le brief, longueurs, doublons…). Une seule erreur et aucune question n'est enregistrée :
    seul l'import refusé est gardé, avec son rapport, que la liste « Derniers imports » permet de rouvrir
    pour le coller dans la conversation de rédaction. Sinon, le test est créé en brouillon.
+
+4. `/bo/tests/<id>/` (relecture) : pour chaque question, support ou script, options, bonne réponse, explication,
+   avertissements de l'import ; boutons « Approuver », « Rejeter », « Modifier » (mêmes contrôles qu'à l'import ;
+   la question repasse alors en brouillon).
+5. Contrôle à l'aveugle : « Télécharger blind.json » (questions sans les réponses), le faire passer dans le Projet Claude
+   « relecture », puis envoyer le fichier rendu : chaque désaccord et chaque doute est signalé.
+6. « Générer l'audio du test » : un seul clic ; la page enchaîne la synthèse des questions de CO avec une barre de progression.
+   Fermer la page n'est pas grave : un nouveau clic reprend là où la synthèse s'était arrêtée, sans rien refaire.
+   La génération est refusée si le test ne tient pas dans le quota du mois (95 % du quota gratuit).
+   Un script modifié rend son audio « périmé » : « Régénérer l'audio » refait cet item seul.
+7. « Publier » : possible seulement quand toutes les questions sont approuvées et tous les audio à jour.
+   Le test est alors figé ; seule action possible ensuite : « Archiver ».
+
+Autres pages : `/bo/` (stock, quota vocal du mois, dépense API, derniers imports), `/bo/voices/` (écoute des voix,
+distribution), `/bo/usage/` (journal des consommations). `uv run python manage.py tts_list_voices` affiche les voix
+du fournisseur configuré.
 
 Le schéma utilisé par l'application est `bank/data/schema-import.json`, copie de `docs/schema-import.json`.
 Les exemples de `docs/exemples/` sont recopiés dans `tests/fixtures/`. Un test signale toute différence
@@ -49,6 +67,42 @@ les résultats, la correction (`/attempts/<id>/review/`) et l'historique (`/hist
 
 Les échéances sont tenues par le serveur. Un passage interrompu se reprend depuis le tableau de bord ;
 il est abandonné d'office 30 minutes après la durée prévue du test.
+
+## Démarrer et tester
+
+Pour une personne qui ne développe pas, sous Windows, dans PowerShell, depuis le dossier du projet.
+
+**Une seule fois :**
+
+```powershell
+uv sync
+uv run python manage.py migrate
+uv run python manage.py seed_formats
+uv run python manage.py createsuperuser
+```
+
+`createsuperuser` demande un nom (interne), une adresse e-mail et un mot de passe : c'est le compte à utiliser,
+connexion avec **l'adresse e-mail**.
+
+**À chaque session de test :**
+
+```powershell
+$env:TTS_PROVIDER = "fake"     # voix factices pour cette fenêtre, même si .env contient TTS_PROVIDER=google
+uv run python manage.py runserver
+```
+
+Ouvrir <http://localhost:8000> et se connecter. Arrêter le site avec Ctrl+C.
+Sans la ligne `$env:TTS_PROVIDER = "fake"`, la valeur de `.env` s'applique : avec `google`, chaque audio généré
+consomme le quota Google réel.
+
+**Créer des tests factices** (dans une seconde fenêtre PowerShell, pendant que le site tourne) :
+
+```powershell
+uv run python manage.py make_dev_test --mode rapide           # test publié, prêt à passer
+uv run python manage.py make_dev_test --mode rapide --draft   # test en brouillon, à relire et publier
+```
+
+**Vérifier tous les tests automatiques :** `uv run pytest` (aucun appel réseau, `.env` est ignoré).
 
 ## Commandes
 

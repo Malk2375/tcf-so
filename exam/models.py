@@ -103,6 +103,9 @@ class Answer(models.Model):
     is_correct = models.BooleanField(default=False)
     time_spent_ms = models.PositiveIntegerField(default=0)
     change_count = models.PositiveSmallIntegerField(default=0)
+    # Index choisis, dans l'ordre, avec leur horodatage : [{"index": 2, "at": "…"}, …].
+    # Sert au constat `answer_changes` (SPEC 12.2).
+    choice_history = models.JSONField(default=list, blank=True)
     flagged = models.BooleanField(default=False)
     first_seen_at = models.DateTimeField()
     answered_at = models.DateTimeField(null=True, blank=True)

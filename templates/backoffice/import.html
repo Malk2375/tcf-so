@@ -12,7 +12,10 @@
   {% if batch.status == "accepted" %}
     <section class="mt-4 rounded-md border border-green-200 bg-green-50 p-4 text-green-950" role="status">
       <h2 class="font-semibold">Import accepté</h2>
-      {% if test %}<p class="mt-1">{{ test }} créé en brouillon, {{ test.test_items.count }} questions.</p>{% endif %}
+      {% if test %}
+        <p class="mt-1">{{ test }} créé en brouillon, {{ test.test_items.count }} questions.</p>
+        <p class="mt-2"><a href="{% url 'backoffice:test_review' test.pk %}" class="link inline-flex min-h-11 items-center">Ouvrir la relecture</a></p>
+      {% endif %}
     </section>
   {% else %}
     <section class="mt-4 rounded-md border border-red-200 bg-red-50 p-4 text-red-950" role="alert">

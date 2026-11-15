@@ -1,0 +1,1 @@
+<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-sm font-medium {% if test.status == 'published' %}bg-green-100 text-green-900{% elif test.status == 'draft' %}bg-amber-100 text-amber-950{% else %}bg-slate-200 text-slate-800{% endif %}">{{ test.get_status_display }}</span>

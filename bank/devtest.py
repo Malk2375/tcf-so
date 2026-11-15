@@ -1,15 +1,17 @@
 """Test factice complet et publié (SPEC 6.5). Réservé au développement."""
 
+import json
 import random
 
 from django.db import transaction
 from django.utils import timezone
 
 from bank.audio import store_placeholder_audio
-from bank.brief import build_brief, next_number
+from bank.brief import build_brief, create_brief, next_number
 from bank.constants import LEVELS
 from bank.content import content_hash, doc_length, support_text, word_count
-from bank.devdata import fake_item
+from bank.devdata import fake_import_file, fake_item
+from bank.importer import import_files
 from bank.models import ExamFormat, Item, Test, TestItem
 
 
@@ -57,3 +59,16 @@ def make_dev_test(mode: str, rng: random.Random | None = None) -> Test:
         if section == "CO":
             store_placeholder_audio(item)
     return test
+
+
+def make_dev_draft(mode: str, rng: random.Random | None = None, user=None) -> Test:
+    """Test factice passé par le vrai circuit : brief, fichier d'import, validation, brouillon."""
+    rng = rng or random.Random()
+    brief = create_brief(ExamFormat.objects.get(mode=mode), user=user, rng=rng)
+    data = fake_import_file(brief.content, rng)
+    raw = json.dumps(data, ensure_ascii=False).encode()
+    result = import_files([(f"items_{brief.brief_id}.json", raw)], user=user)
+    if result.test is None:
+        messages = "; ".join(issue.message for issue in result.report.errors)
+        raise RuntimeError(f"Import factice refusé : {messages}")
+    return result.test
