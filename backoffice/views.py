@@ -11,7 +11,7 @@ from backoffice.forms import BriefForm, ImportForm
 from bank.brief import create_brief
 from bank.constants import MAX_IMPORT_FILE_BYTES
 from bank.importer import import_files
-from bank.models import Brief
+from bank.models import Brief, ImportBatch
 
 
 @staff_required
@@ -49,15 +49,30 @@ def brief_download(request, pk):
     return _brief_download(get_object_or_404(Brief, pk=pk))
 
 
+def _render_import(request, form, batch=None):
+    context = {
+        "form": form,
+        "batch": batch,
+        "test": batch.tests.first() if batch else None,
+        "show_files": batch is not None and len(batch.filenames) > 1,
+        "recent": ImportBatch.objects.select_related("format", "brief")[:20],
+    }
+    return render(request, "backoffice/import.html", context)
+
+
 @staff_required
 @require_http_methods(["GET", "POST"])
 def import_view(request):
     form = ImportForm(request.POST or None, request.FILES or None)
-    result, show_files = None, False
+    batch = None
     if request.method == "POST" and form.is_valid():
         # Lecture bornée : un fichier trop gros est signalé sans être chargé en entier.
         files = [(f.name, f.read(MAX_IMPORT_FILE_BYTES + 1)) for f in form.cleaned_data["files"]]
-        result = import_files(files, user=request.user)
-        show_files = len(files) > 1
-    context = {"form": form, "result": result, "show_files": show_files}
-    return render(request, "backoffice/import.html", context)
+        batch = import_files(files, user=request.user).batch
+    return _render_import(request, form, batch)
+
+
+@staff_required
+def import_report(request, pk):
+    """Réaffiche le rapport d'un import, par exemple pour le coller dans le Projet de rédaction."""
+    return _render_import(request, ImportForm(), get_object_or_404(ImportBatch, pk=pk))

@@ -3,31 +3,56 @@
 {% block bo_content %}
 <h1 class="text-2xl font-bold sm:text-3xl">Import de questions</h1>
 
-{% if result %}
-  {% if result.test %}
-    <section class="mt-6 rounded-md border border-green-200 bg-green-50 p-4 text-green-950" role="status">
+{% if batch %}
+  <p class="mt-2 text-sm text-slate-600">
+    Import n° {{ batch.pk }} du {{ batch.created_at|date:"j F Y à H:i" }}
+    {% if batch.brief %}· brief {{ batch.brief.brief_id }}{% endif %}
+    · {{ batch.filenames|join:", " }}
+  </p>
+  {% if batch.status == "accepted" %}
+    <section class="mt-4 rounded-md border border-green-200 bg-green-50 p-4 text-green-950" role="status">
       <h2 class="font-semibold">Import accepté</h2>
-      <p class="mt-1">{{ result.test }} créé en brouillon, {{ result.test.test_items.count }} questions.</p>
+      {% if test %}<p class="mt-1">{{ test }} créé en brouillon, {{ test.test_items.count }} questions.</p>{% endif %}
     </section>
   {% else %}
-    <section class="mt-6 rounded-md border border-red-200 bg-red-50 p-4 text-red-950" role="alert">
-      <h2 class="font-semibold">Import refusé : {{ result.report.errors|length }} erreur{{ result.report.errors|length|pluralize }}</h2>
-      <p class="mt-1 text-sm">Rien n'a été enregistré. Collez ce rapport dans la conversation de rédaction et demandez le fichier corrigé complet.</p>
-      {% include "backoffice/includes/issues.html" with issues=result.report.errors %}
+    <section class="mt-4 rounded-md border border-red-200 bg-red-50 p-4 text-red-950" role="alert">
+      <h2 class="font-semibold">Import refusé : {{ batch.report.errors|length }} erreur{{ batch.report.errors|length|pluralize }}</h2>
+      <p class="mt-1 text-sm">Aucune question n'a été enregistrée. Collez ce rapport dans la conversation de rédaction et demandez le fichier corrigé complet.</p>
+      {% include "backoffice/includes/issues.html" with issues=batch.report.errors %}
     </section>
   {% endif %}
-  {% if result.report.warnings %}
+  {% if batch.report.warnings %}
     <section class="mt-4 rounded-md border border-amber-200 bg-amber-50 p-4 text-amber-950">
-      <h2 class="font-semibold">{{ result.report.warnings|length }} avertissement{{ result.report.warnings|length|pluralize }}</h2>
+      <h2 class="font-semibold">{{ batch.report.warnings|length }} avertissement{{ batch.report.warnings|length|pluralize }}</h2>
       <p class="mt-1 text-sm">Non bloquants : ils seront rappelés à la relecture.</p>
-      {% include "backoffice/includes/issues.html" with issues=result.report.warnings %}
+      {% include "backoffice/includes/issues.html" with issues=batch.report.warnings %}
     </section>
   {% endif %}
 {% endif %}
 
-<form method="post" enctype="multipart/form-data" class="form-stack card mt-6 max-w-xl space-y-5">
+<form method="post" action="{% url 'backoffice:import' %}" enctype="multipart/form-data" class="form-stack card mt-6 max-w-xl space-y-5">
   {% csrf_token %}
   {% include "includes/form_fields.html" %}
   <button type="submit" class="btn btn-primary w-full sm:w-auto">Valider et importer</button>
 </form>
+
+<section class="mt-8">
+  <h2 class="text-lg font-semibold">Derniers imports</h2>
+  {% if recent %}
+    <ul class="mt-3 divide-y divide-slate-200 rounded-md border border-slate-200 bg-white">
+      {% for item in recent %}
+        <li>
+          <a href="{% url 'backoffice:import_report' item.pk %}" class="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 hover:bg-slate-50">
+            <span class="font-medium">n° {{ item.pk }}</span>
+            <span class="{% if item.status == 'accepted' %}text-green-700{% else %}text-red-700{% endif %}">{{ item.get_status_display }}</span>
+            <span class="text-sm text-slate-600">{% if item.brief %}{{ item.brief.brief_id }}{% elif item.format %}{{ item.format.code }}{% else %}format inconnu{% endif %}</span>
+            <span class="text-sm text-slate-500">{{ item.created_at|date:"j M Y H:i" }}</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="mt-2 text-sm text-slate-600">Aucun import pour l'instant.</p>
+  {% endif %}
+</section>
 {% endblock %}

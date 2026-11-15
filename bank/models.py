@@ -121,8 +121,12 @@ class ImportBatch(models.Model):
     uploaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
     )
+    # Nuls quand l'import est refusé avant d'avoir pu les identifier.
+    brief = models.ForeignKey(
+        Brief, on_delete=models.SET_NULL, null=True, blank=True, related_name="imports"
+    )
     filenames = models.JSONField(default=list)
-    format = models.ForeignKey(ExamFormat, on_delete=models.PROTECT)
+    format = models.ForeignKey(ExamFormat, on_delete=models.PROTECT, null=True, blank=True)
     status = models.CharField(max_length=10, choices=Status.choices)
     report = models.JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)

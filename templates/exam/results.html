@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load exam_tags %}
+{% block head_title %}Résultats{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold sm:text-3xl">Résultats</h1>
+<p class="mt-1 text-slate-700">
+  {{ attempt.test.format.label }}, test n° {{ attempt.test.number }} · terminé le {{ attempt.finished_at|date:"j F Y à H:i" }}
+</p>
+
+<section class="card mt-6" aria-labelledby="global-titre">
+  <h2 id="global-titre" class="text-lg font-semibold">Niveau global estimé</h2>
+  <p class="mt-2 text-4xl font-bold text-blue-900">{{ attempt.level_range }}</p>
+  <p class="mt-1 text-slate-700">Score global : <strong>{{ attempt.global_score }}</strong> / 699</p>
+  {% if margin %}
+    <p class="mt-2 text-sm text-slate-600">
+      Fourchette de ± {{ margin }} points : un test {{ attempt.test.format.get_mode_display|lower }} compte peu de questions.
+    </p>
+  {% endif %}
+  <p class="mt-3 text-sm font-medium text-slate-700">Estimation non officielle. Questions générées par IA.</p>
+</section>
+
+<div class="mt-6 grid gap-4 lg:grid-cols-3">
+  {% for s in sections %}
+    <section class="card" aria-labelledby="epreuve-{{ s.obj.section }}">
+      <h2 id="epreuve-{{ s.obj.section }}" class="font-semibold">{{ s.label }}</h2>
+      <p class="mt-2 text-2xl font-bold text-blue-900">{{ s.obj.get_level_display }}</p>
+      <p class="text-slate-700">{{ s.obj.score }} / 699 · {{ s.obj.n_correct }} bonne{{ s.obj.n_correct|pluralize }} réponse{{ s.obj.n_correct|pluralize }} sur {{ s.total }}</p>
+      {% if s.unanswered %}<p class="text-sm text-slate-600">{{ s.unanswered }} sans réponse</p>{% endif %}
+      {% if s.seconds_used is not None %}
+        <p class="text-sm text-slate-600">Temps utilisé : {{ s.seconds_used|minutes_seconds }}</p>
+      {% endif %}
+      <h3 class="mt-4 text-sm font-semibold text-slate-700">Réussite par niveau</h3>
+      <ul class="mt-2 space-y-2">
+        {% for row in s.by_level %}
+          <li>
+            <div class="flex justify-between text-sm">
+              <span>{{ row.level }}</span>
+              <span>{{ row.correct }} / {{ row.total }}</span>
+            </div>
+            <div class="mt-1 h-2 rounded bg-slate-200" aria-hidden="true">
+              <div class="h-2 rounded bg-blue-700" style="width: {{ row.percent }}%"></div>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endfor %}
+</div>
+
+<div class="mt-6 flex flex-col gap-3 sm:flex-row">
+  <a href="{% url 'attempt_review' attempt.pk %}" class="btn btn-primary">Voir la correction</a>
+  <a href="{% url 'history' %}" class="btn btn-secondary">Historique</a>
+  <a href="{% url 'dashboard' %}" class="btn btn-secondary">Tableau de bord</a>
+</div>
+{% endblock %}

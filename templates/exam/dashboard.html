@@ -2,15 +2,68 @@
 {% block head_title %}Tableau de bord{% endblock %}
 {% block content %}
 <h1 class="text-2xl font-bold sm:text-3xl">Tableau de bord</h1>
+
+{% if current %}
+  <section class="mt-6 rounded-lg border border-amber-300 bg-amber-50 p-5" aria-labelledby="en-cours-titre">
+    <h2 id="en-cours-titre" class="text-lg font-semibold text-amber-950">Passage en cours</h2>
+    <p class="mt-1 text-amber-950">
+      {{ current.test.format.label }}, test n° {{ current.test.number }}, commencé le {{ current.started_at|date:"j F à H:i" }}.
+    </p>
+    <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+      <a href="{% url 'attempt_player' current.pk %}" class="btn btn-primary">Reprendre</a>
+      <form method="post" action="{% url 'attempt_abandon' current.pk %}"
+            x-data @submit="if (!confirm('Abandonner ce passage ? Il ne pourra pas être repris.')) $event.preventDefault()">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-secondary w-full sm:w-auto">Abandonner</button>
+      </form>
+    </div>
+  </section>
+{% endif %}
+
+{% if last %}
+  <section class="card mt-6" aria-labelledby="niveau-titre">
+    <h2 id="niveau-titre" class="text-lg font-semibold">Dernier niveau estimé</h2>
+    <p class="mt-2 text-3xl font-bold text-blue-900">{{ last.level_range }}</p>
+    <p class="mt-1 text-slate-700">
+      {{ last.global_score }} / 699 · mode {{ last.test.format.get_mode_display|lower }}, le {{ last.finished_at|date:"j F Y" }}
+    </p>
+    <p class="mt-3 flex flex-wrap gap-x-4">
+      <a href="{% url 'attempt_results' last.pk %}" class="link inline-flex min-h-11 items-center">Voir les résultats</a>
+      <a href="{% url 'history' %}" class="link inline-flex min-h-11 items-center">Historique</a>
+    </p>
+  </section>
+{% endif %}
+
 <section class="mt-6" aria-labelledby="modes-titre">
   <h2 id="modes-titre" class="text-xl font-semibold">Choisir un mode</h2>
   <ul class="mt-4 grid gap-4 sm:grid-cols-3">
     {% for mode in modes %}
-    <li class="card">
+    <li class="card flex flex-col">
       <h3 class="text-lg font-semibold text-blue-900">{{ mode.label }}</h3>
       <p class="mt-2 text-slate-700">{{ mode.questions }} questions</p>
       <p class="text-slate-700">{{ mode.minutes }} minutes</p>
-      <p class="mt-3 text-sm text-slate-600">Aucun test disponible pour le moment.</p>
+      <p class="mt-1 text-sm text-slate-600">
+        {# En français, 0 et 1 sont au singulier. #}
+        {{ mode.available }} test{% if mode.available > 1 %}s{% endif %} disponible{% if mode.available > 1 %}s{% endif %}
+      </p>
+      <div class="mt-auto pt-4">
+        {% if mode.test %}
+          {% if mode.last_done %}
+            <p class="mb-2 text-sm text-slate-600">Test n° {{ mode.test.number }}, déjà passé le {{ mode.last_done|date:"j F Y" }}.</p>
+          {% else %}
+            <p class="mb-2 text-sm text-slate-600">Test n° {{ mode.test.number }}</p>
+          {% endif %}
+          <form method="post" action="{% url 'attempt_create' %}">
+            {% csrf_token %}
+            <input type="hidden" name="mode" value="{{ mode.format.mode }}">
+            <button type="submit" class="btn btn-primary w-full" {% if current %}disabled aria-disabled="true"{% endif %}>
+              Commencer
+            </button>
+          </form>
+        {% else %}
+          <p class="text-sm text-slate-600">Aucun test disponible pour le moment.</p>
+        {% endif %}
+      </div>
     </li>
     {% endfor %}
   </ul>

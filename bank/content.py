@@ -29,8 +29,9 @@ def support_text(section: str, stimulus_text: str | None, audio_script: dict | N
 
 
 def word_count(text: str) -> int:
-    """Nombre de mots : éléments séparés par des espaces (« ___ » compte pour un mot)."""
-    return len(text.split())
+    """Nombre de mots (4.3) : éléments séparés par des espaces qui contiennent une lettre
+    ou un chiffre. La ponctuation isolée et le blanc « ___ » ne comptent pas."""
+    return sum(1 for token in text.split() if any(char.isalnum() for char in token))
 
 
 def script_chars(audio_script: dict | None) -> int:

@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 from bank.constants import LANGUAGE_POINTS, SKILLS, expected_options_mode, subtypes_for
-from bank.content import length_check
+from bank.content import length_check, word_count
 from bank.schema import SCHEMA_PATH, schema_errors
 from bank.themes import themes
 from tests.conftest import FIXTURES, load_fixture
@@ -73,3 +73,16 @@ def test_themes_list():
     assert len(ids) == len(set(ids))
     example_themes = {i["tags"]["theme"] for i in load_fixture("items_exemple.json")["items"]}
     assert example_themes <= set(ids)
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("Il dit : « Bonjour ! »", 3),
+        ("Peut-être que l'oncle viendra – ou pas ?", 6),
+        ("Je ___ au marché ; il est 8 h.", 7),
+        ("", 0),
+    ],
+)
+def test_word_count_ignores_isolated_punctuation(text, expected):
+    assert word_count(text) == expected

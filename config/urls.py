@@ -6,7 +6,6 @@ from django.urls import include, path
 
 from accounts.urls import account_urlpatterns, profile_urlpatterns
 from config import views
-from exam import views as exam_views
 
 # L'admin passe par la connexion d'allauth (limitation des tentatives).
 admin.site.login = secure_admin_login(admin.site.login)
@@ -16,7 +15,7 @@ urlpatterns = [
     path("accounts/", include(account_urlpatterns)),
     path("accounts/", include("allauth.urls")),
     path("profile/", include(profile_urlpatterns)),
-    path("dashboard/", exam_views.dashboard, name="dashboard"),
+    path("", include("exam.urls")),
     path("bo/", include("backoffice.urls")),
     path("admin/", admin.site.urls),
 ]

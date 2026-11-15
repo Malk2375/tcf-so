@@ -33,12 +33,22 @@ Ses textes sont faits de pseudo-mots : ils ont la bonne longueur, pas de sens.
 1. `/bo/briefs/` : choisir un mode, télécharger le brief (`brief_<format>_<numéro>.json`).
 2. Le joindre à une conversation du Projet Claude « rédaction », récupérer le ou les fichiers JSON.
 3. `/bo/import/` : envoyer 1 à 3 fichiers. La plateforme valide tout (schéma, nombre d'items par niveau,
-   bonne réponse imposée par le brief, longueurs, doublons…). Une seule erreur et rien n'est enregistré :
-   le rapport est à coller dans la conversation de rédaction. Sinon, le test est créé en brouillon.
+   bonne réponse imposée par le brief, longueurs, doublons…). Une seule erreur et aucune question n'est enregistrée :
+   seul l'import refusé est gardé, avec son rapport, que la liste « Derniers imports » permet de rouvrir
+   pour le coller dans la conversation de rédaction. Sinon, le test est créé en brouillon.
 
 Le schéma utilisé par l'application est `bank/data/schema-import.json`, copie de `docs/schema-import.json`.
 Les exemples de `docs/exemples/` sont recopiés dans `tests/fixtures/`. Un test signale toute différence
 quand `docs/` est présent : après une modification de `docs/`, recopier les fichiers.
+
+## Passer un test
+
+Sur le tableau de bord, choisir un mode puis « Commencer » : la plateforme propose le plus ancien test publié
+pas encore terminé. Le lecteur enchaîne les consignes et les trois épreuves (CO, MSL, CE), puis affiche
+les résultats, la correction (`/attempts/<id>/review/`) et l'historique (`/history/`).
+
+Les échéances sont tenues par le serveur. Un passage interrompu se reprend depuis le tableau de bord ;
+il est abandonné d'office 30 minutes après la durée prévue du test.
 
 ## Commandes
 

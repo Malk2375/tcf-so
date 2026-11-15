@@ -81,6 +81,7 @@ class ImportReport:
 class ImportResult:
     report: ImportReport
     test: Test | None = None
+    batch: ImportBatch | None = None
 
 
 @dataclass
@@ -397,14 +398,27 @@ def _warnings(items: list[dict], report: ImportReport) -> None:
 # --- Enregistrement -----------------------------------------------------------------------------
 
 
-def _save(parsed: _Parsed, filenames: list[str], report: ImportReport, user) -> Test:
-    batch = ImportBatch.objects.create(
+def _batch(
+    parsed: _Parsed, filenames: list[str], report: ImportReport, user, status
+) -> ImportBatch:
+    return ImportBatch.objects.create(
         uploaded_by=user,
+        brief=parsed.brief,
         filenames=filenames,
         format=parsed.exam_format,
-        status=ImportBatch.Status.ACCEPTED,
+        status=status,
         report=report.as_dict(),
     )
+
+
+def _reject(parsed: _Parsed, filenames: list[str], report: ImportReport, user) -> ImportResult:
+    """Import refusé : seul l'ImportBatch « rejected » est enregistré, pour garder le rapport."""
+    batch = _batch(parsed, filenames, report, user, ImportBatch.Status.REJECTED)
+    return ImportResult(report, batch=batch)
+
+
+def _save(parsed: _Parsed, filenames: list[str], report: ImportReport, user) -> Test:
+    batch = _batch(parsed, filenames, report, user, ImportBatch.Status.ACCEPTED)
     test = Test.objects.create(
         format=parsed.exam_format, number=parsed.brief.number, import_batch=batch
     )
@@ -441,16 +455,18 @@ def _save(parsed: _Parsed, filenames: list[str], report: ImportReport, user) -> 
 def import_files(files: list[tuple[str, bytes]], user=None) -> ImportResult:
     """Valide puis enregistre 1 à 3 fichiers (nom, contenu).
 
-    Rien n'est écrit si une erreur subsiste.
+    Si une erreur subsiste, aucun item ni test n'est écrit : seulement l'ImportBatch « rejected ».
     """
     report = ImportReport()
+    filenames = [name for name, _ in files]
+    parsed = _Parsed()
     documents = _read_files(files, report)
     if not report.ok:
-        return ImportResult(report)
+        return _reject(parsed, filenames, report, user)
 
     parsed = _resolve_brief(documents, report)
     if not report.ok:
-        return ImportResult(report)
+        return _reject(parsed, filenames, report, user)
 
     _check_slots(parsed, report)
     _check_counts(parsed, report)
@@ -459,13 +475,13 @@ def import_files(files: list[tuple[str, bytes]], user=None) -> ImportResult:
     _check_duplicates(parsed.items, report)
     _warnings(parsed.items, report)
     if not report.ok:
-        return ImportResult(report)
+        return _reject(parsed, filenames, report, user)
 
     try:
         with transaction.atomic():
-            test = _save(parsed, [name for name, _ in files], report, user)
+            test = _save(parsed, filenames, report, user)
     except IntegrityError:
-        # Import concurrent du même brief ou d'un même item : rien n'a été écrit.
+        # Import concurrent du même brief ou d'un même item : la transaction a tout annulé.
         report.error("Enregistrement impossible : un test ou un item identique vient d'être créé.")
-        return ImportResult(report)
-    return ImportResult(report, test)
+        return _reject(parsed, filenames, report, user)
+    return ImportResult(report, test, test.import_batch)

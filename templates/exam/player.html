@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+{% load static %}
+{% block head_title %}Passage du test{% endblock %}
+{% block alpine_components %}<script src="{% static 'js/player.js' %}" defer></script>{% endblock %}
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block main_width %}max-w-none px-0! py-0!{% endblock %}
+{% block content %}
+{{ player_config|json_script:"player-config" }}
+<div x-data="player(JSON.parse(document.getElementById('player-config').textContent))" class="min-h-screen">
+  {# Un seul élément audio pour toute la CO, sans commandes ; le second ne sert qu'au préchargement. #}
+  <audio x-ref="audio" preload="auto" class="hidden"></audio>
+  <audio x-ref="preload" preload="auto" class="hidden" muted></audio>
+
+  {# Bandeau fixe : épreuve, question, minuteur. #}
+  <header class="fixed inset-x-0 top-0 z-30 bg-blue-900 text-white shadow">
+    <div class="mx-auto flex min-h-14 max-w-6xl items-center justify-between gap-3 px-4">
+      <div class="min-w-0">
+        <p class="truncate font-semibold" x-text="section ? section.label : 'Passage du test'">Passage du test</p>
+        <p class="text-sm text-blue-100" x-show="inSection" x-text="progressLabel"></p>
+      </div>
+      <div class="flex shrink-0 items-center gap-2">
+        <span x-show="!online || queued" x-cloak role="status"
+              class="rounded bg-amber-300 px-2 py-1 text-sm font-semibold text-amber-950">Hors ligne</span>
+        <span x-show="inSection" x-cloak role="timer" aria-label="Temps restant"
+              class="font-mono text-xl font-semibold tabular-nums" x-text="timer"></span>
+        <button type="button" x-show="phase === 'qcm'" x-cloak @click="gridOpen = !gridOpen"
+                class="nav-link border border-blue-700 lg:hidden" :aria-expanded="gridOpen.toString()" aria-controls="grille">
+          Questions
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="px-4 pb-28 pt-20 lg:pb-12">
+    {# Chargement #}
+    <p x-show="phase === 'loading' || phase === 'sending'" class="mt-10 text-center text-slate-600" role="status">Chargement…</p>
+
+    {# Erreur #}
+    <section x-show="phase === 'error'" x-cloak class="card mx-auto mt-6 max-w-xl" role="alert">
+      <h1 class="text-xl font-semibold">Un problème est survenu</h1>
+      <p class="mt-2 text-slate-700" x-text="message"></p>
+      <button type="button" class="btn btn-primary mt-4" @click="window.location.reload()">Recharger la page</button>
+    </section>
+
+    {# Consignes et transitions #}
+    <section x-show="phase === 'instructions'" x-cloak class="mx-auto max-w-2xl" aria-labelledby="consignes-titre">
+      <template x-if="previousSection && previousSection.status === 'done'">
+        <p class="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-green-950" role="status">
+          Épreuve terminée : <span x-text="previousSection.label"></span>.
+        </p>
+      </template>
+      <div class="card">
+        <p class="text-sm font-medium text-blue-900" x-text="section ? `Épreuve ${section.order} sur ${sections.length}` : ''"></p>
+        <h1 id="consignes-titre" class="mt-1 text-2xl font-bold" x-text="section && section.label"></h1>
+        <p class="mt-2 text-slate-700">
+          <span x-text="section && section.n_items"></span> questions ·
+          <span x-text="section && formatDuration(section.duration_seconds)"></span>
+        </p>
+
+        <template x-if="section && section.section === 'CO'">
+          <div>
+            <ul class="mt-4 list-disc space-y-2 pl-5 text-slate-800">
+              <li>Chaque document est diffusé <strong>une seule fois</strong>, sans pause ni retour en arrière.</li>
+              <li>Lisez la question et les options pendant l'écoute. Pour certaines questions, les options sont lues à voix haute : seules les lettres A à D s'affichent.</li>
+              <li>Après l'écoute, vous avez <strong x-text="`${section.answer_window_seconds} secondes`"></strong> pour répondre. Vous pouvez changer d'avis jusqu'à la fin du décompte ; la question suivante arrive ensuite d'elle-même.</li>
+              <li>Clavier : touches A à D (ou 1 à 4).</li>
+            </ul>
+            <div class="mt-5 rounded-md bg-slate-50 p-4">
+              <p class="font-medium">Test du son</p>
+              <p class="mt-1 text-sm text-slate-600">Réglez le volume de votre appareil avant de commencer.</p>
+              <button type="button" class="btn btn-secondary mt-3" @click="testSound()">
+                <span x-text="soundPlaying ? 'Lecture…' : 'Écouter le son d\'essai'"></span>
+              </button>
+            </div>
+          </div>
+        </template>
+        <template x-if="section && section.section !== 'CO'">
+          <ul class="mt-4 list-disc space-y-2 pl-5 text-slate-800">
+            <li x-show="section.allow_back">Vous pouvez aller et venir entre les questions, et marquer celles à revoir.</li>
+            <li x-show="!section.allow_back">Pas de retour en arrière : chaque réponse est définitive une fois la question quittée.</li>
+            <li>Le minuteur indique le temps restant. À la fin du temps, vos réponses sont enregistrées et l'épreuve se termine.</li>
+            <li>Clavier : touches A à D (ou 1 à 4) pour choisir, flèches pour changer de question.</li>
+          </ul>
+        </template>
+
+        <p x-show="autoStartSeconds !== null" class="mt-4 font-medium text-blue-900" role="timer">
+          L'épreuve démarre seule dans <span x-text="autoStartSeconds"></span> s.
+        </p>
+        <button type="button" class="btn btn-primary mt-6 w-full sm:w-auto" @click="start(section)">Commencer l'épreuve</button>
+      </div>
+      <div class="mt-4 flex flex-wrap gap-x-4">
+        <a href="{% url 'dashboard' %}" class="link inline-flex min-h-11 items-center">Tableau de bord (reprise possible)</a>
+        <button type="button" class="link inline-flex min-h-11 items-center" @click="abandonAttempt()">Abandonner le passage</button>
+      </div>
+    </section>
+
+    {# Compréhension orale #}
+    <section x-show="phase === 'co'" x-cloak class="mx-auto max-w-[640px] lg:max-w-[720px]" aria-live="polite">
+      <template x-if="coItem">
+        <div>
+          <div class="rounded-md bg-slate-100 p-4">
+            <template x-if="coPhase === 'ready'">
+              <div>
+                <p class="text-slate-800">Touchez le bouton pour reprendre l'écoute. Sans appui, la question se termine dans <span class="tabular-nums" x-text="countdownSeconds"></span> s.</p>
+                <button type="button" class="btn btn-primary mt-3 w-full" @click="resumeAudio()">Reprendre l'écoute</button>
+              </div>
+            </template>
+            <p x-show="coPhase === 'listening'" class="flex items-center gap-2 font-medium text-blue-900">
+              <span class="inline-block size-3 animate-pulse rounded-full bg-blue-700" aria-hidden="true"></span>
+              Écoute en cours…
+            </p>
+            <div x-show="coPhase === 'answering'">
+              <p class="font-medium">Temps pour répondre : <span class="tabular-nums" x-text="countdownSeconds"></span> s</p>
+              <div class="mt-2 h-2 rounded bg-slate-300" aria-hidden="true">
+                <div class="h-2 rounded bg-blue-700 transition-[width] duration-200" :style="`width: ${countdownPercent}%`"></div>
+              </div>
+            </div>
+            <p x-show="coPhase === 'sending'" class="text-slate-700">Question suivante…</p>
+          </div>
+
+          <h1 class="mt-6 text-lg font-semibold" x-text="coItem.question"></h1>
+          <template x-if="coItem.options">
+            <ul class="mt-4 space-y-3">
+              <template x-for="(option, i) in coItem.options" :key="i">
+                <li>
+                  <button type="button" class="option" :class="coItem.selected_index === i && 'option-selected'"
+                          :aria-pressed="(coItem.selected_index === i).toString()" @click="choose(i)">
+                    <span class="option-letter" x-text="letter(i)"></span>
+                    <span x-text="option"></span>
+                  </button>
+                </li>
+              </template>
+            </ul>
+          </template>
+          <template x-if="!coItem.options">
+            <ul class="mt-4 grid grid-cols-2 gap-3">
+              <template x-for="i in [0, 1, 2, 3]" :key="i">
+                <li>
+                  <button type="button" class="option justify-center py-6 text-2xl" :class="coItem.selected_index === i && 'option-selected'"
+                          :aria-pressed="(coItem.selected_index === i).toString()" @click="choose(i)">
+                    <span x-text="letter(i)"></span>
+                  </button>
+                </li>
+              </template>
+            </ul>
+          </template>
+        </div>
+      </template>
+    </section>
+
+    {# MSL et CE #}
+    <section x-show="phase === 'qcm'" x-cloak
+             :class="section && section.section === 'CE' ? 'mx-auto max-w-[640px] lg:max-w-6xl' : 'mx-auto max-w-[640px] lg:max-w-[720px]'">
+      <template x-if="current && phase === 'qcm'">
+        <div :class="section.section === 'CE' && 'lg:grid lg:grid-cols-2 lg:items-start lg:gap-8'">
+          <div x-show="current.stimulus_text" x-ref="stimulus"
+               :class="section.section === 'CE'
+                 ? 'card whitespace-pre-line text-base leading-relaxed lg:max-h-[calc(100vh-12rem)] lg:overflow-y-auto lg:text-lg'
+                 : 'card text-lg leading-relaxed'"
+               x-text="current.stimulus_text"></div>
+          <div class="mt-5 lg:mt-0">
+            <h1 x-show="current.question" class="text-lg font-semibold" x-text="current.question"></h1>
+            <ul class="mt-4 space-y-3">
+              <template x-for="(option, i) in current.options" :key="`${current.test_item_id}-${i}`">
+                <li>
+                  <button type="button" class="option" :class="current.selected_index === i && 'option-selected'"
+                          :aria-pressed="(current.selected_index === i).toString()" @click="choose(i)">
+                    <span class="option-letter" x-text="letter(i)"></span>
+                    <span x-text="option"></span>
+                  </button>
+                </li>
+              </template>
+            </ul>
+            <label class="mt-4 inline-flex min-h-11 cursor-pointer items-center gap-3">
+              <input type="checkbox" class="size-5 accent-amber-600" :checked="current.flagged" @change="toggleFlag()">
+              <span>À revoir</span>
+            </label>
+          </div>
+        </div>
+      </template>
+
+      {# Grille des questions : panneau ouvert depuis le bandeau sous 1024 px, en bas au-delà. #}
+      <div id="grille" x-show="gridOpen" x-cloak @click.self="gridOpen = false"
+           class="fixed inset-0 z-40 bg-slate-900/40 lg:hidden">
+        <div class="absolute inset-x-0 top-14 max-h-[70vh] overflow-y-auto bg-white p-4 shadow-lg">
+          <div class="flex items-center justify-between">
+            <p class="font-semibold">Questions</p>
+            <button type="button" class="btn btn-secondary" @click="gridOpen = false">Fermer</button>
+          </div>
+          <ul class="mt-3 grid grid-cols-6 gap-2 sm:grid-cols-8">
+            <template x-for="(item, i) in items" :key="item.test_item_id">
+              <li><button type="button" :class="gridClass(item, i)" :disabled="!section.allow_back && i < index"
+                          @click="goTo(i)" x-text="i + 1" :aria-label="`Question ${i + 1}`"></button></li>
+            </template>
+          </ul>
+          <p class="mt-3 text-sm text-slate-600"><span x-text="unanswered"></span> sans réponse</p>
+        </div>
+      </div>
+      <div class="mt-8 hidden lg:block">
+        <ul class="flex flex-wrap gap-2">
+          <template x-for="(item, i) in items" :key="item.test_item_id">
+            <li><button type="button" :class="gridClass(item, i)" :disabled="!section.allow_back && i < index"
+                        @click="goTo(i)" x-text="i + 1" :aria-label="`Question ${i + 1}`"></button></li>
+          </template>
+        </ul>
+        <p class="mt-2 text-sm text-slate-600">
+          <span class="grid-legend bg-blue-100"></span> répondue
+          <span class="grid-legend ml-3 bg-amber-200"></span> à revoir
+          · <span x-text="unanswered"></span> sans réponse
+        </p>
+      </div>
+
+      {# Barre Précédent / Suivant, fixée en bas sur téléphone. #}
+      <nav class="fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white px-4 py-3 lg:static lg:mt-6 lg:border-0 lg:bg-transparent lg:px-0"
+           aria-label="Navigation entre les questions">
+        <div class="mx-auto flex max-w-[640px] items-center gap-2 lg:max-w-none">
+          <button type="button" class="btn btn-secondary flex-1 sm:flex-none" x-show="section && section.allow_back"
+                  :disabled="index === 0" @click="goTo(index - 1)">Précédent</button>
+          <button type="button" class="btn btn-secondary flex-1 sm:flex-none"
+                  :disabled="index >= items.length - 1" @click="goTo(index + 1)">Suivant</button>
+          <button type="button" class="btn btn-primary flex-1 sm:ml-auto sm:flex-none" @click="confirmOpen = true"
+                  :disabled="finishing">Terminer</button>
+        </div>
+      </nav>
+
+      {# Confirmation de fin d'épreuve #}
+      <div x-show="confirmOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
+           role="dialog" aria-modal="true" aria-labelledby="confirm-titre" @keydown.escape.window="confirmOpen = false">
+        <div class="card w-full max-w-md">
+          <h2 id="confirm-titre" class="text-lg font-semibold">Terminer l'épreuve ?</h2>
+          <p class="mt-2 text-slate-700" x-show="unanswered > 0">
+            <span x-text="unanswered"></span> question<span x-show="unanswered > 1">s</span> sans réponse.
+          </p>
+          <p class="mt-2 text-slate-700">Vous ne pourrez plus revenir sur cette épreuve.</p>
+          <div class="mt-5 flex flex-col gap-3 sm:flex-row-reverse">
+            <button type="button" class="btn btn-primary" @click="finishSection()">Terminer l'épreuve</button>
+            <button type="button" class="btn btn-secondary" @click="confirmOpen = false">Continuer</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

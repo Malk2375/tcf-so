@@ -8,6 +8,7 @@ from django.db import IntegrityError
 
 from bank.brief import create_brief
 from bank.constants import LETTERS, MAX_IMPORT_FILE_BYTES, QUESTION_REPONSE_TEXT
+from bank.content import word_count
 from bank.devdata import fake_import_file
 from bank.importer import import_files
 from bank.models import ImportBatch, Item, Test, TestItem
@@ -41,10 +42,13 @@ def first(data, section, level=None, subtype=None):
 
 
 def assert_nothing_written():
+    """Import refusé : ni item ni test, seulement un ImportBatch « rejected » avec le rapport."""
     assert Item.objects.count() == 0
     assert Test.objects.count() == 0
     assert TestItem.objects.count() == 0
-    assert ImportBatch.objects.count() == 0
+    batch = ImportBatch.objects.get()
+    assert batch.status == ImportBatch.Status.REJECTED
+    assert batch.report["errors"]
 
 
 @pytest.fixture
@@ -93,7 +97,7 @@ def test_valid_import_creates_draft_test(valid):
         assert test_item.item.tags["doc_length"] in {"court", "moyen", "long"}
         assert len(test_item.item.content_hash) == 64
         if test_item.section != "CO":
-            assert test_item.item.word_count == len(source["stimulus_text"].split())
+            assert test_item.item.word_count == word_count(source["stimulus_text"])
 
 
 def test_doc_length_by_level(valid):
@@ -342,8 +346,8 @@ def test_ce_text_within_tolerance(valid):
 
 def test_msl_sentence_too_short(valid):
     _, data = valid
-    first(data, "MSL", "C2")["stimulus_text"] = "Il ___ parti."  # 3 mots pour 10 à 35
-    assert has(run(data), "Longueur hors fourchette : 3 mots pour 10 à 35 mots")
+    first(data, "MSL", "C2")["stimulus_text"] = "Il ___ parti."  # 2 mots pour 10 à 35
+    assert has(run(data), "Longueur hors fourchette : 2 mots pour 10 à 35 mots")
 
 
 def test_co_script_too_short(valid):

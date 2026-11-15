@@ -5,7 +5,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
 from bank.devdata import fake_import_file
-from bank.models import Brief, Test
+from bank.models import Brief, ImportBatch, Test
 
 pytestmark = pytest.mark.django_db
 
@@ -74,6 +74,36 @@ def test_import_page_shows_report_and_writes_nothing(staff_client, formats):
     assert ">Emplacement 1</span>" in html
     assert "<script>alert(1)</script>" not in html
     assert Test.objects.count() == 0
+    batch = ImportBatch.objects.get()
+    assert batch.status == ImportBatch.Status.REJECTED
+    assert batch.brief.brief_id == data["brief_id"]
+    assert batch.filenames == ["co.json"]
+
+
+def test_rejected_report_can_be_reopened(staff_client, formats):
+    response = staff_client.post(
+        reverse("backoffice:briefs"), {"exam_format": formats["rapide"].pk}
+    )
+    data = fake_import_file(json.loads(response.content))
+    data["items"][0]["correct_index"] = (data["items"][0]["correct_index"] + 1) % 4
+    staff_client.post(reverse("backoffice:import"), {"files": [upload(data)]})
+    batch = ImportBatch.objects.get()
+
+    listing = staff_client.get(reverse("backoffice:import")).content.decode()
+    url = reverse("backoffice:import_report", args=[batch.pk])
+    assert f'href="{url}"' in listing
+    html = staff_client.get(url).content.decode()
+    assert "Import refusé : 1 erreur" in html
+    assert ">Emplacement 1</span>" in html
+
+
+def test_unreadable_file_is_kept_as_rejected_batch(staff_client, formats):
+    file = SimpleUploadedFile("bad.json", b"{not json", content_type="application/json")
+    response = staff_client.post(reverse("backoffice:import"), {"files": [file]})
+    assert "Import refusé" in response.content.decode()
+    batch = ImportBatch.objects.get()
+    assert batch.format is None and batch.brief is None
+    assert batch.filenames == ["bad.json"]
 
 
 def test_import_page_accepts_three_files(staff_client, formats):

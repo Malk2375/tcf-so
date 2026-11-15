@@ -31,7 +31,7 @@ CE_WORDS = {
     "C1": (200, 280),
     "C2": (250, 350),
 }
-# Phrase de MSL, en mots (le blanc « ___ » compte pour un mot).
+# Phrase de MSL, en mots (le blanc « ___ » ne compte pas : voir content.word_count).
 MSL_WORDS = {
     "A1": (6, 12),
     "A2": (8, 15),

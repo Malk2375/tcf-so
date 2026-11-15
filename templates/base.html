@@ -7,6 +7,8 @@
   <title>{% block head_title %}Accueil{% endblock %} · Entraînement TCF SO</title>
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <script src="{% static 'vendor/htmx.min.js' %}" defer></script>
+  {# Les composants Alpine doivent être déclarés avant le démarrage d'Alpine. #}
+  {% block alpine_components %}{% endblock %}
   <script src="{% static 'vendor/alpine.min.js' %}" defer></script>
   {% block extra_head %}{% endblock %}
 </head>
@@ -17,6 +19,7 @@
     Aller au contenu
   </a>
 
+  {% block header %}
   <header class="sticky top-0 z-10 bg-blue-900 text-white shadow">
     <div class="mx-auto flex min-h-14 max-w-5xl flex-wrap items-center justify-between gap-x-2 px-4"
          x-data="{ open: false }">
@@ -40,6 +43,7 @@
            {% endif %}>
         {% if user.is_authenticated %}
           <a href="{% url 'dashboard' %}" class="nav-link">Tableau de bord</a>
+          <a href="{% url 'history' %}" class="nav-link">Historique</a>
           {% if user.is_staff %}
             <a href="{% url 'backoffice:briefs' %}" class="nav-link">Back-office</a>
           {% endif %}
@@ -55,6 +59,7 @@
       </nav>
     </div>
   </header>
+  {% endblock header %}
 
   <main id="contenu" class="mx-auto w-full flex-1 px-4 py-6 sm:py-10 {% block main_width %}max-w-5xl{% endblock %}">
     {% if messages %}
@@ -69,12 +74,14 @@
     {% block content %}{% endblock %}
   </main>
 
+  {% block footer %}
   <footer class="border-t border-slate-200 bg-white">
     <div class="mx-auto max-w-5xl px-4 py-5 text-sm text-slate-600">
       <p>Plateforme d'entraînement personnelle et non commerciale au TCF tout public sur ordinateur.</p>
       <p class="mt-1">Estimation non officielle. Questions générées par IA.</p>
     </div>
   </footer>
+  {% endblock footer %}
   {% block extra_body %}{% endblock %}
 </body>
 </html>
