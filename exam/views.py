@@ -8,6 +8,8 @@ from django.templatetags.static import static
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
+from advice.eligibility import remaining_message
+from advice.models import Advice
 from bank.constants import LEVELS, SECTION_LABELS
 from bank.models import ExamFormat
 from config.views import mode_cards
@@ -43,7 +45,13 @@ def dashboard(request):
         .select_related("test__format")
         .first()
     )
-    context = {"modes": cards, "current": current, "last": last}
+    context = {
+        "modes": cards,
+        "current": current,
+        "last": last,
+        "latest_advice": Advice.objects.filter(user=request.user).first(),
+        "advice_remaining": remaining_message(request.user),
+    }
     return render(request, "exam/dashboard.html", context)
 
 

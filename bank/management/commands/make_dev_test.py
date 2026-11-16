@@ -1,6 +1,6 @@
-from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
+from bank.demo import require_demo
 from bank.devtest import make_dev_draft, make_dev_test
 from bank.models import ExamFormat
 
@@ -19,8 +19,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, mode, draft, **options):
-        if not settings.DEBUG:
-            raise CommandError("Commande réservée au développement (DJANGO_DEBUG=true).")
+        require_demo()
         if not ExamFormat.objects.filter(mode=mode).exists():
             raise CommandError("Formats absents : lancez d'abord « manage.py seed_formats ».")
         if draft:

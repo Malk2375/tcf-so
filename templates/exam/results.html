@@ -47,6 +47,15 @@
   {% endfor %}
 </div>
 
+<section class="card mt-6" aria-labelledby="conseils-titre"
+         hx-post="{% url 'attempt_advice' attempt.pk %}" hx-trigger="load" hx-swap="innerHTML">
+  <h2 id="conseils-titre" class="text-lg font-semibold">Conseils personnalisés</h2>
+  <p class="mt-2 flex items-center gap-2 text-slate-700" role="status">
+    <span class="inline-block size-4 animate-spin rounded-full border-2 border-blue-800 border-t-transparent" aria-hidden="true"></span>
+    Analyse de vos réponses… Cela peut prendre une minute.
+  </p>
+</section>
+
 <div class="mt-6 flex flex-col gap-3 sm:flex-row">
   <a href="{% url 'attempt_review' attempt.pk %}" class="btn btn-primary">Voir la correction</a>
   <a href="{% url 'history' %}" class="btn btn-secondary">Historique</a>

@@ -11,6 +11,8 @@
     {% if row.disagreement %}<span class="rounded-full bg-red-100 px-2.5 py-0.5 text-sm font-semibold text-red-900">Désaccord</span>{% endif %}
     {% if row.blind_doubt %}<span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-sm font-semibold text-amber-950">Doute</span>{% endif %}
     {% if row.audio_state == "stale" %}<span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-sm font-semibold text-amber-950">Audio périmé</span>{% endif %}
+    {% if row.audio_state == "engine" %}<span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-sm font-semibold text-amber-950">Audio à refaire avec le moteur actif</span>{% endif %}
+    {% if item.section == "CO" and row.audio_state != "missing" and item.audio.engine == "fake" %}<span class="rounded-full bg-violet-100 px-2.5 py-0.5 text-sm font-semibold text-violet-900">Audio factice</span>{% endif %}
     {% if row.audio_state == "missing" %}<span class="rounded-full bg-slate-200 px-2.5 py-0.5 text-sm font-medium text-slate-800">Audio manquant</span>{% endif %}
   </header>
 
@@ -25,9 +27,7 @@
     </div>
     {% if row.audio_state != "missing" %}
       <audio controls preload="none" src="{{ item.audio.file.url }}" class="mt-3 w-full max-w-md" aria-label="Audio de la question"></audio>
-      {% if item.audio.voices %}
-        <p class="mt-1 text-xs text-slate-500">Voix : {% for speaker, voice in item.audio.voices.items %}{{ speaker }} {{ voice|cut:"fr-FR-Chirp3-HD-" }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-      {% endif %}
+      <p class="mt-1 text-xs text-slate-600">Moteur : {% if item.audio.engine == "fake" %}factice{% elif item.audio.engine == "google_chirp3_hd" %}Google Chirp 3 HD{% else %}{{ item.audio.engine }}{% endif %}{% if item.audio.voices %} · voix : {% for speaker, voice in item.audio.voices.items %}{{ speaker }} {{ voice|cut:"fr-FR-Chirp3-HD-" }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</p>
     {% endif %}
   {% else %}
     <p class="mt-3 whitespace-pre-line break-words rounded-md bg-slate-50 p-3">{{ item.stimulus_text }}</p>

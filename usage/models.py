@@ -102,8 +102,14 @@ class UsageEntry(models.Model):
         return f"{self.get_kind_display()} {self.month}"
 
 
+FAKE_PROVIDER = "fake"
+
+
 def tts_chars_used(month: str | None = None) -> int:
-    entries = UsageEntry.objects.filter(kind=UsageEntry.Kind.TTS, month=month or current_month())
+    """Caractères facturables du mois : les synthèses factices sont journalisées sans compter."""
+    entries = UsageEntry.objects.filter(
+        kind=UsageEntry.Kind.TTS, month=month or current_month()
+    ).exclude(provider=FAKE_PROVIDER)
     return entries.aggregate(total=Sum("chars"))["total"] or 0
 
 

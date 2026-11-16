@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from django.db import transaction
 from django.utils import timezone
 
-from bank.audio import is_up_to_date
+from bank.audio import AudioState, audio_state
 from bank.constants import SECTIONS
 from bank.content import content_hash, item_fields, support_text, word_count
 from bank.importer import ImportReport, _check_item
@@ -35,7 +35,7 @@ class Row:
     blind_answer: int | None = None
     blind_doubt: str = ""
     blind_checked: bool = False
-    audio_state: str = ""  # CO : « ok », « stale » (script modifié) ou « missing »
+    audio_state: str = ""  # CO : valeur de AudioState (ok, missing, stale, engine)
 
     @property
     def disagreement(self) -> bool:
@@ -64,10 +64,7 @@ def rows(test: Test) -> list[Row]:
             row.blind_answer = answers.get(slot)
             row.blind_doubt = doubts.get(slot, "")
         if item.section == "CO":
-            if is_up_to_date(item):
-                row.audio_state = "ok"
-            else:
-                row.audio_state = "stale" if hasattr(item, "audio") else "missing"
+            row.audio_state = audio_state(item)
         result.append(row)
     return result
 
@@ -209,13 +206,19 @@ def publication_problems(test: Test) -> list[str]:
     not_approved = [r for r in test_rows if r.item.status != Item.Status.APPROVED]
     if not_approved:
         problems.append(f"{len(not_approved)} question(s) non approuvée(s).")
-    missing = [r for r in test_rows if r.audio_state == "missing"]
-    stale = [r for r in test_rows if r.audio_state == "stale"]
+    missing = [r for r in test_rows if r.audio_state == AudioState.MISSING]
+    stale = [r for r in test_rows if r.audio_state == AudioState.STALE]
+    other_engine = [r for r in test_rows if r.audio_state == AudioState.ENGINE]
     if missing:
         problems.append(f"{len(missing)} audio(s) de CO manquant(s).")
     if stale:
         problems.append(
             f"{len(stale)} audio(s) de CO périmé(s) : script modifié depuis la synthèse."
+        )
+    if other_engine:
+        problems.append(
+            f"{len(other_engine)} audio(s) de CO produit(s) par un autre moteur "
+            "(audio factice avec Google) : relancez la génération de l'audio."
         )
     return problems
 

@@ -34,6 +34,19 @@
   </section>
 {% endif %}
 
+<section class="card mt-6" aria-labelledby="conseils-apercu-titre">
+  <h2 id="conseils-apercu-titre" class="text-lg font-semibold">Conseils personnalisés</h2>
+  {% if latest_advice %}
+    <p class="mt-2 text-slate-800">{{ latest_advice.content.summary }}</p>
+    <a href="{% url 'advice' %}" class="link mt-1 inline-flex min-h-11 items-center">Voir vos conseils</a>
+  {% elif advice_remaining %}
+    <p class="mt-2 text-slate-700">Disponibles après {{ advice_remaining|cut:"encore " }} de plus.</p>
+  {% else %}
+    <p class="mt-2 text-slate-700">Vos conseils seront rédigés à l'ouverture des résultats de votre prochain test.</p>
+    <a href="{% url 'advice' %}" class="link mt-1 inline-flex min-h-11 items-center">Page des conseils</a>
+  {% endif %}
+</section>
+
 <section class="mt-6" aria-labelledby="modes-titre">
   <h2 id="modes-titre" class="text-xl font-semibold">Choisir un mode</h2>
   <ul class="mt-4 grid gap-4 sm:grid-cols-3">

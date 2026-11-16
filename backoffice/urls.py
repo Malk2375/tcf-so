@@ -17,6 +17,7 @@ urlpatterns = [
     path("tests/<int:pk>/audio/next", review_views.audio_next, name="audio_next"),
     path("tests/<int:pk>/publish", review_views.publish, name="publish"),
     path("tests/<int:pk>/archive", review_views.archive, name="archive"),
+    path("tests/<int:pk>/delete", review_views.delete, name="delete"),
     path(
         "tests/<int:pk>/items/<int:item_pk>/status",
         review_views.item_status,

@@ -1,0 +1,4 @@
+[
+  {"id": "tv5monde_tcf", "label": "TV5MONDE – entraînement au TCF", "url": "https://apprendre.tv5monde.com/fr/tcf", "for": ["CO", "MSL", "CE"]},
+  {"id": "rfi_francais_facile", "label": "RFI – Le français facile", "url": "https://francaisfacile.rfi.fr/fr/", "for": ["CO"]}
+]

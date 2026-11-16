@@ -34,6 +34,14 @@ def _no_network(settings, monkeypatch):
 
 
 @pytest.fixture
+def demo_db(settings):
+    """Fait passer la base de test pour la base de démonstration (commandes de développement)."""
+    settings.DEBUG = True
+    settings.DEMO_DATABASE_PATH = settings.DATABASES["default"]["NAME"]
+    settings.DEMO_MEDIA_ROOT = settings.MEDIA_ROOT
+
+
+@pytest.fixture
 def formats(db):
     return {f.mode: f for f in seed_formats()}
 

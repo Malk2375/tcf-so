@@ -11,6 +11,7 @@ from django.views.decorators.http import require_POST
 from backoffice.decorators import staff_required
 from backoffice.forms import BlindAnswersForm, ItemForm
 from bank import review
+from bank.deletion import DeletionError, delete_test, deletion_problems
 from bank.models import Item, Test
 from bank.synthesis import audio_progress, generate_next, synthesize_one
 from bank.tts import TTSError
@@ -67,6 +68,7 @@ def _review_context(test: Test, **extra) -> dict:
         "flagged": [r for r in rows if r.flagged],
         "blind_form": BlindAnswersForm(),
         "is_draft": test.status == Test.Status.DRAFT,
+        "deletion_problems": deletion_problems(test),
         **extra,
     }
 
@@ -229,3 +231,25 @@ def archive(request, pk):
     else:
         messages.success(request, "Test archivé : il n'est plus proposé.")
     return redirect(_review_url(test))
+
+
+@staff_required
+@require_POST
+def delete(request, pk):
+    """« Supprimer » : test en brouillon ou archivé, confirmé en retapant son numéro."""
+    test = get_object_or_404(Test.objects.select_related("format"), pk=pk)
+    if request.POST.get("confirm_number", "").strip() != str(test.number):
+        messages.error(request, f"Pour confirmer, tapez le numéro du test : {test.number}.")
+        return redirect(_review_url(test))
+    label = str(test)
+    try:
+        counts = delete_test(test)
+    except DeletionError as exc:
+        messages.error(request, str(exc))
+        return redirect(_review_url(test))
+    messages.success(
+        request,
+        f"{label} supprimé : {counts['items']} question(s), {counts['files']} fichier(s) audio, "
+        f"{counts['attempts']} passage(s) d'administrateur et {counts['advice']} conseil(s).",
+    )
+    return redirect("backoffice:tests")

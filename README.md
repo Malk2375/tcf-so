@@ -71,36 +71,65 @@ il est abandonné d'office 30 minutes après la durée prévue du test.
 ## Démarrer et tester
 
 Pour une personne qui ne développe pas, sous Windows, dans PowerShell, depuis le dossier du projet.
+Les essais se font **toujours dans la base de démonstration** (`data/demo.sqlite3`), jamais dans la base réelle
+(`data/db.sqlite3`, qui contient les vrais tests), et sans les clés d'API de `.env`.
 
-**Une seule fois :**
+**Dans chaque fenêtre PowerShell utilisée pour les essais**, taper d'abord :
+
+```powershell
+$env:DATABASE_URL = "sqlite:///data/demo.sqlite3"
+$env:MEDIA_ROOT = "data/demo-media"
+$env:TTS_PROVIDER = "fake"
+$env:LLM_PROVIDER = "fake"
+```
+
+Ces quatre lignes ne valent que pour la fenêtre où elles sont tapées. Sans elles, ce sont la base réelle et les valeurs
+de `.env` qui s'appliquent : avec `google`, chaque audio généré consomme le quota Google réel ; avec `anthropic`,
+chaque jeu de conseils coûte environ 0,05 $.
+
+**Préparer la base de démonstration** (la première fois, puis chaque fois qu'on veut repartir de zéro ;
+arrêter le site avant) :
 
 ```powershell
 uv sync
-uv run python manage.py migrate
-uv run python manage.py seed_formats
-uv run python manage.py createsuperuser
+uv run python manage.py reset_demo
 ```
 
-`createsuperuser` demande un nom (interne), une adresse e-mail et un mot de passe : c'est le compte à utiliser,
-connexion avec **l'adresse e-mail**.
+`reset_demo` efface la base de démonstration et ses fichiers audio, la recrée avec les trois formats d'examen
+et un compte administrateur de démonstration : **admin@demo.test**, mot de passe **demo-tcf-2026**.
+Elle refuse de s'exécuter sans les quatre lignes ci-dessus.
 
-**À chaque session de test :**
+**Lancer le site :**
 
 ```powershell
-$env:TTS_PROVIDER = "fake"     # voix factices pour cette fenêtre, même si .env contient TTS_PROVIDER=google
 uv run python manage.py runserver
 ```
 
-Ouvrir <http://localhost:8000> et se connecter. Arrêter le site avec Ctrl+C.
-Sans la ligne `$env:TTS_PROVIDER = "fake"`, la valeur de `.env` s'applique : avec `google`, chaque audio généré
-consomme le quota Google réel.
+Ouvrir <http://localhost:8000> et se connecter avec le compte de démonstration. Arrêter le site avec Ctrl+C.
 
-**Créer des tests factices** (dans une seconde fenêtre PowerShell, pendant que le site tourne) :
+**Créer des tests factices** (dans une seconde fenêtre PowerShell, après y avoir tapé les quatre lignes) :
 
 ```powershell
 uv run python manage.py make_dev_test --mode rapide           # test publié, prêt à passer
 uv run python manage.py make_dev_test --mode rapide --draft   # test en brouillon, à relire et publier
 ```
+
+`make_dev_test` ne s'exécute que dans la base de démonstration.
+
+**Audio factice et Google.** Avec `TTS_PROVIDER=google`, un audio produit par le fournisseur factice n'est jamais à jour :
+l'écran de relecture affiche le badge « Audio factice », la publication est refusée, et « Générer l'audio du test »
+le refait avec Google. Les synthèses factices sont journalisées mais ne comptent pas dans le quota du mois.
+
+**Supprimer un test** en brouillon ou archivé : bouton « Supprimer » en bas de l'écran de relecture, après avoir retapé
+le numéro du test. Impossible pour un test publié (l'archiver d'abord) ou passé par un compte non administrateur ;
+le message nomme alors le ou les comptes en cause.
+
+**Conseils personnalisés** (`/advice/`) : disponibles après 3 tests rapides, ou 2 moyens, ou 1 réel (terminés).
+Ils sont rédigés à l'ouverture de la page de résultats. Avec `LLM_PROVIDER=fake`, ils viennent des modèles de secours
+(`advice/fallbacks/`).
+
+**Base réelle, après chaque étape validée :** `uv run python manage.py migrate` (sans les quatre lignes) met sa
+structure à jour. Sans cela, les nouvelles pages échouent (par exemple, « Supprimer » après l'étape 5).
 
 **Vérifier tous les tests automatiques :** `uv run pytest` (aucun appel réseau, `.env` est ignoré).
 

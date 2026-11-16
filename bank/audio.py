@@ -17,7 +17,7 @@ from django.core.files.storage import default_storage
 from bank.constants import CHARS_PER_SECOND, LETTERS, QUESTION_REPONSE
 from bank.content import item_fields, script_hash, tts_chars
 from bank.models import AudioAsset, Item
-from bank.tts import SAMPLE_RATE, TTSError, TTSProvider, silence_pcm, tone_pcm
+from bank.tts import SAMPLE_RATE, TTSError, TTSProvider, active_engine, silence_pcm, tone_pcm
 
 # Silences et signal d'ouverture de l'assemblage (7.3), en secondes.
 OPENING_SIGNAL = 0.4
@@ -180,10 +180,28 @@ def synthesize_item(item: Item, provider: TTSProvider, casting: dict) -> tuple[A
     return asset, plan.chars
 
 
-def is_up_to_date(item: Item) -> bool:
-    """Vrai si l'item a un audio et que son script n'a pas changé depuis la synthèse."""
+class AudioState:
+    OK = "ok"
+    MISSING = "missing"
+    STALE = "stale"  # script modifié depuis la synthèse
+    ENGINE = "engine"  # produit par un autre moteur que le fournisseur actif (7.4)
+
+
+def audio_state(item: Item, engine: str | None = None) -> str:
     asset = getattr(item, "audio", None)
-    return asset is not None and asset.script_hash == script_hash(item_fields(item))
+    if asset is None:
+        return AudioState.MISSING
+    if asset.script_hash != script_hash(item_fields(item)):
+        return AudioState.STALE
+    if asset.engine != (engine or active_engine()):
+        # Un audio factice n'est jamais à jour quand TTS_PROVIDER=google : il sera régénéré.
+        return AudioState.ENGINE
+    return AudioState.OK
+
+
+def is_up_to_date(item: Item, engine: str | None = None) -> bool:
+    """Vrai si l'item a un audio du moteur actif et que son script n'a pas changé depuis."""
+    return audio_state(item, engine) == AudioState.OK
 
 
 # --- Audio factice de `make_dev_test` (SPEC 6.5) ------------------------------------------------

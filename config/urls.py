@@ -16,6 +16,7 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("profile/", include(profile_urlpatterns)),
     path("", include("exam.urls")),
+    path("", include("advice.urls")),
     path("bo/", include("backoffice.urls")),
     path("admin/", admin.site.urls),
 ]

@@ -1,0 +1,212 @@
+{
+  "level_break:CO": {
+    "title": "Comprendre les documents oraux plus longs",
+    "lesson": "Quand le document s'allonge, on ne peut plus tout retenir : il faut écouter avec un but. Avant l'audio, lisez la question et les options pour savoir quoi chercher (un lieu, une raison, un avis). Pendant l'écoute, repérez les mots qui structurent le discours : « d'abord », « mais », « en revanche », « finalement ». La réponse se trouve souvent juste après un mot d'opposition. Exemple 1 : « Le train devait partir à 8 h, mais il partira à 8 h 20 » : l'information utile est la seconde. Exemple 2 : « Certains pensent que c'est cher ; moi, je trouve que ça vaut le prix » : l'opinion du locuteur suit « moi ». Ne cherchez pas à comprendre chaque mot : visez l'idée qui répond à la question.",
+    "exam_strategy": "Lisez la question pendant le signal sonore. Gardez en tête un seul objectif d'écoute. Dès que l'audio se termine, choisissez : la première impression est souvent la bonne.",
+    "practice": [
+      {"question": "Vous entendez : « Le musée ouvre normalement à 9 heures, mais exceptionnellement, demain, il n'ouvrira qu'à 11 heures. » À quelle heure le musée ouvre-t-il demain ?", "options": ["À 9 heures.", "À 10 heures.", "À 11 heures.", "Il sera fermé."], "correct_index": 2, "explanation": "« mais exceptionnellement, demain » introduit l'information qui compte : 11 heures. 9 heures est l'horaire habituel."},
+      {"question": "Vous entendez : « Au départ, je voulais faire médecine. Finalement, j'ai choisi le droit, et je ne le regrette pas. » Qu'a étudié la personne ?", "options": ["La médecine.", "Le droit.", "Les deux.", "Elle n'a pas encore choisi."], "correct_index": 1, "explanation": "« Finalement » annonce le choix réel : le droit. La médecine était seulement un projet."},
+      {"question": "Vous entendez : « On dit souvent que le télétravail isole. Pour ma part, il m'a permis de mieux m'organiser. » Quel est l'avis du locuteur ?", "options": ["Le télétravail isole.", "Le télétravail est positif pour lui.", "Il n'a pas d'avis.", "Il refuse le télétravail."], "correct_index": 1, "explanation": "« Pour ma part » introduit son opinion personnelle, positive. « On dit souvent » rapporte l'avis des autres."}
+    ],
+    "week_plan": [
+      {"action": "Écouter un document de 2 minutes, noter en une phrase l'idée principale, puis vérifier avec la transcription", "minutes": 15, "frequency": "4 fois cette semaine", "resource_id": "rfi_francais_facile"},
+      {"action": "Faire une série d'exercices de compréhension orale au niveau supérieur au vôtre", "minutes": 20, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  },
+  "level_break:CE": {
+    "title": "Lire des textes plus longs et plus complexes",
+    "lesson": "Face à un texte long, lisez d'abord la question, puis parcourez le texte pour trouver le paragraphe utile au lieu de tout lire en détail. Le titre, la première et la dernière phrase de chaque paragraphe donnent la structure. Repérez les connecteurs : « cependant » annonce une opposition, « ainsi » une conséquence, « en effet » une explication. Exemple 1 : « Le projet a été bien accueilli. Cependant, son coût inquiète les élus » : la réserve suit « cependant ». Exemple 2 : « Les ventes ont chuté ; ainsi, l'usine fermera en mars » : la fermeture est une conséquence. Les mauvaises options reprennent souvent des mots du texte dans un autre sens : vérifiez le sens, pas les mots.",
+    "exam_strategy": "Question d'abord, texte ensuite. Soulignez mentalement le passage qui répond, puis comparez chaque option à ce passage précis.",
+    "practice": [
+      {"question": "« La ville a construit de nouvelles pistes cyclables. Cependant, beaucoup d'habitants continuent de prendre la voiture. » Que dit le texte ?", "options": ["Tout le monde prend le vélo.", "Les pistes n'ont pas encore changé les habitudes de tous.", "La ville interdit la voiture.", "Les pistes ont été supprimées."], "correct_index": 1, "explanation": "« Cependant » montre que les pistes n'ont pas suffi à changer les habitudes de tous les habitants."},
+      {"question": "« Les inscriptions ont doublé cette année ; ainsi, l'école ouvrira deux nouvelles classes. » Pourquoi l'école ouvre-t-elle des classes ?", "options": ["À cause de travaux.", "Parce que les inscriptions ont augmenté.", "Parce que des professeurs partent.", "Pour économiser de l'argent."], "correct_index": 1, "explanation": "« ainsi » introduit la conséquence du doublement des inscriptions."},
+      {"question": "« Contrairement à une idée reçue, lire sur écran ne fatigue pas davantage les yeux si l'on fait des pauses. » Selon le texte :", "options": ["Lire sur écran est toujours fatigant.", "Il ne faut jamais lire sur écran.", "Avec des pauses, l'écran n'est pas plus fatigant.", "Le papier fatigue plus que l'écran."], "correct_index": 2, "explanation": "« Contrairement à une idée reçue » annonce que l'idée courante est fausse, à condition de faire des pauses."}
+    ],
+    "week_plan": [
+      {"action": "Lire un article de presse, puis résumer chaque paragraphe en une ligne", "minutes": 20, "frequency": "3 fois cette semaine", "resource_id": null},
+      {"action": "Faire des exercices de compréhension écrite au niveau supérieur au vôtre", "minutes": 20, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  },
+  "level_break:MSL": {
+    "title": "Consolider les structures du niveau supérieur",
+    "lesson": "Les questions de structures montent vite en difficulté : après les bases (temps simples, articles), viennent les modes (subjonctif, conditionnel), les pronoms complexes et les connecteurs. La méthode reste la même : lisez toute la phrase, repérez le mot qui commande la forme manquante, puis éliminez les options impossibles. Exemple 1 : « Il faut que tu ___ à l'heure » : « il faut que » commande le subjonctif, donc « sois ». Exemple 2 : « C'est le livre ___ je t'ai parlé » : « parler de » demande « dont ». Le mot clé est rarement à côté du blanc : cherchez le verbe, la préposition ou le connecteur qui gouverne la phrase.",
+    "exam_strategy": "Lisez la phrase entière avant les options. Cherchez le mot qui commande la forme, éliminez deux options, puis choisissez entre les deux restantes.",
+    "practice": [
+      {"question": "Il faut que vous ___ ce formulaire avant vendredi.", "options": ["remplissez", "remplissiez", "remplirez", "avez rempli"], "correct_index": 1, "explanation": "« Il faut que » est toujours suivi du subjonctif : « que vous remplissiez »."},
+      {"question": "Voici l'entreprise ___ je vous ai parlé.", "options": ["que", "qui", "dont", "où"], "correct_index": 2, "explanation": "On dit « parler de quelque chose » : le relatif qui remplace « de + nom » est « dont »."},
+      {"question": "Si j'avais su, je ___ plus tôt.", "options": ["viendrai", "venais", "serais venu", "suis venu"], "correct_index": 2, "explanation": "« Si » + plus-que-parfait appelle le conditionnel passé : « je serais venu »."}
+    ],
+    "week_plan": [
+      {"action": "Revoir une règle de grammaire du niveau supérieur et écrire 5 phrases qui l'utilisent", "minutes": 15, "frequency": "4 fois cette semaine", "resource_id": null},
+      {"action": "Faire une série d'exercices de structures de la langue", "minutes": 20, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  },
+  "doc_type:CO": {
+    "title": "Mieux comprendre un type de document oral",
+    "lesson": "Chaque type de document oral a ses habitudes. Une annonce donne une information pratique (heure, lieu, changement) ; un message vocal contient une demande ou un rendez-vous ; un dialogue oppose deux points de vue ; une interview ou une émission développe une opinion argumentée. Savoir à quoi s'attendre permet d'écouter au bon endroit. Exemple 1 : dans une annonce de gare, l'information utile suit souvent « en raison de » ou « nous vous informons que ». Exemple 2 : dans un message vocal, la demande arrive souvent à la fin : « Rappelle-moi avant 18 heures ». Avant l'audio, demandez-vous : quel type de document, et quelle information ce type de document donne-t-il d'habitude ?",
+    "exam_strategy": "Identifiez le type de document dès les premières secondes, puis concentrez-vous sur la partie où ce type de document place l'information demandée.",
+    "practice": [
+      {"question": "Vous entendez : « En raison de travaux, le train de 14 h 10 partira de la voie 7. » Que se passe-t-il ?", "options": ["Le train est annulé.", "Le train change de voie.", "Le train est en avance.", "Les travaux sont terminés."], "correct_index": 1, "explanation": "L'annonce indique un changement de voie (voie 7) à cause des travaux."},
+      {"question": "Vous entendez : « Salut, c'est Marc. Le dîner est décalé à 20 h 30. Tu peux apporter le dessert ? » Que demande Marc ?", "options": ["D'annuler le dîner.", "D'apporter le dessert.", "D'arriver à 19 h.", "De le rappeler."], "correct_index": 1, "explanation": "La demande est formulée à la fin du message : « Tu peux apporter le dessert ? »."},
+      {"question": "Vous entendez : « — Tu viens au concert ? — J'aimerais bien, mais je travaille tard ce soir. » Que répond la seconde personne ?", "options": ["Elle vient au concert.", "Elle n'aime pas les concerts.", "Elle ne peut pas venir.", "Elle viendra plus tard."], "correct_index": 2, "explanation": "« J'aimerais bien, mais… » exprime un refus poli : elle ne peut pas venir."}
+    ],
+    "week_plan": [
+      {"action": "Écouter trois documents du type qui vous pose problème et noter, pour chacun, où se trouvait l'information principale", "minutes": 15, "frequency": "3 fois cette semaine", "resource_id": "rfi_francais_facile"},
+      {"action": "Refaire les questions manquées de ce type dans la correction, sans regarder la réponse", "minutes": 10, "frequency": "2 fois cette semaine", "resource_id": null}
+    ]
+  },
+  "doc_type:CE": {
+    "title": "Mieux lire un type de document écrit",
+    "lesson": "Chaque type d'écrit s'organise à sa façon. Une affiche ou une petite annonce donne des informations pratiques (dates, prix, conditions) ; un courrier a un objet, une demande et une formule de politesse ; un article présente des faits puis des avis ; un texte argumentatif défend une thèse avec des arguments et des concessions. Exemple 1 : dans un courrier, la demande se trouve souvent après « Je vous écris afin de » ou « Je vous serais reconnaissant de ». Exemple 2 : dans un texte argumentatif, « certes… mais » signale une concession suivie de la position de l'auteur. Repérer la structure du document indique où chercher la réponse.",
+    "exam_strategy": "Identifiez d'abord le type de document et son but, puis allez directement à la partie qui répond à la question.",
+    "practice": [
+      {"question": "« Madame, je vous écris afin d'obtenir le remboursement de ma commande n° 452, reçue endommagée. » Quel est le but de ce courrier ?", "options": ["Passer une commande.", "Demander un remboursement.", "Remercier pour une livraison.", "Changer d'adresse."], "correct_index": 1, "explanation": "« afin d'obtenir le remboursement » donne le but du courrier."},
+      {"question": "« Certes, la voiture électrique pollue moins en ville ; mais sa batterie pose de vrais problèmes de recyclage. » Quelle est la position de l'auteur ?", "options": ["Il est totalement favorable.", "Il souligne une limite importante.", "Il n'a pas d'avis.", "Il parle seulement de la ville."], "correct_index": 1, "explanation": "« Certes… mais » : l'auteur concède un avantage puis insiste sur une limite."},
+      {"question": "« Vide-grenier dimanche 12 mai, place du marché, de 8 h à 17 h. Inscription des exposants : 5 € la table. » Que doit payer un exposant ?", "options": ["Rien.", "5 € par table.", "5 € par visiteur.", "12 €."], "correct_index": 1, "explanation": "L'annonce précise : « Inscription des exposants : 5 € la table »."}
+    ],
+    "week_plan": [
+      {"action": "Lire trois documents du type qui vous pose problème et souligner, dans chacun, la phrase qui donne le but ou l'idée principale", "minutes": 15, "frequency": "3 fois cette semaine", "resource_id": null},
+      {"action": "Faire des exercices de compréhension écrite sur ce type de document", "minutes": 20, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  },
+  "skill:explicite": {
+    "title": "Repérer une information précise",
+    "lesson": "Une question d'information explicite porte sur un détail dit clairement : une date, un lieu, un prix, un nom. La difficulté vient des distracteurs : le document cite souvent plusieurs dates ou plusieurs lieux. Méthode : repérez dans la question le mot clé (« quand », « combien », « où ») et le contexte précis (« demain », « pour les enfants »). Exemple 1 : « Le spectacle coûte 15 €, 10 € pour les étudiants » ; question : « Combien paie un étudiant ? » → 10 €. Exemple 2 : « La réunion prévue lundi aura finalement lieu mardi » ; question : « Quel jour a lieu la réunion ? » → mardi. Vérifiez toujours que le détail choisi correspond exactement à la situation de la question.",
+    "exam_strategy": "Soulignez le mot interrogatif et la précision de la question. Méfiez-vous des options qui reprennent un chiffre ou un nom bien présent dans le document, mais pour une autre situation.",
+    "practice": [
+      {"question": "« Entrée : 12 €. Tarif réduit (moins de 18 ans) : 6 €. Gratuit pour les moins de 5 ans. » Combien paie un enfant de 10 ans ?", "options": ["Rien.", "6 €.", "12 €.", "5 €."], "correct_index": 1, "explanation": "Un enfant de 10 ans a moins de 18 ans mais plus de 5 ans : tarif réduit, 6 €."},
+      {"question": "« Le rendez-vous de jeudi est avancé à mercredi, même heure, 15 h. » Quand a lieu le rendez-vous ?", "options": ["Jeudi à 15 h.", "Mercredi à 15 h.", "Mercredi à 13 h.", "Jeudi à 13 h."], "correct_index": 1, "explanation": "Le rendez-vous est avancé à mercredi, à la même heure : 15 h."},
+      {"question": "« La bibliothèque est fermée le lundi ; les autres jours, elle ouvre de 10 h à 19 h, sauf le samedi (10 h – 13 h). » À quelle heure ferme-t-elle le samedi ?", "options": ["19 h.", "10 h.", "13 h.", "Elle est fermée."], "correct_index": 2, "explanation": "Le samedi est l'exception : 10 h – 13 h, donc fermeture à 13 h."}
+    ],
+    "week_plan": [
+      {"action": "Lire ou écouter des annonces pratiques et noter toutes les dates, heures et prix avec leur contexte", "minutes": 15, "frequency": "3 fois cette semaine", "resource_id": "tv5monde_tcf"},
+      {"action": "Reprendre vos questions manquées et souligner le détail de la question que vous aviez négligé", "minutes": 10, "frequency": "2 fois cette semaine", "resource_id": null}
+    ]
+  },
+  "skill:global": {
+    "title": "Comprendre le sens global d'un document",
+    "lesson": "Une question globale demande le thème, le but ou l'idée principale du document, pas un détail. Les mauvaises options sont souvent des détails vrais mais secondaires. Méthode : après lecture ou écoute, formulez en une phrase « ce document sert à… » avant de regarder les options. Exemple 1 : un message qui parle de la météo, de l'heure et du lieu d'un pique-nique a pour but d'organiser le pique-nique, pas de parler de la météo. Exemple 2 : un article qui cite trois études sur le sommeil des adolescents a pour sujet le manque de sommeil des adolescents, pas une des études. Choisissez l'option qui couvre tout le document.",
+    "exam_strategy": "Résumez le document en une phrase avant de lire les options. Écartez les options qui ne parlent que d'une partie du document.",
+    "practice": [
+      {"question": "« Bonjour, c'est Julie. Il fera beau samedi, alors on fait le pique-nique au parc à midi. Apporte des boissons ! » Quel est le but du message ?", "options": ["Parler de la météo.", "Organiser un pique-nique.", "Acheter des boissons.", "Annuler une sortie."], "correct_index": 1, "explanation": "Tous les éléments servent à organiser le pique-nique ; la météo n'est qu'un détail."},
+      {"question": "« Trois études récentes montrent que les adolescents dorment en moyenne une heure de moins qu'il y a vingt ans, en partie à cause des écrans. » Quel est le sujet ?", "options": ["Les écrans.", "Le manque de sommeil des adolescents.", "Les études scientifiques.", "La vie il y a vingt ans."], "correct_index": 1, "explanation": "Le sujet central est le sommeil des adolescents ; les écrans sont une cause citée."},
+      {"question": "« Notre magasin déménage ! Retrouvez-nous dès le 3 juin au 12, rue Victor-Hugo, avec les mêmes horaires. » Le document annonce :", "options": ["Une fermeture définitive.", "Un changement d'adresse.", "De nouveaux horaires.", "Des soldes."], "correct_index": 1, "explanation": "Le message principal est le déménagement, c'est-à-dire la nouvelle adresse."}
+    ],
+    "week_plan": [
+      {"action": "Après chaque document lu ou écouté, écrire une phrase « Ce document sert à… »", "minutes": 15, "frequency": "4 fois cette semaine", "resource_id": "rfi_francais_facile"},
+      {"action": "Faire une série d'exercices en vous obligeant à résumer avant de lire les options", "minutes": 20, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  },
+  "skill:inference": {
+    "title": "Déduire ce qui n'est pas dit directement",
+    "lesson": "Une question d'inférence porte sur une information que le document suggère sans l'écrire mot pour mot : un sentiment, une cause, une conséquence probable. La bonne réponse s'appuie toujours sur des indices précis ; elle n'est jamais une supposition libre. Méthode : relevez deux indices dans le document, puis cherchez l'option qu'ils permettent d'affirmer. Exemple 1 : « Il a regardé sa montre pour la troisième fois et soupiré » → il est impatient. Exemple 2 : « Les rayons étaient vides et la caissière fermait déjà sa caisse » → le magasin allait fermer. Écartez les options qui vont plus loin que les indices.",
+    "exam_strategy": "Pour chaque option, demandez-vous : « Quel passage me permet de l'affirmer ? ». Sans indice précis, l'option est fausse.",
+    "practice": [
+      {"question": "« Elle a relu sa lettre dix fois, a hésité devant la boîte aux lettres, puis l'a remise dans son sac. » Que peut-on déduire ?", "options": ["Elle a posté la lettre.", "Elle hésite à envoyer la lettre.", "Elle a perdu la lettre.", "La lettre n'est pas finie."], "correct_index": 1, "explanation": "Relire, hésiter puis reprendre la lettre : autant d'indices de son hésitation."},
+      {"question": "« Paul est arrivé trempé, son parapluie cassé à la main. » Que s'est-il probablement passé ?", "options": ["Il a pris une douche.", "Il a eu du vent et de la pluie.", "Il est tombé dans une piscine.", "Il a oublié son parapluie."], "correct_index": 1, "explanation": "Trempé et parapluie cassé : la pluie et le vent sont l'explication la plus directe."},
+      {"question": "« Depuis l'ouverture du centre commercial, trois boutiques du centre-ville ont fermé. » Le texte suggère que :", "options": ["Le centre-ville se développe.", "Le centre commercial concurrence les boutiques.", "Les boutiques ont déménagé au centre commercial.", "Le centre commercial va fermer."], "correct_index": 1, "explanation": "Le lien dans le temps (« depuis ») suggère une concurrence ; rien ne dit que les boutiques ont déménagé."}
+    ],
+    "week_plan": [
+      {"action": "Lire un court texte et écrire deux déductions, chacune justifiée par une phrase du texte", "minutes": 15, "frequency": "3 fois cette semaine", "resource_id": null},
+      {"action": "Faire des exercices de compréhension en justifiant chaque réponse par un indice", "minutes": 20, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  },
+  "skill:opinion": {
+    "title": "Identifier l'opinion ou l'intention de l'auteur",
+    "lesson": "Pour trouver une opinion, distinguez ce que l'auteur rapporte (« on dit que », « selon certains ») de ce qu'il pense (« à mon avis », « je trouve », « il me semble »). Le vocabulaire évaluatif trahit aussi la position : « hélas », « heureusement », « regrettable », « remarquable ». Exemple 1 : « Beaucoup jugent ce film trop long ; je l'ai trouvé passionnant » → l'auteur aime le film. Exemple 2 : « Cette réforme, hélas, ne règle rien » → l'auteur est critique. L'ironie existe aussi : « Bravo pour la ponctualité, une heure de retard ! » exprime un reproche. Cherchez qui parle et avec quels mots chargés d'émotion.",
+    "exam_strategy": "Repérez les marques de l'opinion personnelle (je, à mon avis) et les adjectifs ou adverbes évaluatifs. Ne confondez pas l'avis rapporté et l'avis de l'auteur.",
+    "practice": [
+      {"question": "« Beaucoup jugent ce roman difficile. Pour moi, c'est le plus beau livre de l'année. » Quelle est l'opinion de l'auteur ?", "options": ["Le roman est difficile.", "Il admire ce roman.", "Il n'a pas lu le roman.", "Il est indifférent."], "correct_index": 1, "explanation": "« Pour moi » introduit son avis : le plus beau livre de l'année."},
+      {"question": "« Cette décision, hélas, arrive bien trop tard. » Que pense l'auteur ?", "options": ["La décision est parfaite.", "La décision est tardive et il le regrette.", "La décision est trop rapide.", "Il n'a pas d'avis."], "correct_index": 1, "explanation": "« hélas » et « bien trop tard » expriment un regret critique."},
+      {"question": "« Quelle organisation remarquable : trois heures d'attente pour un café ! » Quelle est l'intention du locuteur ?", "options": ["Féliciter les organisateurs.", "Critiquer avec ironie.", "Recommander le café.", "Décrire objectivement."], "correct_index": 1, "explanation": "« remarquable » est ironique : trois heures d'attente montrent une mauvaise organisation."}
+    ],
+    "week_plan": [
+      {"action": "Lire un éditorial ou écouter une chronique et noter les mots qui révèlent l'opinion de l'auteur", "minutes": 15, "frequency": "3 fois cette semaine", "resource_id": "rfi_francais_facile"},
+      {"action": "Faire des exercices sur l'opinion et l'intention", "minutes": 20, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  },
+  "skill:grammaire": {
+    "title": "Choisir la bonne forme grammaticale",
+    "lesson": "Dans une phrase à trou de grammaire, la forme attendue dépend d'un autre mot de la phrase : un verbe qui impose un mode, une préposition, un sujet qui impose un accord, un connecteur qui impose un temps. Méthode en trois temps : lisez toute la phrase ; trouvez le mot qui commande le blanc ; éliminez les options incompatibles. Exemple 1 : « Bien qu'il ___ fatigué, il continue » : « bien que » impose le subjonctif, donc « soit ». Exemple 2 : « Les fleurs que j'ai ___ sont fanées » : avec « avoir », le participe s'accorde avec le COD placé avant (« que » = les fleurs), donc « achetées ».",
+    "exam_strategy": "Ne choisissez jamais à l'oreille seulement : nommez la règle qui justifie votre choix, même rapidement.",
+    "practice": [
+      {"question": "Bien qu'elle ___ beaucoup travaillé, elle n'a pas réussi.", "options": ["a", "ait", "avait", "aura"], "correct_index": 1, "explanation": "« Bien que » impose le subjonctif : « bien qu'elle ait travaillé »."},
+      {"question": "Les lettres que nous avons ___ sont arrivées.", "options": ["envoyé", "envoyée", "envoyés", "envoyées"], "correct_index": 3, "explanation": "Le COD « que » (= les lettres, féminin pluriel) est placé avant « avoir » : « envoyées »."},
+      {"question": "Je partirai dès que je ___ mon travail.", "options": ["finis", "finirai", "aurai fini", "finisse"], "correct_index": 2, "explanation": "Avec « dès que » et un futur dans la principale, l'action antérieure se met au futur antérieur : « aurai fini »."}
+    ],
+    "week_plan": [
+      {"action": "Choisir une règle (mode après une conjonction, accord du participe…) et faire 15 phrases d'exercice", "minutes": 15, "frequency": "4 fois cette semaine", "resource_id": null},
+      {"action": "Faire une série d'exercices de structures de la langue", "minutes": 20, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  },
+  "skill:lexique": {
+    "title": "Choisir le mot juste",
+    "lesson": "Les questions de lexique testent le sens exact des mots et leurs associations habituelles. Plusieurs options ont souvent un sens proche ; une seule convient au contexte. Méthode : cherchez dans la phrase l'indice de sens (le sujet, le complément, le registre), puis vérifiez que le mot s'emploie avec les autres mots de la phrase. Exemple 1 : on « prend une décision », on ne « fait » pas une décision. Exemple 2 : on « pose une question » mais on « émet une hypothèse ». Ces associations (collocations) s'apprennent par blocs : notez les verbes avec leurs compléments, pas les mots isolés.",
+    "exam_strategy": "Remplacez le blanc par chaque option et demandez-vous si l'expression existe telle quelle. Éliminez les mots de sens proche mais d'emploi différent.",
+    "practice": [
+      {"question": "Après une longue réflexion, il a ___ la décision de déménager.", "options": ["fait", "pris", "mis", "donné"], "correct_index": 1, "explanation": "L'expression figée est « prendre une décision »."},
+      {"question": "Les chercheurs ont ___ une hypothèse surprenante.", "options": ["posé", "dit", "émis", "rendu"], "correct_index": 2, "explanation": "On « émet » une hypothèse ; on « pose » une question."},
+      {"question": "Le gouvernement a ___ de nouvelles mesures contre la pollution.", "options": ["adopté", "adapté", "adhéré", "admis"], "correct_index": 0, "explanation": "On « adopte » des mesures ; « adapter » signifie modifier pour convenir."}
+    ],
+    "week_plan": [
+      {"action": "Noter 10 expressions verbe + nom rencontrées dans vos lectures et les réemployer dans des phrases", "minutes": 15, "frequency": "4 fois cette semaine", "resource_id": null},
+      {"action": "Faire des exercices de vocabulaire en contexte", "minutes": 15, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  },
+  "skill:registre": {
+    "title": "Adapter le registre de langue",
+    "lesson": "Le registre (familier, courant, soutenu) dépend de la situation : un courrier administratif demande un registre soutenu, un message à un ami accepte le familier. Les questions de registre proposent souvent des mots de même sens mais de niveaux différents. Exemple 1 : « bosser » (familier), « travailler » (courant), « œuvrer » (soutenu). Exemple 2 : dans une lettre officielle, on écrit « Je vous prie d'agréer… » et non « Bises ». Repérez les indices de la situation (vouvoiement, destinataire, type d'écrit) avant de choisir.",
+    "exam_strategy": "Identifiez le destinataire et la situation, puis écartez les options d'un registre qui ne leur convient pas.",
+    "practice": [
+      {"question": "(Courrier à un directeur) Je vous ___ de bien vouloir examiner ma demande.", "options": ["prie", "exige", "dis", "ordonne"], "correct_index": 0, "explanation": "« Je vous prie de bien vouloir » est la formule soutenue attendue dans un courrier officiel."},
+      {"question": "Quel mot est familier ?", "options": ["une voiture", "une automobile", "une bagnole", "un véhicule"], "correct_index": 2, "explanation": "« bagnole » appartient au registre familier."},
+      {"question": "(Message à un collègue proche) ___, je serai en retard demain !", "options": ["Madame, Monsieur", "Salut", "Veuillez agréer", "Je vous prie"], "correct_index": 1, "explanation": "Avec un collègue proche, « Salut » convient ; les autres formules sont réservées aux courriers formels."}
+    ],
+    "week_plan": [
+      {"action": "Réécrire un court message familier en registre soutenu, puis l'inverse", "minutes": 15, "frequency": "3 fois cette semaine", "resource_id": null},
+      {"action": "Faire des exercices sur les registres de langue", "minutes": 15, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  },
+  "time_pressure": {
+    "title": "Mieux répartir votre temps",
+    "lesson": "Les questions sont classées par niveau croissant : les premières sont courtes et rapides, les dernières demandent plus de lecture. Si vous passez trop de temps au début, vous manquez de temps pour les questions difficiles, qui rapportent le plus de points. Méthode : fixez-vous un temps cible par question (voir les repères ci-dessous), et si vous dépassez ce temps, choisissez la réponse la plus probable, marquez la question « à revoir » et passez à la suivante. Exemple 1 : une phrase de structure de niveau A2 ne doit pas prendre plus d'une demi-minute. Exemple 2 : un texte C1 mérite plus de temps, car il compte davantage. Ne laissez jamais une question sans réponse : une réponse au hasard a une chance sur quatre d'être juste.",
+    "exam_strategy": "Regardez le minuteur à la moitié des questions : vous devez avoir utilisé moins de la moitié du temps. Répondez à tout, marquez vos doutes, et revenez-y à la fin.",
+    "practice": [
+      {"question": "Il vous reste 2 minutes et 4 questions sans réponse. Que faites-vous ?", "options": ["Je lis attentivement la première et laisse les autres.", "Je réponds rapidement aux 4, puis je reviens sur la plus facile.", "J'attends la fin de l'épreuve.", "Je relis mes réponses précédentes."], "correct_index": 1, "explanation": "Une question sans réponse vaut zéro ; une réponse rapide a au moins une chance sur quatre d'être juste."},
+      {"question": "À la moitié des questions, vous avez utilisé 70 % du temps. Que faites-vous ?", "options": ["Je continue au même rythme.", "J'accélère et je marque mes doutes pour plus tard.", "Je reviens au début pour vérifier.", "Je saute les questions longues."], "correct_index": 1, "explanation": "Les questions restantes sont plus longues : il faut accélérer tout de suite et garder les vérifications pour la fin."},
+      {"question": "Vous hésitez depuis 2 minutes entre deux options d'une question facile. Que faites-vous ?", "options": ["Je continue à hésiter jusqu'à être sûr.", "Je choisis la plus probable, je marque « à revoir » et je passe.", "Je laisse la question vide.", "Je recommence la lecture du début."], "correct_index": 1, "explanation": "Fixer un choix et marquer la question protège le temps des questions suivantes."}
+    ],
+    "week_plan": [
+      {"action": "Faire 10 questions de compréhension écrite chronométrées en respectant le temps cible par niveau", "minutes": 20, "frequency": "3 fois cette semaine", "resource_id": "tv5monde_tcf"},
+      {"action": "Passer un test rapide en vérifiant le minuteur à la moitié de chaque épreuve", "minutes": 26, "frequency": "1 fois cette semaine", "resource_id": null}
+    ]
+  },
+  "answer_changes": {
+    "title": "Changer de réponse seulement avec une raison précise",
+    "lesson": "Vos changements de réponse remplacent plus souvent une bonne réponse par une mauvaise que l'inverse. C'est fréquent : le doute pousse à revenir sur un premier choix qui reposait sur une bonne compréhension globale. Règle simple : ne changez une réponse que si vous trouvez un élément précis du document qui contredit votre premier choix. Exemple 1 : vous avez choisi B, puis vous relisez et voyez « sauf le lundi » qui exclut B : changer est justifié. Exemple 2 : vous hésitez parce que C « semble aussi possible » sans nouvel indice : gardez B. Un changement sans indice nouveau est un pari, et vos résultats montrent que ce pari vous coûte des points.",
+    "exam_strategy": "Avant de changer une réponse, citez mentalement le passage qui prouve que la première était fausse. Pas de passage, pas de changement.",
+    "practice": [
+      {"question": "Vous avez choisi A. En relisant, l'option C vous semble « aussi possible », sans nouvel indice. Que faites-vous ?", "options": ["Je passe à C.", "Je garde A.", "Je laisse vide.", "Je choisis au hasard."], "correct_index": 1, "explanation": "Sans élément nouveau qui contredit A, le premier choix est le plus fiable."},
+      {"question": "Vous avez choisi B. En relisant, vous trouvez une phrase qui contredit clairement B. Que faites-vous ?", "options": ["Je garde B par principe.", "Je change pour l'option que la phrase confirme.", "Je laisse vide.", "Je marque la question sans changer."], "correct_index": 1, "explanation": "Un indice précis justifie le changement : c'est le seul cas où il faut changer."},
+      {"question": "Quand vaut-il mieux revenir sur une question marquée « à revoir » ?", "options": ["Tout de suite, plusieurs fois.", "À la fin, s'il reste du temps.", "Jamais.", "Avant de commencer l'épreuve."], "correct_index": 1, "explanation": "Revenir à la fin évite de perdre le temps prévu pour les questions suivantes."}
+    ],
+    "week_plan": [
+      {"action": "Pendant vos exercices, noter chaque changement de réponse et vérifier ensuite s'il était justifié", "minutes": 10, "frequency": "3 fois cette semaine", "resource_id": null},
+      {"action": "Faire une série d'exercices en vous interdisant tout changement sans indice précis", "minutes": 20, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  },
+  "language_point": {
+    "title": "Revoir un point de langue",
+    "lesson": "Un point de langue s'apprend en trois temps : comprendre la règle, l'observer dans des phrases réelles, puis l'employer soi-même. Commencez par la règle de base et ses déclencheurs, c'est-à-dire les mots qui imposent la forme (une conjonction, une préposition, un temps dans la principale). Exemple 1 : « Je veux que tu viennes » : « vouloir que » déclenche le subjonctif. Exemple 2 : « J'en ai acheté trois » : « en » remplace « des pommes » et se place avant le verbe. Dans un exercice à trou, cherchez d'abord le déclencheur dans la phrase, puis éliminez les options qui ne respectent pas la règle. Reprenez ensuite vos erreurs ci-dessous : chacune montre le déclencheur que vous n'aviez pas repéré.",
+    "exam_strategy": "Cherchez le mot qui déclenche la forme avant de regarder les options. Éliminez d'abord les options grammaticalement impossibles.",
+    "practice": [
+      {"question": "Je veux que tu ___ avec nous.", "options": ["viens", "viennes", "viendras", "venir"], "correct_index": 1, "explanation": "« vouloir que » déclenche le subjonctif : « que tu viennes »."},
+      {"question": "Des pommes ? J'___ ai acheté trois.", "options": ["y", "en", "les", "leur"], "correct_index": 1, "explanation": "« en » remplace un nom précédé de « des » avec une quantité."},
+      {"question": "C'est la ville ___ je suis né.", "options": ["que", "qui", "dont", "où"], "correct_index": 3, "explanation": "« où » remplace un complément de lieu : naître dans cette ville."}
+    ],
+    "week_plan": [
+      {"action": "Relire la règle de ce point de langue et écrire 10 phrases personnelles qui l'utilisent", "minutes": 15, "frequency": "3 fois cette semaine", "resource_id": null},
+      {"action": "Faire une série d'exercices de structures de la langue sur ce point", "minutes": 20, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  }
+}

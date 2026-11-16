@@ -266,8 +266,12 @@ def test_generate_whole_test_then_rerun_does_nothing(draft, fast_mp3):
 
     progress = run_until_done(draft)
     assert progress.done == progress.total == len(items)
-    assert UsageEntry.objects.filter(kind="tts").count() == len(items)
-    assert tts_chars_used() == expected_chars
+    entries = UsageEntry.objects.filter(kind="tts")
+    assert entries.count() == len(items)
+    # Synthèses factices : journalisées avec leurs caractères, mais hors quota.
+    assert {e.provider for e in entries} == {"fake"}
+    assert sum(e.chars for e in entries) == expected_chars
+    assert tts_chars_used() == 0
 
     files = {a.item_id: (a.file.name, a.created_at) for a in AudioAsset.objects.all()}
     assert generate_next(draft).finished
@@ -307,23 +311,27 @@ def test_modified_script_makes_audio_stale_and_only_it_is_redone(draft, fast_mp3
 def test_quota_stops_synthesis_with_clear_message(draft, fast_mp3):
     site = SiteSettings.load()
     needed = audio_progress(draft).pending_chars
-    # Quota effectif (95 %) juste en dessous de ce que demande le test.
-    site.tts_monthly_char_quota = int((needed - 1) / site.tts_quota_safety)
-    site.save()
+    # Consommations Google simulées : il reste un caractère de moins que ce que demande le test.
+    UsageEntry.objects.create(
+        kind="tts", provider=GoogleChirp3Provider.name, chars=site.tts_effective_quota - needed + 1
+    )
     progress = audio_progress(draft)
     assert not progress.fits
     with pytest.raises(QuotaError, match=QUOTA_MESSAGE):
         generate_next(draft)
     assert AudioAsset.objects.count() == 0
-    assert UsageEntry.objects.count() == 0
+    assert UsageEntry.objects.count() == 1  # la consommation simulée seulement
 
 
 def test_quota_counts_previous_usage(draft, fast_mp3):
+    """Consommations Google simulées : elles comptent dans le quota, pas les factices."""
     site = SiteSettings.load()
     needed = audio_progress(draft).pending_chars
-    UsageEntry.objects.create(kind="tts", provider="fake", chars=site.tts_effective_quota - needed)
+    google = GoogleChirp3Provider.name
+    UsageEntry.objects.create(kind="tts", provider=google, chars=site.tts_effective_quota - needed)
+    UsageEntry.objects.create(kind="tts", provider="fake", chars=10 * needed)
     assert audio_progress(draft).fits
-    UsageEntry.objects.create(kind="tts", provider="fake", chars=1)
+    UsageEntry.objects.create(kind="tts", provider=google, chars=1)
     assert not audio_progress(draft).fits
     with pytest.raises(QuotaError):
         generate_next(draft)
@@ -363,3 +371,30 @@ def test_tts_list_voices_command(capsys):
     out = capsys.readouterr().out
     assert "fr-FR-Chirp3-HD-Kore\tféminine" in out
     assert "fr-FR-Chirp3-HD-Puck\tmasculine" in out
+
+
+# --- Moteur de l'audio (7.4) --------------------------------------------------------------------
+
+
+def test_fake_audio_is_never_up_to_date_with_google(draft, fast_mp3, settings):
+    run_until_done(draft)
+    assert audio_progress(draft).finished
+    settings.TTS_PROVIDER = "google"  # aucun appel : on ne fait que mesurer l'état
+    item = co_items(draft)[0]
+    assert audio.audio_state(item) == audio.AudioState.ENGINE
+    assert not is_up_to_date(item)
+    progress = audio_progress(draft)
+    assert progress.done == 0 and progress.next_item == item
+
+
+def test_fake_audio_is_regenerated_by_the_active_engine(draft, fast_mp3):
+    run_until_done(draft)
+
+    class OtherEngine(FakeTTSProvider):
+        name = "google_chirp3_hd"  # se fait passer pour Google, sans réseau
+
+    progress = generate_next(draft, OtherEngine())
+    assert progress.done == 1
+    item = co_items(draft)[0]
+    assert item.audio.engine == "google_chirp3_hd"
+    assert UsageEntry.objects.filter(provider="google_chirp3_hd").count() == 1

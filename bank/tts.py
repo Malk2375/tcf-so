@@ -174,6 +174,15 @@ class GoogleChirp3Provider:
         return sorted(voices, key=lambda v: v.name)
 
 
+# Moteur enregistré dans AudioAsset.engine pour chaque valeur de TTS_PROVIDER.
+ENGINES = {"fake": FakeTTSProvider.name, "google": GoogleChirp3Provider.name}
+
+
+def active_engine() -> str:
+    """Moteur du fournisseur actif, sans l'instancier (aucune clé requise)."""
+    return ENGINES.get(settings.TTS_PROVIDER, settings.TTS_PROVIDER)
+
+
 def get_provider() -> TTSProvider:
     if settings.TTS_PROVIDER == "google":
         return GoogleChirp3Provider(settings.GOOGLE_TTS_API_KEY)

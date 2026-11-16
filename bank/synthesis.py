@@ -1,7 +1,9 @@
 """Génération de l'audio d'un test, item par item, avec quota (SPEC 7.4 et 15).
 
 La page de relecture enchaîne les appels `audio/next` : chacun synthétise au plus un item.
-L'opération est reprenable et idempotente : un item dont l'audio a le bon `script_hash` est ignoré.
+L'opération est reprenable et idempotente : un item dont l'audio a le bon `script_hash` et le moteur
+du fournisseur actif est ignoré. Les synthèses factices sont journalisées mais ne comptent pas
+dans le quota (`tts_chars_used`).
 """
 
 import hashlib
@@ -55,9 +57,9 @@ def co_items(test: Test) -> list[Item]:
     )
 
 
-def audio_progress(test: Test) -> AudioProgress:
+def audio_progress(test: Test, engine: str | None = None) -> AudioProgress:
     items = co_items(test)
-    pending = [item for item in items if not is_up_to_date(item)]
+    pending = [item for item in items if not is_up_to_date(item, engine)]
     return AudioProgress(
         total=len(items),
         done=len(items) - len(pending),
@@ -107,7 +109,8 @@ def generate_next(test: Test, provider: TTSProvider | None = None) -> AudioProgr
     dans le quota restant."""
     if test.status != Test.Status.DRAFT:
         raise TTSError("Test publié : son audio est figé.")
-    progress = audio_progress(test)
+    engine = provider.name if provider else None
+    progress = audio_progress(test, engine)
     if progress.finished:
         return progress
     if not progress.fits:
@@ -116,7 +119,7 @@ def generate_next(test: Test, provider: TTSProvider | None = None) -> AudioProgr
             f"il en reste {progress.remaining_quota} ce mois-ci."
         )
     synthesize_one(progress.next_item, provider)
-    return audio_progress(test)
+    return audio_progress(test, engine)
 
 
 def voice_sample_path(voice: str, provider: TTSProvider | None = None) -> str:

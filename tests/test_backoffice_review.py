@@ -349,7 +349,7 @@ def test_backoffice_pages_require_staff(client, draft):
 
 
 def test_backoffice_home_shows_stock_quota_and_imports(staff_client, draft):
-    UsageEntry.objects.create(kind="tts", provider="fake", chars=95_000)
+    UsageEntry.objects.create(kind="tts", provider="google_chirp3_hd", chars=95_000)
     html = staff_client.get(url("home")).content.decode()
     assert "Stock de tests" in html
     assert "1</span> publié" not in html  # aucun test publié
@@ -399,10 +399,9 @@ def test_casting_needs_three_voices_per_gender(staff_client, db):
     assert SiteSettings.load().tts_casting == before
 
 
-def test_make_dev_test_draft_command(formats, settings, capsys):
+def test_make_dev_test_draft_command(formats, demo_db, capsys):
     from django.core.management import call_command
 
-    settings.DEBUG = True
     call_command("make_dev_test", "--mode", "rapide", "--draft")
     test = Test.objects.get()
     assert test.status == Test.Status.DRAFT

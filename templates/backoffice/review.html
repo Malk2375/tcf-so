@@ -85,6 +85,30 @@
   {% endif %}
 </section>
 
+{% if test.status != "published" %}
+<section class="card mt-6 border-red-200" aria-labelledby="suppression-titre">
+  <h2 id="suppression-titre" class="text-lg font-semibold text-red-900">Supprimer le test</h2>
+  {% if deletion_problems %}
+    <ul class="mt-2 list-disc space-y-1 pl-5 text-slate-800">
+      {% for problem in deletion_problems %}<li>{{ problem }}</li>{% endfor %}
+    </ul>
+  {% else %}
+    <p class="mt-2 text-slate-700">
+      Supprime le test, ses questions, leurs fichiers audio, ainsi que les passages des comptes administrateurs sur ce test
+      et les conseils qui en dépendent. Le brief et l'import restent. Action définitive.
+    </p>
+    <form method="post" action="{% url 'backoffice:delete' test.pk %}" class="form-stack mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+      {% csrf_token %}
+      <div>
+        <label for="confirm-number" class="block font-medium">Tapez le numéro du test ({{ test.number }}) pour confirmer</label>
+        <input id="confirm-number" name="confirm_number" inputmode="numeric" autocomplete="off" required>
+      </div>
+      <button type="submit" class="btn btn-danger w-full sm:w-auto">Supprimer</button>
+    </form>
+  {% endif %}
+</section>
+{% endif %}
+
 {% regroup rows by test_item.section as sections %}
 {% for section in sections %}
   <section class="mt-8" aria-labelledby="section-{{ section.grouper }}">

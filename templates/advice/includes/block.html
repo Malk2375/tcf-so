@@ -1,0 +1,19 @@
+{# Bloc de conseils de la page de résultats, chargé par HTMX. #}
+<div id="advice-block">
+  {% if advice %}
+    <h2 id="conseils-titre" class="text-lg font-semibold">Vos conseils personnalisés</h2>
+    <p class="mt-2 text-slate-800">{{ advice.content.summary }}</p>
+    {% if advice.content.next_goal %}
+      <p class="mt-2 text-slate-800"><span class="font-semibold">Objectif :</span> {{ advice.content.next_goal }}</p>
+    {% endif %}
+    {% if advice.content.items %}
+      <ul class="mt-3 list-disc space-y-1 pl-5 text-slate-800">
+        {% for item in advice.content.items %}<li>{{ item.title }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+    <a href="{% url 'advice' %}" class="btn btn-primary mt-4 w-full sm:w-auto">Voir les leçons et les exercices</a>
+  {% elif remaining %}
+    <h2 id="conseils-titre" class="text-lg font-semibold">Conseils personnalisés</h2>
+    <p class="mt-2 text-slate-700">Vos conseils seront disponibles après {{ remaining|cut:"encore " }} de plus.</p>
+  {% endif %}
+</div>

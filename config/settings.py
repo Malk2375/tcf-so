@@ -167,6 +167,10 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = _project_path(env.str("MEDIA_ROOT", default="data/media"))
 
+# Base et médias de démonstration : seuls endroits où `make_dev_test` et `reset_demo` s'exécutent.
+DEMO_DATABASE_PATH = BASE_DIR / "data" / "demo.sqlite3"
+DEMO_MEDIA_ROOT = BASE_DIR / "data" / "demo-media"
+
 # --- Fournisseurs externes (factices par défaut) ------------------------------------------------
 
 TTS_PROVIDER = env.str("TTS_PROVIDER", default="fake")

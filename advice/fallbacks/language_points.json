@@ -1,0 +1,114 @@
+{
+  "passe_compose_imparfait": {
+    "title": "Choisir entre passé composé et imparfait",
+    "lesson": "Le passé composé présente une action terminée, datée ou comptée : un événement qui fait avancer le récit. L'imparfait décrit le décor, une situation qui dure, une habitude ou une action en cours interrompue. Posez-vous la question : est-ce un événement (« et puis… ») ou une description (« à ce moment-là, c'était… ») ? Exemple 1 : « Quand j'étais petit, je jouais au football tous les samedis » : habitude, imparfait. Exemple 2 : « Je lisais quand le téléphone a sonné » : l'action en cours (imparfait) est interrompue par un événement (passé composé). Indices fréquents : « soudain », « un jour », « hier à 8 h » appellent le passé composé ; « d'habitude », « autrefois », « tous les jours » appellent l'imparfait.",
+    "exam_strategy": "Cherchez l'indice de temps dans la phrase : un moment précis ou un événement soudain → passé composé ; une habitude, une durée ou une description → imparfait.",
+    "practice": [
+      {"question": "Quand nous ___ en vacances, il pleuvait tous les jours.", "options": ["sommes partis", "partions", "étions", "avons été"], "correct_index": 2, "explanation": "La phrase décrit une situation qui dure (« il pleuvait tous les jours ») : « nous étions en vacances »."},
+      {"question": "Je dormais quand soudain quelqu'un ___ à la porte.", "options": ["frappait", "a frappé", "frappe", "frappera"], "correct_index": 1, "explanation": "« soudain » marque un événement ponctuel qui interrompt l'action en cours : passé composé."},
+      {"question": "Autrefois, mon grand-père ___ à pied à l'école.", "options": ["est allé", "allait", "va", "ira"], "correct_index": 1, "explanation": "« Autrefois » indique une habitude passée : imparfait."}
+    ],
+    "week_plan": [
+      {"action": "Raconter par écrit un souvenir en 8 phrases, en soulignant les événements (passé composé) et le décor (imparfait)", "minutes": 15, "frequency": "3 fois cette semaine", "resource_id": null},
+      {"action": "Faire une série d'exercices passé composé / imparfait", "minutes": 15, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  },
+  "subjonctif_present": {
+    "title": "Employer le subjonctif présent",
+    "lesson": "Le subjonctif s'emploie après des expressions de volonté, d'obligation, de sentiment ou de doute suivies de « que » : « vouloir que », « il faut que », « être content que », « douter que ». Il se forme sur la 3e personne du pluriel du présent : ils prennent → que je prenne. Quelques verbes sont irréguliers : être (que je sois), avoir (que j'aie), faire (que je fasse), aller (que j'aille), pouvoir (que je puisse). Exemple 1 : « Il faut que tu fasses tes devoirs ». Exemple 2 : « Je suis content que vous soyez là ». Attention : après « penser que » ou « espérer que » à la forme affirmative, on emploie l'indicatif : « J'espère qu'il viendra ».",
+    "exam_strategy": "Repérez le verbe avant « que » : volonté, obligation, sentiment ou doute → subjonctif ; certitude, opinion affirmative → indicatif.",
+    "practice": [
+      {"question": "Il faut que nous ___ avant midi.", "options": ["partons", "partions", "partirons", "partirions"], "correct_index": 1, "explanation": "« Il faut que » impose le subjonctif : « que nous partions »."},
+      {"question": "Je suis heureux que tu ___ réussi ton examen.", "options": ["as", "aies", "avais", "auras"], "correct_index": 1, "explanation": "Un sentiment (« heureux que ») déclenche le subjonctif : « que tu aies réussi »."},
+      {"question": "J'espère qu'il ___ beau demain.", "options": ["fasse", "fera", "ferait", "faisait"], "correct_index": 1, "explanation": "« espérer que » à l'affirmatif est suivi de l'indicatif : « il fera beau »."}
+    ],
+    "week_plan": [
+      {"action": "Apprendre les subjonctifs irréguliers (être, avoir, faire, aller, pouvoir, savoir, vouloir) et écrire une phrase avec chacun", "minutes": 15, "frequency": "3 fois cette semaine", "resource_id": null},
+      {"action": "Faire une série d'exercices sur le subjonctif", "minutes": 15, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  },
+  "subjonctif_emplois": {
+    "title": "Savoir quand employer le subjonctif",
+    "lesson": "Au-delà des verbes de volonté, le subjonctif suit aussi certaines conjonctions : « bien que », « pour que », « avant que », « à condition que », « sans que », « afin que ». Il apparaît également après les verbes d'opinion à la forme négative ou interrogative : « Je ne pense pas qu'il ait raison ». En revanche, « après que », « parce que », « pendant que » et « tandis que » sont suivis de l'indicatif. Exemple 1 : « Bien qu'il soit tard, je continue ». Exemple 2 : « Je ne crois pas qu'elle puisse venir ». Retenez les conjonctions par groupes : but, concession, condition, antériorité → subjonctif.",
+    "exam_strategy": "Repérez la conjonction ou le verbe d'opinion avant le blanc. Vérifiez la forme négative : « je pense que » (indicatif) devient « je ne pense pas que » (subjonctif).",
+    "practice": [
+      {"question": "Je t'explique encore une fois pour que tu ___ bien.", "options": ["comprends", "comprennes", "comprendras", "as compris"], "correct_index": 1, "explanation": "« pour que » (but) est suivi du subjonctif : « que tu comprennes »."},
+      {"question": "Je ne pense pas qu'il ___ la vérité.", "options": ["dit", "dise", "dira", "disait"], "correct_index": 1, "explanation": "Un verbe d'opinion à la forme négative est suivi du subjonctif : « qu'il dise »."},
+      {"question": "Il est arrivé après que nous ___ le repas.", "options": ["ayons fini", "avions fini", "finissions", "finissons"], "correct_index": 1, "explanation": "« après que » se construit avec l'indicatif ; l'action antérieure au passé se met au plus-que-parfait."}
+    ],
+    "week_plan": [
+      {"action": "Faire deux listes de conjonctions (avec subjonctif / avec indicatif) et écrire une phrase pour chacune", "minutes": 15, "frequency": "3 fois cette semaine", "resource_id": null},
+      {"action": "Faire une série d'exercices sur les emplois du subjonctif", "minutes": 15, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  },
+  "pronoms_relatifs_simples": {
+    "title": "Choisir le bon pronom relatif simple",
+    "lesson": "Le pronom relatif dépend de la fonction du mot qu'il remplace dans la relative. « Qui » remplace un sujet : « la femme qui parle ». « Que » remplace un complément direct : « le livre que je lis ». « Où » remplace un complément de lieu ou de temps : « la ville où j'habite », « le jour où je suis arrivé ». « Dont » remplace un complément introduit par « de » : « le film dont je parle » (parler de). Exemple 1 : « L'homme ___ m'a aidé » : le blanc est sujet de « a aidé », donc « qui ». Exemple 2 : « Le projet ___ je suis fier » : être fier de, donc « dont ». Astuce : reconstruisez la phrase simple (« je suis fier du projet ») pour trouver la préposition.",
+    "exam_strategy": "Regardez ce qui suit le blanc : un verbe sans sujet → qui ; un sujet + verbe sans complément → que ; une construction avec « de » → dont ; un lieu ou un moment → où.",
+    "practice": [
+      {"question": "Le restaurant ___ nous avons dîné était excellent.", "options": ["que", "qui", "dont", "où"], "correct_index": 3, "explanation": "On dîne dans un lieu : « où » remplace le complément de lieu."},
+      {"question": "C'est un sujet ___ on parle beaucoup.", "options": ["que", "dont", "qui", "où"], "correct_index": 1, "explanation": "On dit « parler de » : « dont » remplace « de + nom »."},
+      {"question": "La collègue ___ tu as rencontrée hier est italienne.", "options": ["qui", "que", "dont", "où"], "correct_index": 1, "explanation": "« tu as rencontré la collègue » : complément direct, donc « que »."}
+    ],
+    "week_plan": [
+      {"action": "Relier 10 paires de phrases simples avec qui, que, dont ou où", "minutes": 15, "frequency": "3 fois cette semaine", "resource_id": null},
+      {"action": "Faire une série d'exercices sur les pronoms relatifs", "minutes": 15, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  },
+  "pronoms_relatifs_composes": {
+    "title": "Employer les pronoms relatifs composés",
+    "lesson": "Après une préposition autre que « de », on emploie « lequel, laquelle, lesquels, lesquelles », accordé avec le nom remplacé : « la table sur laquelle j'écris ». Avec « à », il se contracte : auquel, à laquelle, auxquels, auxquelles (« le projet auquel je pense »). Avec une locution terminée par « de » (« à côté de », « grâce à » mis à part), on obtient duquel, de laquelle, desquels, desquelles : « le parc près duquel j'habite ». Pour une personne, on peut aussi dire « à qui », « avec qui ». Exemple 1 : « Les amis avec lesquels je voyage » (ou avec qui). Exemple 2 : « La raison pour laquelle je suis venu ». Identifiez la préposition, puis accordez le pronom.",
+    "exam_strategy": "Repérez la préposition avant le blanc et le nom remplacé : son genre et son nombre donnent la forme du pronom.",
+    "practice": [
+      {"question": "Voici la raison pour ___ je refuse.", "options": ["lequel", "laquelle", "lesquelles", "dont"], "correct_index": 1, "explanation": "« raison » est féminin singulier : « pour laquelle »."},
+      {"question": "C'est un problème ___ je n'avais pas pensé.", "options": ["auquel", "duquel", "lequel", "dont"], "correct_index": 0, "explanation": "On dit « penser à » : à + lequel = « auquel »."},
+      {"question": "Le jardin au milieu ___ se trouve la fontaine est public.", "options": ["dont", "duquel", "auquel", "lequel"], "correct_index": 1, "explanation": "« au milieu de » + lequel donne « duquel »."}
+    ],
+    "week_plan": [
+      {"action": "Écrire 10 phrases avec une préposition différente (sur, avec, pour, grâce à, près de…) suivie de lequel", "minutes": 15, "frequency": "3 fois cette semaine", "resource_id": null},
+      {"action": "Faire une série d'exercices sur les pronoms relatifs composés", "minutes": 15, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  },
+  "pronoms_y_en": {
+    "title": "Employer les pronoms y et en",
+    "lesson": "« En » remplace un complément introduit par « de » (ou par un partitif, ou suivi d'une quantité) : « Tu veux du café ? Oui, j'en veux » ; « Il parle de son voyage ? Oui, il en parle » ; « J'ai trois frères, j'en ai trois ». « Y » remplace un complément de lieu ou un complément introduit par « à » (pour une chose) : « Tu vas à Lyon ? Oui, j'y vais » ; « Tu penses à ton examen ? Oui, j'y pense ». Pour une personne après « à », on utilise plutôt « lui/leur » ou « à lui/à elle ». Exemple 1 : « Je m'occupe du dossier » → « Je m'en occupe ». Exemple 2 : « Je m'intéresse à la politique » → « Je m'y intéresse ».",
+    "exam_strategy": "Reconstruisez la phrase avec son complément : « de » + chose ou quantité → en ; « à » + chose ou un lieu → y.",
+    "practice": [
+      {"question": "— Tu as besoin de ton ordinateur ? — Oui, j'___ ai besoin.", "options": ["y", "en", "le", "lui"], "correct_index": 1, "explanation": "« avoir besoin de » : le complément introduit par « de » est remplacé par « en »."},
+      {"question": "— Vous participez à la réunion ? — Oui, nous ___ participons.", "options": ["en", "y", "la", "leur"], "correct_index": 1, "explanation": "« participer à » + chose : « y »."},
+      {"question": "— Combien de pommes as-tu achetées ? — J'___ ai acheté cinq.", "options": ["les", "y", "en", "leur"], "correct_index": 2, "explanation": "Avec une quantité, on reprend le nom par « en »."}
+    ],
+    "week_plan": [
+      {"action": "Répondre à 15 questions en remplaçant le complément par y ou en", "minutes": 15, "frequency": "3 fois cette semaine", "resource_id": null},
+      {"action": "Faire une série d'exercices sur les pronoms y et en", "minutes": 15, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  },
+  "pronoms_cod_coi": {
+    "title": "Choisir entre pronoms COD et COI",
+    "lesson": "Un complément d'objet direct (COD) suit le verbe sans préposition : « Je vois Marie » → « Je la vois ». Un complément d'objet indirect (COI) de personne est introduit par « à » : « Je parle à Marie » → « Je lui parle ». Pronoms COD : le, la, les ; pronoms COI : lui, leur. Me, te, nous, vous servent aux deux. Le choix dépend donc de la construction du verbe : « aider quelqu'un » (COD : je l'aide), « téléphoner à quelqu'un » (COI : je lui téléphone). Exemple 1 : « Tu as appelé tes parents ? Oui, je les ai appelés ». Exemple 2 : « Tu as écrit à tes parents ? Oui, je leur ai écrit ». Attention : « leur » pronom ne prend jamais de « s ».",
+    "exam_strategy": "Demandez-vous : verbe + quelqu'un (COD : le, la, les) ou verbe + à quelqu'un (COI : lui, leur) ?",
+    "practice": [
+      {"question": "— Tu as répondu à ton directeur ? — Oui, je ___ ai répondu.", "options": ["le", "lui", "leur", "l'"], "correct_index": 1, "explanation": "« répondre à quelqu'un » : COI singulier, « lui »."},
+      {"question": "— Tu connais ces étudiants ? — Oui, je ___ connais bien.", "options": ["leur", "les", "lui", "en"], "correct_index": 1, "explanation": "« connaître quelqu'un » : COD pluriel, « les »."},
+      {"question": "— Tu as offert des fleurs à tes voisines ? — Oui, je ___ ai offert des fleurs.", "options": ["les", "leurs", "leur", "lui"], "correct_index": 2, "explanation": "« offrir à quelqu'un » : COI pluriel, « leur », sans « s »."}
+    ],
+    "week_plan": [
+      {"action": "Classer 20 verbes courants selon leur construction (quelqu'un / à quelqu'un) et écrire une phrase avec pronom pour chacun", "minutes": 15, "frequency": "3 fois cette semaine", "resource_id": null},
+      {"action": "Faire une série d'exercices sur les pronoms COD et COI", "minutes": 15, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  },
+  "connecteurs_logiques": {
+    "title": "Choisir le bon connecteur logique",
+    "lesson": "Un connecteur exprime la relation entre deux idées : cause (parce que, car, puisque, comme), conséquence (donc, alors, c'est pourquoi, si bien que), opposition (mais, pourtant, cependant, alors que), but (pour, afin de, pour que), addition (de plus, en outre). Pour choisir, résumez le lien entre les deux parties de la phrase en un mot : cause ? conséquence ? opposition ? Exemple 1 : « Il pleuvait ; ___, nous sommes restés à la maison » → conséquence : « c'est pourquoi » ou « donc ». Exemple 2 : « Il est riche ; ___, il vit très simplement » → opposition : « pourtant ». Attention aux constructions : « afin de » + infinitif, « afin que » + subjonctif ; « comme » (cause) se place en début de phrase.",
+    "exam_strategy": "Avant de lire les options, nommez la relation logique entre les deux parties de la phrase, puis vérifiez la construction (infinitif, subjonctif, place dans la phrase).",
+    "practice": [
+      {"question": "Le train était en retard, ___ j'ai manqué ma correspondance.", "options": ["pourtant", "si bien que", "bien que", "afin que"], "correct_index": 1, "explanation": "Le retard a pour conséquence la correspondance manquée : « si bien que »."},
+      {"question": "Elle a beaucoup révisé ; ___, elle a échoué.", "options": ["donc", "pourtant", "car", "ainsi"], "correct_index": 1, "explanation": "Le résultat contredit l'effort : opposition, « pourtant »."},
+      {"question": "___ il faisait beau, nous avons mangé dehors.", "options": ["Comme", "Donc", "Pourtant", "Afin que"], "correct_index": 0, "explanation": "« Comme » exprime la cause en début de phrase."}
+    ],
+    "week_plan": [
+      {"action": "Classer 20 connecteurs par relation logique et écrire une phrase avec chacun", "minutes": 15, "frequency": "3 fois cette semaine", "resource_id": null},
+      {"action": "Faire une série d'exercices sur les connecteurs", "minutes": 15, "frequency": "2 fois cette semaine", "resource_id": "tv5monde_tcf"}
+    ]
+  }
+}
