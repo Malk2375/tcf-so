@@ -1,0 +1,4 @@
+# Fins de ligne imposées : scripts du serveur (Linux) et lanceurs Windows.
+*.sh text eol=lf
+Caddyfile text eol=lf
+*.cmd text eol=crlf

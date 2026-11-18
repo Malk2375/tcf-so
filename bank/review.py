@@ -1,16 +1,23 @@
 """Relecture d'un test en brouillon, contrôle à l'aveugle et publication (SPEC 6.4 et 11)."""
 
+import re
 from dataclasses import dataclass, field
 
 from django.db import transaction
 from django.utils import timezone
 
 from bank.audio import AudioState, audio_state
-from bank.constants import SECTIONS
+from bank.constants import LETTERS, SECTIONS
 from bank.content import content_hash, item_fields, support_text, word_count
 from bank.importer import ImportReport, _check_item
 from bank.models import Item, Test, TestItem
-from bank.schema import StrictJSONError, parse_json, schema_errors
+from bank.schema import (
+    StrictJSONError,
+    decode_text,
+    json_candidate,
+    parse_pasted_json,
+    schema_errors,
+)
 
 
 class ReviewError(Exception):
@@ -156,11 +163,40 @@ def blind_export(test: Test) -> dict:
     return {"format": test.format.code, "test": test.number, "items": items}
 
 
-def import_blind_answers(test: Test, raw: bytes) -> list[str]:
+_GRID_ENTRY = re.compile(r"(?<!\d)(\d{1,3})\s*[-.:)=/]?\s*([A-Da-d])(?![A-Za-zÀ-ÿ])")
+
+
+def parse_grid(text: str) -> dict:
+    """Ligne « grille » du relecteur : « 1A · 2C · 3B … », séparateurs libres."""
+    answers, errors = {}, []
+    for slot, letter in _GRID_ENTRY.findall(text):
+        slot = str(int(slot))
+        index = LETTERS.index(letter.upper())
+        if slot in answers and answers[slot] != index:
+            errors.append(f"Grille : emplacement {slot} donné deux fois.")
+        answers[slot] = index
+    if errors:
+        raise StrictJSONError(" ".join(errors))
+    if not answers:
+        raise StrictJSONError(
+            "ni JSON (objet { … } ou bloc ```json```), ni ligne « grille » (1A · 2C · 3B …)"
+        )
+    return {"answers": answers, "doubts": {}}
+
+
+def read_blind_answers(raw: bytes | str) -> dict:
+    """Réponses du relecteur : fichier ou texte collé. JSON seul, bloc ```json``` copié
+    depuis la conversation, ou, faute de JSON, la ligne « grille »."""
+    if json_candidate(raw) is not None:
+        return parse_pasted_json(raw)
+    return parse_grid(decode_text(raw))
+
+
+def import_blind_answers(test: Test, raw: bytes | str) -> list[str]:
     """Enregistre les réponses du relecteur, ou rien s'il y a une erreur ; renvoie les erreurs."""
     require_draft(test)
     try:
-        data = parse_json(raw)
+        data = read_blind_answers(raw)
     except StrictJSONError as exc:
         return [f"Lecture impossible : {exc}."]
     if not isinstance(data, dict) or not isinstance(data.get("answers"), dict):

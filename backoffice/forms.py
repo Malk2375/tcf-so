@@ -108,8 +108,51 @@ class ItemForm(forms.Form):
         return changes
 
 
-class BlindAnswersForm(forms.Form):
+class PasteOrFileForm(forms.Form):
+    """Un fichier JSON ou un texte collé (l'un ou l'autre)."""
+
     file = forms.FileField(
-        label="Réponses du relecteur (JSON)",
+        label="Fichier JSON",
+        required=False,
         widget=forms.ClearableFileInput(attrs={"accept": ".json,application/json"}),
     )
+    text = forms.CharField(
+        label="ou texte collé",
+        required=False,
+        strip=False,
+        widget=forms.Textarea(attrs={"rows": 5, "class": "font-mono text-sm"}),
+    )
+    missing_message = "Choisissez un fichier ou collez un texte."
+
+    def clean(self):
+        data = super().clean()
+        has_file = bool(data.get("file"))
+        has_text = bool((data.get("text") or "").strip())
+        if has_file == has_text:
+            raise forms.ValidationError(
+                "Choisissez un fichier ou collez un texte, pas les deux."
+                if has_file
+                else self.missing_message
+            )
+        return data
+
+
+class BlindAnswersForm(PasteOrFileForm):
+    missing_message = (
+        "Choisissez le fichier rendu par le relecteur, ou collez sa réponse "
+        "(JSON, bloc ```json``` ou ligne « grille »)."
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["file"].label = "Réponses du relecteur : fichier JSON"
+        self.fields["text"].label = "ou réponse collée (JSON, bloc ```json``` ou grille 1A · 2C …)"
+
+
+class CorrectionsForm(PasteOrFileForm):
+    missing_message = "Choisissez le fichier de corrections, ou collez son contenu."
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["file"].label = "Corrections : fichier JSON"
+        self.fields["text"].label = "ou contenu collé (JSON ou bloc ```json```)"

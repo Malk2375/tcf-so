@@ -5,6 +5,7 @@
 """
 
 import json
+import re
 from functools import cache
 from pathlib import Path
 
@@ -57,3 +58,35 @@ def schema_errors(data: object) -> list[str]:
         path = "".join(f"[{p}]" if isinstance(p, int) else f".{p}" for p in error.absolute_path)
         messages.append(f"{path.lstrip('.') or 'racine'} : {error.message}")
     return messages
+
+
+_FENCE = re.compile(r"```[^\S\n]*(?:json)?[^\S\n]*\n(.*?)```", re.DOTALL | re.IGNORECASE)
+
+
+def decode_text(raw: bytes | str) -> str:
+    if isinstance(raw, str):
+        return raw
+    try:
+        return raw.decode("utf-8-sig")
+    except UnicodeDecodeError as exc:
+        raise StrictJSONError("le fichier n'est pas encodé en UTF-8") from exc
+
+
+def json_candidate(raw: bytes | str) -> str | None:
+    """Le JSON contenu dans un texte collé : le premier bloc de code (balises retirées),
+    ou le texte entier s'il commence par « { ». None si aucun JSON n'est trouvé."""
+    text = decode_text(raw).strip().lstrip("\ufeff")
+    fenced = _FENCE.search(text)
+    if fenced:
+        return fenced.group(1).strip()
+    if text.startswith("{") or text.startswith("["):
+        return text
+    return None
+
+
+def parse_pasted_json(raw: bytes | str) -> object:
+    """JSON strict tiré d'un fichier ou d'un texte collé (bloc ```json``` accepté)."""
+    candidate = json_candidate(raw)
+    if candidate is None:
+        raise StrictJSONError("aucun JSON trouvé (ni objet { … }, ni bloc de code ```json```)")
+    return parse_json(candidate.encode("utf-8"))

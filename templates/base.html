@@ -4,8 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#1e3a8a">
+  <meta name="csrf-token" content="{{ csrf_token }}">
   <title>{% block head_title %}Accueil{% endblock %} · Entraînement TCF SO</title>
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  {# Application installable (SPEC 14) #}
+  <link rel="manifest" href="{% url 'manifest' %}">
+  <link rel="icon" href="{% static 'icons/favicon-32.png' %}" type="image/png">
+  <link rel="apple-touch-icon" href="{% static 'icons/apple-touch-icon.png' %}">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="TCF SO">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <script src="{% static 'vendor/htmx.min.js' %}" defer></script>
   {# Les composants Alpine doivent être déclarés avant le démarrage d'Alpine. #}
   {% block alpine_components %}{% endblock %}
@@ -18,6 +27,11 @@
      class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:rounded focus:bg-white focus:px-4 focus:py-3">
     Aller au contenu
   </a>
+  {% if demo_mode %}
+    <div class="bg-orange-500 px-4 py-1 text-center text-sm font-bold tracking-wide text-black" role="note">
+      DÉMONSTRATION · base data/demo.sqlite3, voix et conseils factices
+    </div>
+  {% endif %}
 
   {% block header %}
   <header class="sticky top-0 z-10 bg-blue-900 text-white shadow">
@@ -80,9 +94,15 @@
     <div class="mx-auto max-w-5xl px-4 py-5 text-sm text-slate-600">
       <p>Plateforme d'entraînement personnelle et non commerciale au TCF tout public sur ordinateur.</p>
       <p class="mt-1">Estimation non officielle. Questions générées par IA.</p>
+      <p class="mt-1"><a href="{% url 'install_help' %}" class="link inline-flex min-h-11 items-center">Installer l'application sur votre téléphone</a></p>
     </div>
   </footer>
   {% endblock footer %}
   {% block extra_body %}{% endblock %}
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("{% url 'service_worker' %}").catch(() => {}));
+    }
+  </script>
 </body>
 </html>

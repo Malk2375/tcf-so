@@ -34,22 +34,53 @@
 <section class="card mt-6" aria-labelledby="aveugle-titre">
   <h2 id="aveugle-titre" class="text-lg font-semibold">Contrôle à l'aveugle</h2>
   <p class="mt-1 text-sm text-slate-700">
-    Téléchargez les questions sans les réponses, faites-les passer dans le Projet Claude « relecture », puis envoyez ici le fichier rendu.
+    Téléchargez les questions sans les réponses, faites-les passer dans le Projet Claude « relecture », puis envoyez ici le fichier rendu ou collez sa réponse.
   </p>
   {% if test.blind_check.received_at %}
     <p class="mt-2 text-sm text-slate-600">Réponses reçues le {{ test.blind_check.received_at|slice:":10" }} : {{ disagreements }} désaccord{{ disagreements|fr_plural }}, {{ doubts }} doute{{ doubts|fr_plural }}.</p>
   {% endif %}
-  <div class="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end">
-    <a href="{% url 'backoffice:blind_json' test.pk %}" class="btn btn-secondary">Télécharger blind.json</a>
-    <form method="post" action="{% url 'backoffice:blind_answers' test.pk %}" enctype="multipart/form-data" class="form-stack flex flex-col gap-3 sm:flex-row sm:items-end">
-      {% csrf_token %}
-      <div>
-        <label for="{{ blind_form.file.id_for_label }}" class="block font-medium">{{ blind_form.file.label }}</label>
-        {{ blind_form.file }}
-      </div>
-      <button type="submit" class="btn btn-secondary">Envoyer les réponses</button>
-    </form>
-  </div>
+  <a href="{% url 'backoffice:blind_json' test.pk %}" class="btn btn-secondary mt-4 w-full sm:w-auto">Télécharger blind.json</a>
+  <form method="post" action="{% url 'backoffice:blind_answers' test.pk %}" enctype="multipart/form-data" class="form-stack mt-4 flex flex-col gap-3">
+    {% csrf_token %}
+    <div>
+      <label for="{{ blind_form.file.id_for_label }}" class="block font-medium">{{ blind_form.file.label }}</label>
+      {{ blind_form.file }}
+    </div>
+    <div>
+      <label for="{{ blind_form.text.id_for_label }}" class="block font-medium">{{ blind_form.text.label }}</label>
+      {{ blind_form.text }}
+    </div>
+    <button type="submit" class="btn btn-secondary w-full sm:w-auto sm:self-start">Envoyer les réponses</button>
+  </form>
+</section>
+{% endif %}
+
+{% if is_draft %}
+<section id="corrections" class="card mt-6" aria-labelledby="corrections-titre">
+  <h2 id="corrections-titre" class="text-lg font-semibold">Importer des corrections</h2>
+  <p class="mt-1 text-sm text-slate-700">
+    Fichier au format d'import habituel (même format et même brief_id que ce test), ne contenant que les items à remplacer.
+    Chaque item remplace celui du même emplacement, repasse en brouillon et perd son résultat de contrôle à l'aveugle.
+    Un item identique à l'actuel garde son statut. Tout ou rien.
+  </p>
+  {% if corrections_report %}
+    <div class="mt-4 rounded-md border border-red-300 bg-red-50 p-4 text-red-950" role="alert">
+      <h3 class="font-semibold">Corrections refusées : {{ corrections_report.errors|length }} erreur{{ corrections_report.errors|length|pluralize }}. Rien n'a été modifié.</h3>
+      {% include "backoffice/includes/issues.html" with issues=corrections_report.errors %}
+    </div>
+  {% endif %}
+  <form method="post" action="{% url 'backoffice:corrections' test.pk %}" enctype="multipart/form-data" class="form-stack mt-4 flex flex-col gap-3">
+    {% csrf_token %}
+    <div>
+      <label for="corrections-file" class="block font-medium">{{ corrections_form.file.label }}</label>
+      <input type="file" name="file" id="corrections-file" accept=".json,application/json">
+    </div>
+    <div>
+      <label for="corrections-text" class="block font-medium">{{ corrections_form.text.label }}</label>
+      <textarea name="text" id="corrections-text" rows="5" class="font-mono text-sm">{{ corrections_form.text.value|default_if_none:"" }}</textarea>
+    </div>
+    <button type="submit" class="btn btn-secondary w-full sm:w-auto sm:self-start">Importer des corrections</button>
+  </form>
 </section>
 {% endif %}
 

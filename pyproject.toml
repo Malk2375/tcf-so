@@ -9,6 +9,7 @@ dependencies = [
     "django>=5.2,<5.3",
     "django-allauth>=65.22,<66",
     "django-environ>=0.14",
+    "gunicorn>=27.0.1",
     "imageio-ffmpeg>=0.6",
     "jsonschema>=4.23",
     "rapidfuzz>=3.10",
@@ -18,6 +19,7 @@ dependencies = [
 dev = [
     "pytest>=9.0",
     "pytest-django>=4.11",
+    "pytest-playwright>=0.10.0",
     "ruff>=0.15",
     "time-machine>=3.6.0",
 ]
@@ -32,6 +34,7 @@ testpaths = ["tests"]
 addopts = "-ra"
 # Les modèles « Test » et « TestItem » ne sont pas des classes de test.
 filterwarnings = ["ignore:cannot collect test class:pytest.PytestCollectionWarning"]
+markers = ["e2e: tests de bout en bout dans Chromium (Playwright)"]
 
 [tool.ruff]
 line-length = 100

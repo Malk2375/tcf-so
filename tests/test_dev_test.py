@@ -98,8 +98,20 @@ def test_reset_demo_removes_database_and_media(tmp_path):
 
 
 def test_reset_demo_creates_formats_and_admin(db):
-    populate()
+    assert populate(with_tests=False) == []
     assert ExamFormat.objects.count() == 3
     admin = get_user_model().objects.get(email=DEMO_EMAIL)
     assert admin.is_superuser and admin.is_staff
     assert admin.check_password(DEMO_PASSWORD)
+
+
+def test_reset_demo_creates_tests_to_pass_and_a_draft(db, monkeypatch):
+    from bank import audio
+
+    monkeypatch.setattr(audio, "encode_mp3", lambda pcm: b"MP3" + pcm[:64])
+    created = populate()
+    assert len(created) == 5
+    published = Test.objects.filter(status=Test.Status.PUBLISHED)
+    assert sorted(t.format.mode for t in published) == ["moyen", "rapide", "rapide", "rapide"]
+    draft = Test.objects.get(status=Test.Status.DRAFT)
+    assert draft.import_batch.uploaded_by.email == DEMO_EMAIL  # corrections possibles

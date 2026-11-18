@@ -1,0 +1,52 @@
+# Caddy : HTTPS automatique, fichiers statiques et audio, le reste vers Django (service « web »).
+# SITE_ADDRESS : l'adresse IP publique du VPS (ex. 203.0.113.10) ou un nom de domaine.
+{
+	email {$ACME_EMAIL}
+	# Un navigateur qui ouvre https://<adresse IP> n'envoie pas de nom de serveur (SNI) :
+	# Caddy présente alors le certificat de l'adresse du site.
+	default_sni {$SITE_ADDRESS}
+}
+
+{$SITE_ADDRESS} {
+	# Let's Encrypt ne délivre de certificat pour une adresse IP qu'avec le profil « shortlived »
+	# (160 heures) ; Caddy le renouvelle seul. Sans émetteur ACME explicite, Caddy signerait
+	# lui-même le certificat d'une adresse IP (non reconnu par les navigateurs).
+	tls {
+		issuer acme {
+			profile shortlived
+		}
+	}
+
+	encode zstd gzip
+
+	# Audio : noms tirés du contenu, jamais modifiés ; requêtes partielles (Range) gérées par file_server.
+	@audio path /media/audio/*
+	handle @audio {
+		root * /srv/data
+		header Cache-Control "public, max-age=31536000, immutable"
+		file_server
+	}
+
+	handle /media/* {
+		root * /srv/data
+		header Cache-Control "public, max-age=86400"
+		file_server
+	}
+
+	# Habillage (CSS, JS, icônes) : noms fixes, cache court ; le service worker garde sa copie.
+	handle /static/* {
+		root * /srv
+		header Cache-Control "public, max-age=3600"
+		file_server
+	}
+
+	handle {
+		reverse_proxy web:8000
+	}
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy same-origin
+		-Server
+	}
+}

@@ -281,14 +281,16 @@ def _check_item(item: dict, report: ImportReport) -> None:
             )
 
 
-def _check_duplicates(items: list[dict], report: ImportReport) -> None:
-    """Règles 8 et 9 : doublons exacts et quasi-doublons, en banque ou dans le fichier."""
+def _check_duplicates(items: list[dict], report: ImportReport, exclude=()) -> None:
+    """Règles 8 et 9 : doublons exacts et quasi-doublons, en banque ou dans le fichier.
+
+    `exclude` : items de la banque à ignorer (ceux que des corrections remplacent)."""
     for item in items:
         item["_hash"] = content_hash(item)
     existing = set(
-        Item.objects.filter(content_hash__in=[i["_hash"] for i in items]).values_list(
-            "content_hash", flat=True
-        )
+        Item.objects.filter(content_hash__in=[i["_hash"] for i in items])
+        .exclude(pk__in=exclude)
+        .values_list("content_hash", flat=True)
     )
     seen: dict[str, int] = {}
     for item in items:
@@ -303,7 +305,7 @@ def _check_duplicates(items: list[dict], report: ImportReport) -> None:
         seen.setdefault(item["_hash"], item["slot"])
 
     bank_by_section = defaultdict(list)
-    for bank_item in Item.objects.all():
+    for bank_item in Item.objects.exclude(pk__in=exclude):
         fields = {
             "section": bank_item.section,
             "subtype": bank_item.subtype,

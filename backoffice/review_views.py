@@ -9,8 +9,10 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from backoffice.decorators import staff_required
-from backoffice.forms import BlindAnswersForm, ItemForm
+from backoffice.forms import BlindAnswersForm, CorrectionsForm, ItemForm
 from bank import review
+from bank.constants import MAX_IMPORT_FILE_BYTES
+from bank.corrections import import_corrections
 from bank.deletion import DeletionError, delete_test, deletion_problems
 from bank.models import Item, Test
 from bank.synthesis import audio_progress, generate_next, synthesize_one
@@ -67,6 +69,7 @@ def _review_context(test: Test, **extra) -> dict:
         "doubts": sum(bool(r.blind_doubt) for r in rows),
         "flagged": [r for r in rows if r.flagged],
         "blind_form": BlindAnswersForm(),
+        "corrections_form": CorrectionsForm(),
         "is_draft": test.status == Test.Status.DRAFT,
         "deletion_problems": deletion_problems(test),
         **extra,
@@ -165,6 +168,18 @@ def audio_next(request, pk):
     return response
 
 
+def _pasted_or_uploaded(form, limit: int) -> tuple[bytes | str | None, str, list[str]]:
+    """Contenu envoyé (fichier ou texte collé), son origine, ou les erreurs du formulaire."""
+    if not form.is_valid():
+        return None, "", [e for errors in form.errors.values() for e in errors]
+    upload = form.cleaned_data["file"]
+    raw = upload.read(limit + 1) if upload else form.cleaned_data["text"]
+    source = upload.name if upload else "texte collé"
+    if len(raw) > limit:
+        return None, source, [f"Contenu de plus de {limit // (1024 * 1024)} Mo."]
+    return raw, source, []
+
+
 @staff_required
 def blind_json(request, pk):
     test = get_object_or_404(Test, pk=pk)
@@ -181,14 +196,8 @@ def blind_json(request, pk):
 def blind_answers(request, pk):
     test = get_object_or_404(Test, pk=pk)
     form = BlindAnswersForm(request.POST, request.FILES)
-    if not form.is_valid():
-        messages.error(request, "Choisissez le fichier JSON rendu par le relecteur.")
-        return redirect(_review_url(test))
-    upload = form.cleaned_data["file"]
-    raw = upload.read(MAX_BLIND_FILE_BYTES + 1)
-    if len(raw) > MAX_BLIND_FILE_BYTES:
-        errors = ["Fichier de plus de 1 Mo."]
-    else:
+    raw, _, errors = _pasted_or_uploaded(form, MAX_BLIND_FILE_BYTES)
+    if raw is not None:
         try:
             errors = review.import_blind_answers(test, raw)
         except review.ReviewError as exc:
@@ -253,3 +262,44 @@ def delete(request, pk):
         f"{counts['attempts']} passage(s) d'administrateur et {counts['advice']} conseil(s).",
     )
     return redirect("backoffice:tests")
+
+
+@staff_required
+@require_POST
+def corrections(request, pk):
+    """« Importer des corrections » (6.4 bis) : tout ou rien ; rapport affiché en cas de refus."""
+    test = get_object_or_404(Test.objects.select_related("format", "import_batch"), pk=pk)
+    form = CorrectionsForm(request.POST, request.FILES)
+    raw, source, errors = _pasted_or_uploaded(form, MAX_IMPORT_FILE_BYTES)
+    if raw is None:
+        for error in errors:
+            messages.error(request, error)
+        return redirect(_review_url(test))
+    try:
+        result = import_corrections(test, raw, source=source)
+    except review.ReviewError as exc:
+        messages.error(request, str(exc))
+        return redirect(_review_url(test))
+    if not result.report.ok:
+        context = _review_context(
+            test, corrections_report=result.report.as_dict(), corrections_form=form
+        )
+        return render(request, "backoffice/review.html", context, status=422)
+    unchanged = ""
+    if result.unchanged:
+        unchanged = f" Inchangé(s), statut conservé : {_slots(result.unchanged)}."
+    if result.replaced:
+        messages.success(
+            request,
+            f"Corrections enregistrées. Emplacement(s) remplacé(s), à relire et approuver : "
+            f"{_slots(result.replaced)}.{unchanged}",
+        )
+    else:
+        messages.info(
+            request, f"Aucune correction : tous les items envoyés sont identiques.{unchanged}"
+        )
+    return redirect(_review_url(test))
+
+
+def _slots(slots: list[int]) -> str:
+    return ", ".join(str(slot) for slot in slots)

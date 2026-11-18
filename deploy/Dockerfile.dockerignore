@@ -1,0 +1,18 @@
+# Fichiers exclus de l'image (le contexte de construction est la racine du projet).
+.env
+.env.*
+!.env.example
+.git
+.venv
+.tools
+.pytest_cache
+.ruff_cache
+**/__pycache__
+data
+staticfiles
+tests
+docs
+assets
+deploy
+*.zip
+*.cmd

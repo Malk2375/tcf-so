@@ -19,18 +19,36 @@ def _media_root(settings, tmp_path):
     settings.MEDIA_ROOT = tmp_path / "media"
 
 
+LOOPBACK = {"127.0.0.1", "::1", "localhost"}
+
+
+def _is_loopback(address) -> bool:
+    host = address[0] if isinstance(address, tuple) else address
+    return isinstance(host, str) and host in LOOPBACK
+
+
 @pytest.fixture(autouse=True)
 def _no_network(settings, monkeypatch):
-    """Aucun appel réseau pendant les tests : fournisseurs factices, connexions refusées."""
+    """Aucun appel réseau pendant les tests : fournisseurs factices, connexions refusées.
+    Seule la machine locale reste joignable (serveur de test et navigateur de Playwright)."""
     settings.TTS_PROVIDER = "fake"
     settings.GOOGLE_TTS_API_KEY = ""
     settings.LLM_PROVIDER = "fake"
+    real_connect = socket.socket.connect
+    real_create_connection = socket.create_connection
 
-    def refuse(*args, **kwargs):
-        raise RuntimeError("Appel réseau interdit pendant les tests.")
+    def connect(sock, address):
+        if not _is_loopback(address):
+            raise RuntimeError("Appel réseau interdit pendant les tests.")
+        return real_connect(sock, address)
 
-    monkeypatch.setattr(socket.socket, "connect", refuse)
-    monkeypatch.setattr(socket, "create_connection", refuse)
+    def create_connection(address, *args, **kwargs):
+        if not _is_loopback(address):
+            raise RuntimeError("Appel réseau interdit pendant les tests.")
+        return real_create_connection(address, *args, **kwargs)
+
+    monkeypatch.setattr(socket.socket, "connect", connect)
+    monkeypatch.setattr(socket, "create_connection", create_connection)
 
 
 @pytest.fixture

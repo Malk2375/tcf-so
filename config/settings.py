@@ -35,6 +35,7 @@ ENV_VARIABLES = [
     "EMAIL_HOST_PASSWORD",
     "DEFAULT_FROM_EMAIL",
     "SIGNUP_CODE",
+    "PHONE_TUNNEL",
 ]
 
 # Une variable présente mais vide (copie brute de .env.example) vaut « non renseignée ».
@@ -117,6 +118,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "config.context_processors.site",
             ],
         },
     },
@@ -138,6 +140,11 @@ if DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
         ),
         "transaction_mode": "IMMEDIATE",
     }
+
+# Tests : base dans un fichier (et non en mémoire), pour que le serveur des tests de bout en bout
+# et le navigateur se partagent la base avec les mêmes verrous qu'en vrai (mode WAL, attente).
+if "pytest" in sys.modules and DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
+    DATABASES["default"]["TEST"] = {"NAME": str(DATA_DIR / "test.sqlite3")}
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -177,6 +184,26 @@ TTS_PROVIDER = env.str("TTS_PROVIDER", default="fake")
 GOOGLE_TTS_API_KEY = env.str("GOOGLE_TTS_API_KEY", default="")
 LLM_PROVIDER = env.str("LLM_PROVIDER", default="fake")
 ANTHROPIC_API_KEY = env.str("ANTHROPIC_API_KEY", default="")
+
+# --- Démonstration (demo.cmd) -------------------------------------------------------------------
+# Le site de démonstration se reconnaît à sa base. Il ne touche jamais aux médias réels ni aux clés
+# d'API, et ses cookies portent d'autres noms : les deux sites partagent `localhost`.
+
+DEMO = Path(str(DATABASES["default"]["NAME"])) == DEMO_DATABASE_PATH
+if DEMO:
+    MEDIA_ROOT = DEMO_MEDIA_ROOT
+    TTS_PROVIDER = LLM_PROVIDER = "fake"
+    GOOGLE_TTS_API_KEY = ANTHROPIC_API_KEY = ""
+    SESSION_COOKIE_NAME = "tcf_demo_sessionid"
+    CSRF_COOKIE_NAME = "tcf_demo_csrftoken"
+
+# Démonstration sur téléphone (telephone.cmd) : le site est joint par un Cloudflare Quick Tunnel,
+# en HTTPS, à une adresse *.trycloudflare.com. Ce domaine n'est autorisé que dans ce mode.
+PHONE_TUNNEL = DEMO and env.bool("PHONE_TUNNEL", default=False)
+if PHONE_TUNNEL:
+    ALLOWED_HOSTS = [*ALLOWED_HOSTS, ".trycloudflare.com"]
+    CSRF_TRUSTED_ORIGINS = [*CSRF_TRUSTED_ORIGINS, "https://*.trycloudflare.com"]
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # --- E-mails (désactivés au MVP) ----------------------------------------------------------------
 
@@ -218,3 +245,6 @@ if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_HSTS_SECONDS = 60 * 60 * 24 * 365
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    # Caddy redirige déjà HTTP vers HTTPS (W008). Sans nom de domaine, ni sous-domaines ni liste
+    # de préchargement HSTS n'ont de sens (W005, W021).
+    SILENCED_SYSTEM_CHECKS = ["security.W005", "security.W008", "security.W021"]

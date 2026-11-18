@@ -20,8 +20,9 @@ document.addEventListener("alpine:init", () => {
   }
 
   function csrfToken() {
-    const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
-    return match ? decodeURIComponent(match[1]) : "";
+    // Jeton de la page (le nom du cookie change sur le site de démonstration).
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.content : "";
   }
 
   Alpine.data("player", (config) => ({

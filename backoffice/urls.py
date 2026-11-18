@@ -14,6 +14,7 @@ urlpatterns = [
     path("tests/<int:pk>/", review_views.test_review, name="test_review"),
     path("tests/<int:pk>/blind.json", review_views.blind_json, name="blind_json"),
     path("tests/<int:pk>/blind-answers", review_views.blind_answers, name="blind_answers"),
+    path("tests/<int:pk>/corrections", review_views.corrections, name="corrections"),
     path("tests/<int:pk>/audio/next", review_views.audio_next, name="audio_next"),
     path("tests/<int:pk>/publish", review_views.publish, name="publish"),
     path("tests/<int:pk>/archive", review_views.archive, name="archive"),

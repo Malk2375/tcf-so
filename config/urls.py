@@ -5,13 +5,17 @@ from django.contrib import admin
 from django.urls import include, path
 
 from accounts.urls import account_urlpatterns, profile_urlpatterns
-from config import views
+from config import pwa, views
 
 # L'admin passe par la connexion d'allauth (limitation des tentatives).
 admin.site.login = secure_admin_login(admin.site.login)
 
 urlpatterns = [
     path("", views.home, name="home"),
+    path("manifest.webmanifest", pwa.manifest, name="manifest"),
+    path("sw.js", pwa.service_worker, name="service_worker"),
+    path("offline/", pwa.offline, name="offline"),
+    path("install/", pwa.install_help, name="install_help"),
     path("accounts/", include(account_urlpatterns)),
     path("accounts/", include("allauth.urls")),
     path("profile/", include(profile_urlpatterns)),

@@ -43,7 +43,12 @@ Ses textes sont faits de pseudo-mots : ils ont la bonne longueur, pas de sens.
    avertissements de l'import ; boutons « Approuver », « Rejeter », « Modifier » (mêmes contrôles qu'à l'import ;
    la question repasse alors en brouillon).
 5. Contrôle à l'aveugle : « Télécharger blind.json » (questions sans les réponses), le faire passer dans le Projet Claude
-   « relecture », puis envoyer le fichier rendu : chaque désaccord et chaque doute est signalé.
+   « relecture », puis envoyer sa réponse : le fichier, ou le texte collé dans la zone prévue (le JSON seul, le bloc
+   ```json``` copié tel quel, ou à défaut la ligne « grille » `1A · 2C · 3B …`). Chaque désaccord et chaque doute est signalé.
+   « Importer des corrections » : un fichier (ou un texte collé) au format d'import, avec le même `brief_id`,
+   ne contenant que les items à remplacer. Mêmes contrôles qu'à l'import ; tout ou rien. Chaque item remplace celui
+   du même emplacement, repasse en brouillon et perd son résultat de contrôle à l'aveugle ; un item identique
+   à l'actuel garde son statut.
 6. « Générer l'audio du test » : un seul clic ; la page enchaîne la synthèse des questions de CO avec une barre de progression.
    Fermer la page n'est pas grave : un nouveau clic reprend là où la synthèse s'était arrêtée, sans rien refaire.
    La génération est refusée si le test ne tient pas dans le quota du mois (95 % du quota gratuit).
@@ -70,51 +75,48 @@ il est abandonné d'office 30 minutes après la durée prévue du test.
 
 ## Démarrer et tester
 
-Pour une personne qui ne développe pas, sous Windows, dans PowerShell, depuis le dossier du projet.
-Les essais se font **toujours dans la base de démonstration** (`data/demo.sqlite3`), jamais dans la base réelle
-(`data/db.sqlite3`, qui contient les vrais tests), et sans les clés d'API de `.env`.
+Pour une personne qui ne développe pas, sous Windows. Aucune variable à taper : deux fichiers à double-cliquer,
+à la racine du projet. Chaque fenêtre affiche au démarrage la base utilisée, les fournisseurs (voix, conseils)
+et le compte à utiliser. Pour arrêter un site, fermer sa fenêtre.
 
-**Dans chaque fenêtre PowerShell utilisée pour les essais**, taper d'abord :
+| Fichier | Site | Adresse | Base | Voix et conseils |
+| --- | --- | --- | --- | --- |
+| `demo.cmd` | Démonstration, pour les essais | <http://localhost:8001> | `data/demo.sqlite3` | factices, toujours |
+| `demarrer.cmd` | Site réel | <http://localhost:8000> | `data/db.sqlite3` | ceux de `.env` (payants si configurés) |
+| `telephone.cmd` | Démonstration, depuis un téléphone | `https://….trycloudflare.com` (affichée) | `data/demo.sqlite3` | factices, toujours |
+
+**Une seule fois :** dans PowerShell, depuis le dossier du projet, `uv sync` (installe les dépendances).
+
+**`demo.cmd`** crée la base de démonstration la première fois (`reset_demo` : formats d'examen et compte
+**admin@demo.test**, mot de passe **demo-tcf-2026**), met sa structure à jour, lance le site sur le port 8001 et ouvre
+le navigateur. Chaque page affiche un bandeau orange « DÉMONSTRATION ». Ses cookies portent d'autres noms que ceux
+du site réel : on peut être connecté aux deux en même temps. Même si `.env` contient des clés, la démonstration
+n'appelle jamais Google ni Claude, et ses fichiers audio vont dans `data/demo-media`.
+
+**`telephone.cmd`** lance le site de démonstration et un tunnel HTTPS Cloudflare (« Quick Tunnel », sans compte),
+puis affiche en gros une adresse `https://….trycloudflare.com` (copiée aussi dans le presse-papiers) : ouvrez-la sur
+le téléphone, en Wi-Fi ou en 4G, pour passer un test et installer l'application. L'adresse change à chaque lancement
+et n'est autorisée que dans ce mode. Fermez d'abord `demo.cmd` (même port 8001). La première fois, `cloudflared.exe`
+est téléchargé depuis les publications officielles de Cloudflare sur GitHub dans `.tools/`, avec vérification de son
+empreinte. Tant que la fenêtre est ouverte, toute personne qui connaît l'adresse peut voir la démonstration.
+
+**`demarrer.cmd`** met à jour la structure de la base réelle (`migrate`), lance le site sur le port 8000 et ouvre
+le navigateur. À utiliser après chaque étape validée, pour que les nouvelles pages fonctionnent.
+
+**Tests factices et remise à zéro de la démonstration** (dans PowerShell, depuis le dossier du projet,
+en recopiant les quatre premières lignes : elles ne valent que pour cette fenêtre) :
 
 ```powershell
 $env:DATABASE_URL = "sqlite:///data/demo.sqlite3"
 $env:MEDIA_ROOT = "data/demo-media"
 $env:TTS_PROVIDER = "fake"
 $env:LLM_PROVIDER = "fake"
-```
-
-Ces quatre lignes ne valent que pour la fenêtre où elles sont tapées. Sans elles, ce sont la base réelle et les valeurs
-de `.env` qui s'appliquent : avec `google`, chaque audio généré consomme le quota Google réel ; avec `anthropic`,
-chaque jeu de conseils coûte environ 0,05 $.
-
-**Préparer la base de démonstration** (la première fois, puis chaque fois qu'on veut repartir de zéro ;
-arrêter le site avant) :
-
-```powershell
-uv sync
-uv run python manage.py reset_demo
-```
-
-`reset_demo` efface la base de démonstration et ses fichiers audio, la recrée avec les trois formats d'examen
-et un compte administrateur de démonstration : **admin@demo.test**, mot de passe **demo-tcf-2026**.
-Elle refuse de s'exécuter sans les quatre lignes ci-dessus.
-
-**Lancer le site :**
-
-```powershell
-uv run python manage.py runserver
-```
-
-Ouvrir <http://localhost:8000> et se connecter avec le compte de démonstration. Arrêter le site avec Ctrl+C.
-
-**Créer des tests factices** (dans une seconde fenêtre PowerShell, après y avoir tapé les quatre lignes) :
-
-```powershell
 uv run python manage.py make_dev_test --mode rapide           # test publié, prêt à passer
 uv run python manage.py make_dev_test --mode rapide --draft   # test en brouillon, à relire et publier
+uv run python manage.py reset_demo                            # repartir de zéro (fermer demo.cmd avant)
 ```
 
-`make_dev_test` ne s'exécute que dans la base de démonstration.
+`make_dev_test` et `reset_demo` refusent de s'exécuter ailleurs que dans la base de démonstration.
 
 **Audio factice et Google.** Avec `TTS_PROVIDER=google`, un audio produit par le fournisseur factice n'est jamais à jour :
 l'écran de relecture affiche le badge « Audio factice », la publication est refusée, et « Générer l'audio du test »
@@ -128,10 +130,19 @@ le message nomme alors le ou les comptes en cause.
 Ils sont rédigés à l'ouverture de la page de résultats. Avec `LLM_PROVIDER=fake`, ils viennent des modèles de secours
 (`advice/fallbacks/`).
 
-**Base réelle, après chaque étape validée :** `uv run python manage.py migrate` (sans les quatre lignes) met sa
-structure à jour. Sans cela, les nouvelles pages échouent (par exemple, « Supprimer » après l'étape 5).
+**Application installable.** Le site est une application web installable (manifeste, icônes, service worker,
+page hors ligne). La page « Installer l'application » (lien en bas de chaque page, `/install/`) explique l'installation
+sur Android, iPhone et ordinateur. Un téléphone n'installe l'application que depuis une adresse en HTTPS
+(ou `localhost` sur l'ordinateur lui-même).
 
-**Vérifier tous les tests automatiques :** `uv run pytest` (aucun appel réseau, `.env` est ignoré).
+**Mise en ligne.** Les fichiers de production sont dans `deploy/` ; le pas-à-pas est `docs/DEPLOIEMENT.md`.
+Les tests publiés sur l'ordinateur passent sur le serveur sans régénérer l'audio : `uv run python manage.py export_tests`
+(dans PowerShell, base réelle) crée `tests_<date>.zip`, que `import_tests` recrée sur le serveur (section 8 du pas-à-pas).
+
+**Vérifier tous les tests automatiques :** `uv run pytest` (aucun appel réseau, `.env` est ignoré ; environ 3 minutes).
+Les tests de bout en bout pilotent Chromium : la première fois, `uv run playwright install chromium`
+(sans lui, ces tests sont ignorés avec un message). Les icônes se régénèrent avec
+`uv run python scripts/make_icons.py` à partir de `assets/icons/icon.svg`.
 
 ## Commandes
 
