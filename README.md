@@ -44,15 +44,15 @@ Ses textes sont faits de pseudo-mots : ils ont la bonne longueur, pas de sens.
    la question repasse alors en brouillon).
 5. Contrôle à l'aveugle : « Télécharger blind.json » (questions sans les réponses), le faire passer dans le Projet Claude
    « relecture », puis envoyer sa réponse : le fichier, ou le texte collé dans la zone prévue (le JSON seul, le bloc
-   ```json``` copié tel quel, ou à défaut la ligne « grille » `1A · 2C · 3B …`). Chaque désaccord et chaque doute est signalé.
+   ```json``` copié tel quel, ou à défaut la ligne « grille » `1A · 2C · 3B …`). Chaque désaccord et chaque doute est signalé ; une question sans réponse du relecteur (par exemple remplacée depuis par une correction) est « Non contrôlée » et ne compte pas dans les désaccords.
    « Importer des corrections » : un fichier (ou un texte collé) au format d'import, avec le même `brief_id`,
    ne contenant que les items à remplacer. Mêmes contrôles qu'à l'import ; tout ou rien. Chaque item remplace celui
    du même emplacement, repasse en brouillon et perd son résultat de contrôle à l'aveugle ; un item identique
    à l'actuel garde son statut.
-6. « Générer l'audio du test » : un seul clic ; la page enchaîne la synthèse des questions de CO avec une barre de progression.
+6. « Générer l'audio du test » (en haut de la page, dans le bilan) : un seul clic ; la page enchaîne la synthèse des questions de CO avec une barre de progression.
    Fermer la page n'est pas grave : un nouveau clic reprend là où la synthèse s'était arrêtée, sans rien refaire.
    La génération est refusée si le test ne tient pas dans le quota du mois (95 % du quota gratuit).
-   Un script modifié rend son audio « périmé » : « Régénérer l'audio » refait cet item seul.
+   Un script modifié rend son audio « périmé » : « Régénérer cet audio », présent sous une question dès que son audio existe, refait cet item seul.
 7. « Publier » : possible seulement quand toutes les questions sont approuvées et tous les audio à jour.
    Le test est alors figé ; seule action possible ensuite : « Archiver ».
 

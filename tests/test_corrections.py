@@ -336,3 +336,79 @@ def test_corrections_refuse_a_brief_whose_slots_differ(draft, staff_user):
 
 def document_for(test, brief):
     return {"schema_version": 1, "format": test.format.code, "brief_id": brief.brief_id}
+
+
+# --- Question sans réponse du relecteur : « Non contrôlée » (6.4) ---------------------------------
+
+
+def test_corrected_item_is_unchecked_not_a_disagreement(staff_client, draft):
+    items = items_of(draft)
+    draft.blind_check = {
+        "answers": {str(i.test_item.slot): i.correct_index for i in items},
+        "doubts": {},
+        "received_at": "2026-11-18T10:00:00+00:00",
+    }
+    draft.save()
+    target = by_section(draft, "MSL")[0]
+    new = as_import(draft, target, explanation=FIXED)
+    assert import_corrections(draft, json.dumps(document(draft, [new]))).report.ok
+
+    rows = {r.item.pk: r for r in review_rows(draft)}
+    assert rows[target.pk].unchecked and not rows[target.pk].disagreement
+    assert not rows[target.pk].flagged
+    assert sum(r.disagreement for r in rows.values()) == 0
+
+    html = staff_client.get(url("test_review", draft.pk)).content.decode()
+    card = html.split(f'id="item-{target.pk}"')[1].split("</article>")[0]
+    assert "Non contrôlée" in card and "Désaccord" not in card and "pas de réponse" not in card
+    assert "1 question non contrôlée par le relecteur (hors désaccords)" in html
+    bilan = html.split('id="bilan-titre"')[1].split("</section>")[0]
+    assert 'Désaccords</dt><dd class="text-xl font-bold tabular-nums ">0<' in bilan
+
+
+def test_no_unchecked_badge_before_the_reviewer_answers(staff_client, draft):
+    html = staff_client.get(url("test_review", draft.pk)).content.decode()
+    assert "Non contrôlée" not in html
+    assert all(not r.unchecked for r in review_rows(draft))
+
+
+def review_rows(test):
+    from bank.review import rows
+
+    test.refresh_from_db()
+    return rows(test)
+
+
+# --- Audio : un bouton pour le test, en haut ; « Régénérer cet audio » si l'audio existe (7.4) --
+
+
+def test_generate_button_sits_in_the_bilan_and_no_per_item_button_without_audio(
+    staff_client, draft
+):
+    html = staff_client.get(url("test_review", draft.pk)).content.decode()
+    bilan = html.split('id="bilan-titre"')[1].split("</section>")[0]
+    assert "Générer l'audio du test" in bilan
+    first_card = html.index('<article id="item-')
+    assert html.index("Générer l'audio du test") < first_card
+    assert "Régénérer cet audio" not in html
+    assert "Générer l'audio</button>" not in html  # plus de bouton question par question
+
+
+def test_regenerate_button_appears_once_audio_exists(staff_client, draft):
+    while not synthesis.audio_progress(draft).finished:
+        generate_next(draft, provider=FakeTTSProvider())
+    html = staff_client.get(url("test_review", draft.pk)).content.decode()
+    co = by_section(draft, "CO")
+    assert html.count("Régénérer cet audio") == len(co)
+    for item in co:
+        card = html.split(f'id="item-{item.pk}"')[1].split("</article>")[0]
+        assert "Régénérer cet audio" in card
+
+
+def test_per_item_synthesis_refused_without_existing_audio(staff_client, draft):
+    from bank.models import AudioAsset
+
+    co = by_section(draft, "CO")[0]
+    response = staff_client.post(url("item_audio", draft.pk, co.pk), follow=True)
+    assert "pas encore d&#x27;audio" in response.content.decode()
+    assert not AudioAsset.objects.filter(item=co).exists()

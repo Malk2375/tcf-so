@@ -14,7 +14,7 @@ from bank import review
 from bank.constants import MAX_IMPORT_FILE_BYTES
 from bank.corrections import import_corrections
 from bank.deletion import DeletionError, delete_test, deletion_problems
-from bank.models import Item, Test
+from bank.models import AudioAsset, Item, Test
 from bank.synthesis import audio_progress, generate_next, synthesize_one
 from bank.tts import TTSError
 
@@ -67,6 +67,7 @@ def _review_context(test: Test, **extra) -> dict:
         "approved": approved,
         "disagreements": sum(r.disagreement for r in rows),
         "doubts": sum(bool(r.blind_doubt) for r in rows),
+        "unchecked": sum(r.unchecked for r in rows),
         "flagged": [r for r in rows if r.flagged],
         "blind_form": BlindAnswersForm(),
         "corrections_form": CorrectionsForm(),
@@ -130,10 +131,15 @@ def item_edit(request, pk, item_pk):
 @staff_required
 @require_POST
 def item_audio(request, pk, item_pk):
-    """Bouton « Régénérer » : refait l'audio d'un seul item."""
+    """« Régénérer cet audio » : refait l'audio existant d'un seul item (7.4). La première
+    synthèse passe toujours par « Générer l'audio du test »."""
     test, item = _test_item(pk, item_pk)
     try:
         review.require_draft(test)
+        if not AudioAsset.objects.filter(item=item).exists():
+            raise review.ReviewError(
+                "Cette question n'a pas encore d'audio : utilisez « Générer l'audio du test »."
+            )
         synthesize_one(item)
     except (TTSError, review.ReviewError) as exc:
         messages.error(request, str(exc))

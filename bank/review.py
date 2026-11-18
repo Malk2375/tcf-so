@@ -41,12 +41,19 @@ class Row:
     warnings: list[str] = field(default_factory=list)
     blind_answer: int | None = None
     blind_doubt: str = ""
-    blind_checked: bool = False
+    blind_received: bool = False  # le relecteur a rendu ses réponses pour ce test
+    blind_checked: bool = False  # … et il a répondu à cette question
     audio_state: str = ""  # CO : valeur de AudioState (ok, missing, stale, engine)
 
     @property
     def disagreement(self) -> bool:
         return self.blind_checked and self.blind_answer != self.item.correct_index
+
+    @property
+    def unchecked(self) -> bool:
+        """« Non contrôlée » : réponses reçues, mais aucune pour cette question (par exemple
+        remplacée depuis par une correction). Ce n'est pas un désaccord."""
+        return self.blind_received and not self.blind_checked
 
     @property
     def flagged(self) -> bool:
@@ -67,7 +74,8 @@ def rows(test: Test) -> list[Row]:
         item, slot = test_item.item, str(test_item.slot)
         row = Row(test_item, item, warnings=by_slot.get(test_item.slot, []))
         if blind:
-            row.blind_checked = True
+            row.blind_received = True
+            row.blind_checked = slot in answers
             row.blind_answer = answers.get(slot)
             row.blind_doubt = doubts.get(slot, "")
         if item.section == "CO":

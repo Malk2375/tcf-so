@@ -2,7 +2,8 @@
 # Sauvegarde quotidienne (cron, en root) : copie cohérente de SQLite (sqlite3 .backup), puis restic
 # vers un stockage hors site ; rétention 7 jours et 4 semaines.
 # Réglages dans /etc/tcf-so/backup.env (voir docs/DEPLOIEMENT.md) :
-#   RESTIC_REPOSITORY, RESTIC_PASSWORD, et les identifiants du stockage (AWS_ACCESS_KEY_ID, …).
+#   RESTIC_REPOSITORY, RESTIC_PASSWORD, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION
+#   (OVHcloud Object Storage, S3, dans une autre région que le VPS).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 

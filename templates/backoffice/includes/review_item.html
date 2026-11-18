@@ -9,6 +9,7 @@
     <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-sm font-medium
       {% if item.status == 'approved' or item.status == 'published' %}bg-green-100 text-green-900{% elif item.status == 'rejected' %}bg-red-100 text-red-900{% else %}bg-slate-200 text-slate-800{% endif %}">{{ item.get_status_display }}</span>
     {% if row.disagreement %}<span class="rounded-full bg-red-100 px-2.5 py-0.5 text-sm font-semibold text-red-900">Désaccord</span>{% endif %}
+    {% if row.unchecked %}<span class="rounded-full bg-slate-200 px-2.5 py-0.5 text-sm font-semibold text-slate-800">Non contrôlée</span>{% endif %}
     {% if row.blind_doubt %}<span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-sm font-semibold text-amber-950">Doute</span>{% endif %}
     {% if row.audio_state == "stale" %}<span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-sm font-semibold text-amber-950">Audio périmé</span>{% endif %}
     {% if row.audio_state == "engine" %}<span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-sm font-semibold text-amber-950">Audio à refaire avec le moteur actif</span>{% endif %}
@@ -51,12 +52,15 @@
 
   {% if row.blind_checked %}
     <p class="mt-2 text-sm {% if row.disagreement %}font-semibold text-red-800{% else %}text-slate-600{% endif %}">
-      Relecteur à l'aveugle :
-      {% if row.blind_answer is None %}pas de réponse{% else %}{{ row.blind_answer|letter }}{% endif %}
-      {% if not row.disagreement %}(d'accord){% endif %}
+      Relecteur à l'aveugle : {{ row.blind_answer|letter }}{% if not row.disagreement %} (d'accord){% endif %}
     </p>
-    {% if row.blind_doubt %}<p class="mt-1 text-sm text-amber-950">Doute : {{ row.blind_doubt }}</p>{% endif %}
+  {% elif row.unchecked %}
+    <p class="mt-2 text-sm text-slate-700">
+      Relecteur à l'aveugle : non contrôlée (aucune réponse du relecteur pour cette question ;
+      renvoyez-lui blind.json pour la contrôler).
+    </p>
   {% endif %}
+  {% if row.blind_doubt %}<p class="mt-1 text-sm text-amber-950">Doute : {{ row.blind_doubt }}</p>{% endif %}
 
   {% if row.warnings %}
     <ul class="mt-2 space-y-1 text-sm text-amber-950">
@@ -81,10 +85,10 @@
         </form>
       {% endif %}
       <a href="{% url 'backoffice:item_edit' test.pk item.pk %}" class="btn btn-secondary">Modifier</a>
-      {% if item.section == "CO" %}
+      {% if item.section == "CO" and row.audio_state != "missing" %}
         <form method="post" action="{% url 'backoffice:item_audio' test.pk item.pk %}">
           {% csrf_token %}
-          <button type="submit" class="btn btn-secondary">{% if row.audio_state == "missing" %}Générer l'audio{% else %}Régénérer l'audio{% endif %}</button>
+          <button type="submit" class="btn btn-secondary">Régénérer cet audio</button>
         </form>
       {% endif %}
     </div>

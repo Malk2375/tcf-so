@@ -15,6 +15,13 @@
     <div><dt class="text-sm text-slate-600">Doutes</dt><dd class="text-xl font-bold tabular-nums {% if doubts %}text-amber-900{% endif %}">{{ doubts }}</dd></div>
     <div><dt class="text-sm text-slate-600">Audio de CO</dt><dd class="text-xl font-bold tabular-nums">{{ progress.done }} / {{ progress.total }}</dd></div>
   </dl>
+  {% if unchecked %}
+    <p class="mt-2 text-sm text-slate-700">{{ unchecked }} question{{ unchecked|fr_plural }} non contrôlée{{ unchecked|fr_plural }} par le relecteur (hors désaccords).</p>
+  {% endif %}
+  <div class="mt-5 rounded-lg border-2 border-blue-200 bg-blue-50 p-4" aria-labelledby="audio-titre">
+    <h3 id="audio-titre" class="font-semibold text-blue-950">Audio du test</h3>
+    <div class="mt-2">{% include "backoffice/includes/audio_panel.html" %}</div>
+  </div>
   {% if flagged %}
     <h3 class="mt-4 font-semibold">À regarder d'abord</h3>
     <ul class="mt-1 flex flex-wrap gap-2">
@@ -84,10 +91,6 @@
 </section>
 {% endif %}
 
-<section class="card mt-6" aria-labelledby="audio-titre">
-  <h2 id="audio-titre" class="text-lg font-semibold">Audio</h2>
-  <div class="mt-3">{% include "backoffice/includes/audio_panel.html" %}</div>
-</section>
 
 <section class="card mt-6" aria-labelledby="publication-titre">
   <h2 id="publication-titre" class="text-lg font-semibold">Publication</h2>
