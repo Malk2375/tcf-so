@@ -68,6 +68,7 @@ def _review_context(test: Test, **extra) -> dict:
         "disagreements": sum(r.disagreement for r in rows),
         "doubts": sum(bool(r.blind_doubt) for r in rows),
         "unchecked": sum(r.unchecked for r in rows),
+        "approvable": len(review.approvable(rows)),
         "flagged": [r for r in rows if r.flagged],
         "blind_form": BlindAnswersForm(),
         "corrections_form": CorrectionsForm(),
@@ -219,6 +220,23 @@ def blind_answers(request, pk):
             f"Réponses du relecteur enregistrées : {disagreements} désaccord(s), "
             f"{sum(bool(r.blind_doubt) for r in rows)} doute(s).",
         )
+    return redirect(_review_url(test))
+
+
+@staff_required
+@require_POST
+def approve_clean(request, pk):
+    """« Approuver les questions sans alerte » (11), après confirmation dans la page."""
+    test = get_object_or_404(Test, pk=pk)
+    try:
+        expected = int(request.POST.get("expected", ""))
+        count = review.approve_clean(test, expected)
+    except ValueError:
+        messages.error(request, "Demande incomplète : rechargez la page.")
+    except review.ReviewError as exc:
+        messages.error(request, str(exc))
+    else:
+        messages.success(request, f"{count} question(s) sans alerte approuvée(s).")
     return redirect(_review_url(test))
 
 

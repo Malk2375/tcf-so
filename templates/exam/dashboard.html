@@ -7,7 +7,7 @@
   <section class="mt-6 rounded-lg border border-amber-300 bg-amber-50 p-5" aria-labelledby="en-cours-titre">
     <h2 id="en-cours-titre" class="text-lg font-semibold text-amber-950">Passage en cours</h2>
     <p class="mt-1 text-amber-950">
-      {{ current.test.format.label }}, test n° {{ current.test.number }}, commencé le {{ current.started_at|date:"j F à H:i" }}.
+      {{ current.test.format.label }}, {{ current.test.public_label }}, commencé le {{ current.started_at|date:"j F à H:i" }}.
     </p>
     <div class="mt-4 flex flex-col gap-3 sm:flex-row">
       <a href="{% url 'attempt_player' current.pk %}" class="btn btn-primary">Reprendre</a>
@@ -62,9 +62,9 @@
       <div class="mt-auto pt-4">
         {% if mode.test %}
           {% if mode.last_done %}
-            <p class="mb-2 text-sm text-slate-600">Test n° {{ mode.test.number }}, déjà passé le {{ mode.last_done|date:"j F Y" }}.</p>
+            <p class="mb-2 text-sm text-slate-600">{{ mode.test.public_label }}, déjà passé le {{ mode.last_done|date:"j F Y" }}.</p>
           {% else %}
-            <p class="mb-2 text-sm text-slate-600">Test n° {{ mode.test.number }}</p>
+            <p class="mb-2 text-sm text-slate-600">{{ mode.test.public_label }}</p>
           {% endif %}
           <form method="post" action="{% url 'attempt_create' %}">
             {% csrf_token %}

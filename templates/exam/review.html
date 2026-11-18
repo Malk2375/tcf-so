@@ -4,7 +4,7 @@
 {% block content %}
 <h1 class="text-2xl font-bold sm:text-3xl">Correction</h1>
 <p class="mt-1 text-slate-700">
-  {{ attempt.test.format.label }}, test n° {{ attempt.test.number }} ·
+  {{ attempt.test.format.label }}, {{ attempt.test.public_label }} ·
   <a href="{% url 'attempt_results' attempt.pk %}" class="link">retour aux résultats</a>
 </p>
 

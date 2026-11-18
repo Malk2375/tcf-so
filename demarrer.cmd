@@ -14,6 +14,7 @@ set "LLM_PROVIDER="
 set "SITE_URL="
 echo Mise a jour de la base...
 uv run python manage.py migrate || goto :erreur
+uv run python manage.py refresh_warnings || goto :erreur
 uv run python manage.py site_info --port 8000
 start "" /min powershell -NoProfile -Command "Start-Sleep -Seconds 4; Start-Process 'http://localhost:8000'"
 uv run python manage.py runserver 8000

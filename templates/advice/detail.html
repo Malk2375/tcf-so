@@ -3,7 +3,7 @@
 {% block content %}
 <h1 class="text-2xl font-bold sm:text-3xl">Conseils du {{ advice.created_at|date:"j F Y" }}</h1>
 <p class="mt-1 text-slate-700">
-  Après le test n° {{ advice.attempt.test.number }} ({{ advice.attempt.test.format.get_mode_display|lower }}) ·
+  Après le {{ advice.attempt.test.public_label }} ({{ advice.attempt.test.format.get_mode_display|lower }}) ·
   <a href="{% url 'advice' %}" class="link">derniers conseils</a>
 </p>
 <div class="mt-6">{% include "advice/includes/content.html" %}</div>

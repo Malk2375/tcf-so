@@ -27,6 +27,8 @@ def make_dev_test(mode: str, rng: random.Random | None = None) -> Test:
         status=Test.Status.PUBLISHED,
         published_at=timezone.now(),
     )
+    test.assign_public_number()
+    test.save(update_fields=["public_number"])
     level_rank = {level: rank for rank, level in enumerate(LEVELS)}
     positions: dict[str, int] = {}
     slots = sorted(brief["slots"], key=lambda s: (s["section"], level_rank[s["level"]], s["slot"]))

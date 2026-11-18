@@ -94,6 +94,7 @@ def export_archive(path, tests=None) -> list[Test]:
             {
                 "format": test.format.code,
                 "number": test.number,
+                "public_number": test.public_number,
                 "published_at": _iso(test.published_at),
                 "blind_check": test.blind_check,
                 "brief_id": brief.brief_id if brief else None,
@@ -165,7 +166,12 @@ def import_archive(path) -> ImportOutcome:
     outcome = ImportOutcome()
     briefs = {b["brief_id"]: b for b in manifest.get("briefs", [])}
     with archive:
-        for entry in manifest.get("tests", []):
+        # Les numéros publics sont attribués sur le serveur, dans l'ordre de ceux de l'ordinateur.
+        entries = sorted(
+            manifest.get("tests", []),
+            key=lambda e: (e["format"], e.get("public_number") or 10**9, e["number"]),
+        )
+        for entry in entries:
             problems = _problems(entry, archive)
             if problems:
                 outcome.refused.append(f"{_label(entry)} : {' ; '.join(problems)}")
@@ -199,6 +205,8 @@ def _create(entry: dict, brief_data: dict | None, archive, written: list[str]) -
         published_at=parse_datetime(entry["published_at"]) if entry["published_at"] else None,
         blind_check=entry.get("blind_check") or {},
     )
+    test.assign_public_number()
+    test.save(update_fields=["public_number"])
     for data in entry["items"]:
         item = Item.objects.create(**{name: data[name] for name in ITEM_FIELDS})
         TestItem.objects.create(

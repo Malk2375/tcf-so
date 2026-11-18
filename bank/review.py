@@ -96,6 +96,38 @@ def set_status(item: Item, status: str) -> None:
     item.save(update_fields=["status", "reviewed_at"])
 
 
+def approvable(test_rows: list[Row]) -> list[Row]:
+    """Questions « sans alerte » (11) : en brouillon, contrôlées par le relecteur et d'accord,
+    sans doute, sans avertissement d'import. Les autres restent à traiter une par une."""
+    return [
+        r
+        for r in test_rows
+        if r.item.status == Item.Status.DRAFT
+        and r.blind_checked
+        and not r.disagreement
+        and not r.blind_doubt
+        and not r.warnings
+    ]
+
+
+def approve_clean(test: Test, expected: int) -> int:
+    """Approuve d'un coup les questions sans alerte. `expected` est le nombre annoncé sur le
+    bouton : s'il a changé entre-temps (autre onglet, correction), rien n'est approuvé."""
+    with transaction.atomic():
+        test = Test.objects.select_for_update().get(pk=test.pk)
+        require_draft(test)
+        items = [r.item.pk for r in approvable(rows(test))]
+        if len(items) != expected:
+            raise ReviewError(
+                f"La liste a changé ({len(items)} question(s) sans alerte au lieu de {expected}) : "
+                "rien n'a été approuvé. Vérifiez et recommencez."
+            )
+        Item.objects.filter(pk__in=items).update(
+            status=Item.Status.APPROVED, reviewed_at=timezone.now()
+        )
+    return len(items)
+
+
 # --- Modification d'un item ---------------------------------------------------------------------
 
 
@@ -277,7 +309,8 @@ def publish(test: Test) -> None:
         Item.objects.filter(test_item__test=test).update(status=Item.Status.PUBLISHED)
         test.status = Test.Status.PUBLISHED
         test.published_at = timezone.now()
-        test.save(update_fields=["status", "published_at"])
+        test.assign_public_number()
+        test.save(update_fields=["status", "published_at", "public_number"])
 
 
 def archive(test: Test) -> None:

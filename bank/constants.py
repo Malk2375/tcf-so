@@ -137,10 +137,13 @@ MAX_SPEAKERS = 3
 MAX_IMPORT_FILES = 3
 MAX_IMPORT_FILE_BYTES = 2 * 1024 * 1024
 NEAR_DUPLICATE_RATIO = 85
-# Avertissement : une option dépasse de plus de 60 % la longueur moyenne des trois autres.
-OPTION_LENGTH_EXCESS = 0.60
-# Avertissement : la bonne réponse est la plus longue dans plus de 40 % des items d'une épreuve.
+# Avertissements de longueur (6.3), en CO et CE seulement : la bonne réponse dépasse la moyenne des
+# trois autres options d'au moins 40 % et d'au moins 12 caractères…
+CORRECT_LENGTH_EXCESS = 0.40
+CORRECT_LENGTH_MIN_CHARS = 12
+# … ou elle est strictement la plus longue dans plus de 40 % des items d'une épreuve.
 CORRECT_LONGEST_SHARE = 0.40
+LENGTH_WARNING_SECTIONS = ("CO", "CE")
 
 # --- Brief (6.1) ---------------------------------------------------------------------------------
 

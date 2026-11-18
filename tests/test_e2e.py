@@ -437,3 +437,52 @@ def test_layout_checks_detect_problems(browser, live_server, transactional_db):
     with pytest.raises(AssertionError, match="Petit"):
         assert_fits(page, "défaut volontaire")
     context.close()
+
+
+# --- « Valider » en CO (allow_early_next, SPEC 4.2 et 8.5) ----------------------------------------
+
+
+def co_item_id(page):
+    return page.evaluate(
+        """() => { const d = Alpine.$data(document.querySelector('[x-data^="player"]'));
+                   return d.coItem ? d.coItem.test_item_id : null; }"""
+    )
+
+
+@pytest.mark.parametrize("allowed", [True, False], ids=["valider", "sans-valider"])
+def test_co_validate_button(browser, live_server, candidate, allowed):
+    test = make_dev_test("rapide", rng=random.Random(5))
+    FormatSection.objects.filter(format=test.format, section="CO").update(
+        answer_window_seconds=60, allow_early_next=allowed
+    )
+    attempt = services.create_attempt(candidate, test)
+    context = open_context(browser, live_server, candidate, VIEWPORTS["390x844"])
+    page = context.new_page()
+    page.goto(f"{live_server.url}/attempts/{attempt.pk}/")
+    wait_phase(page, ["instructions"])
+    page.get_by_role("button", name="Commencer l'épreuve").click()
+    page.wait_for_function(
+        """() => Alpine.$data(
+                   document.querySelector('[x-data^="player"]')).coPhase === 'answering'""",
+        timeout=15000,
+    )
+    validate = page.get_by_role("button", name="Valider")
+    if not allowed:
+        assert validate.count() == 0
+        context.close()
+        return
+    expect(validate).to_be_disabled()  # écoute terminée, mais aucune réponse choisie
+    first = co_item_id(page)
+    choose_first_option(page)
+    expect(validate).to_be_enabled()
+    assert_fits(page, "390×844, CO avec Valider")
+    validate.click()
+    page.wait_for_function(
+        """(first) => { const d = Alpine.$data(document.querySelector('[x-data^="player"]'));
+                        return d.coItem && d.coItem.test_item_id !== first; }""",
+        arg=first,
+        timeout=10000,  # bien avant la fin des 60 s de décompte
+    )
+    answer = attempt.answers.get(test_item_id=first)
+    assert answer.selected_index == 0  # le choix est enregistré avant le passage
+    context.close()

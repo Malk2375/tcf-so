@@ -4,7 +4,7 @@
 {% block content %}
 <h1 class="text-2xl font-bold sm:text-3xl">Résultats</h1>
 <p class="mt-1 text-slate-700">
-  {{ attempt.test.format.label }}, test n° {{ attempt.test.number }} · terminé le {{ attempt.finished_at|date:"j F Y à H:i" }}
+  {{ attempt.test.format.label }}, {{ attempt.test.public_label }} · terminé le {{ attempt.finished_at|date:"j F Y à H:i" }}
 </p>
 
 <section class="card mt-6" aria-labelledby="global-titre">

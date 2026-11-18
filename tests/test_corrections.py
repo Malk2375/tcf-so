@@ -4,6 +4,7 @@ import json
 import random
 
 import pytest
+from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
@@ -228,7 +229,7 @@ def test_all_or_nothing_when_one_of_two_items_is_invalid(draft):
     assert first.explanation != FIXED
 
 
-def test_corrected_co_script_makes_audio_stale(draft):
+def test_corrected_co_script_leaves_the_item_without_audio(draft):
     generate_next(draft, provider=FakeTTSProvider())
     while not synthesis.audio_progress(draft).finished:
         generate_next(draft, provider=FakeTTSProvider())
@@ -241,7 +242,7 @@ def test_corrected_co_script_makes_audio_stale(draft):
     )
     assert result.report.ok, result.report.as_dict()
     co.refresh_from_db()
-    assert audio_state(co) == AudioState.STALE
+    assert audio_state(co) == AudioState.MISSING  # à produire par « Générer l'audio du test »
 
 
 def test_corrections_refused_on_a_published_test(draft):
@@ -412,3 +413,42 @@ def test_per_item_synthesis_refused_without_existing_audio(staff_client, draft):
     response = staff_client.post(url("item_audio", draft.pk, co.pk), follow=True)
     assert "pas encore d&#x27;audio" in response.content.decode()
     assert not AudioAsset.objects.filter(item=co).exists()
+
+
+# --- Question corrigée : jamais synthétisée dans sa nouvelle version (7.4) ------------------------
+
+
+def test_corrected_co_text_drops_old_audio_and_hides_regenerate(staff_client, draft):
+    from bank.models import AudioAsset
+
+    while not synthesis.audio_progress(draft).finished:
+        generate_next(draft, provider=FakeTTSProvider())
+    co = next(i for i in by_section(draft, "CO") if i.subtype != "question_reponse")
+    old_file = co.audio.file.name
+    script = json.loads(json.dumps(co.audio_script))
+    script["lines"][0]["text"] += " Merci."
+    result = import_corrections(
+        draft, json.dumps(document(draft, [as_import(draft, co, audio_script=script)]))
+    )
+    assert result.report.ok, result.report.as_dict()
+    assert not AudioAsset.objects.filter(item=co).exists()
+    assert not default_storage.exists(old_file)
+    html = staff_client.get(url("test_review", draft.pk)).content.decode()
+    card = html.split(f'id="item-{co.pk}"')[1].split("</article>")[0]
+    assert "Régénérer cet audio" not in card and "Audio manquant" in card
+    assert "Reprendre la génération de l" in html  # le bouton du test la produira
+
+
+def test_corrected_explanation_keeps_valid_audio(draft):
+    from bank.models import AudioAsset
+
+    while not synthesis.audio_progress(draft).finished:
+        generate_next(draft, provider=FakeTTSProvider())
+    co = by_section(draft, "CO")[0]
+    asset = co.audio
+    result = import_corrections(
+        draft, json.dumps(document(draft, [as_import(draft, co, explanation=FIXED)]))
+    )
+    assert result.report.ok, result.report.as_dict()
+    assert AudioAsset.objects.get(item=co).pk == asset.pk
+    assert audio_state(co) == AudioState.OK

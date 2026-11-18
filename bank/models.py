@@ -30,6 +30,9 @@ class ExamFormat(models.Model):
     mode = models.CharField(max_length=10, choices=Mode.choices, unique=True)
     label = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
+    # Dernier numéro public attribué dans ce mode : un numéro public n'est jamais réutilisé,
+    # même après la suppression d'un test archivé.
+    last_public_number = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -58,6 +61,8 @@ class FormatSection(models.Model):
     level_distribution = models.JSONField(help_text='Par exemple {"A1": 5, "A2": 6, …}')
     allow_back = models.BooleanField()
     auto_advance = models.BooleanField()
+    # CO : bouton « Valider » pour passer avant la fin du temps de réponse (4.2, 8.5).
+    allow_early_next = models.BooleanField(default=False)
     answer_window_seconds = models.PositiveSmallIntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -222,6 +227,9 @@ class Test(models.Model):
         ImportBatch, on_delete=models.SET_NULL, null=True, blank=True, related_name="tests"
     )
     published_at = models.DateTimeField(null=True, blank=True)
+    # Numéro montré aux utilisateurs (« Test 1 »), attribué à la publication ; `number` est le
+    # numéro interne, lié au brief (section 5).
+    public_number = models.PositiveIntegerField(null=True, blank=True)
     # Contrôle à l'aveugle (6.4) : {"answers": {"<slot>": index}, "doubts": {"<slot>": "raison"},
     # "received_at": "…"} ; vide tant que les réponses du relecteur n'ont pas été envoyées.
     blind_check = models.JSONField(default=dict, blank=True)
@@ -231,10 +239,37 @@ class Test(models.Model):
         ordering = ["format", "number"]
         constraints = [
             models.UniqueConstraint(fields=["format", "number"], name="unique_test_number"),
+            models.UniqueConstraint(
+                fields=["format", "public_number"], name="unique_test_public_number"
+            ),
         ]
 
     def __str__(self):
         return f"{self.format.label} — test {self.number}"
+
+    @property
+    def public_label(self) -> str:
+        """Ce que voient les utilisateurs : « Test 3 »."""
+        return f"Test {self.public_number}" if self.public_number else "Test"
+
+    @property
+    def admin_label(self) -> str:
+        """Back-office : « test n° 2 · publié comme Test 1 »."""
+        label = f"test n° {self.number}"
+        return f"{label} · publié comme {self.public_label}" if self.public_number else label
+
+    def assign_public_number(self) -> None:
+        """Numéro public suivant du mode (à appeler dans une transaction, à la publication)."""
+        if self.public_number:
+            return
+        exam_format = ExamFormat.objects.select_for_update().get(pk=self.format_id)
+        highest = (
+            Test.objects.filter(format=exam_format).aggregate(m=models.Max("public_number"))["m"]
+            or 0
+        )
+        self.public_number = max(exam_format.last_public_number, highest) + 1
+        exam_format.last_public_number = self.public_number
+        exam_format.save(update_fields=["last_public_number"])
 
 
 class TestItem(models.Model):

@@ -48,6 +48,7 @@ def section_summary(attempt_section: AttemptSection) -> dict:
         "duration_seconds": round(services.section_duration_seconds(test, fs)),
         "allow_back": fs.allow_back,
         "auto_advance": fs.auto_advance,
+        "allow_early_next": fs.allow_early_next,
         "answer_window_seconds": fs.answer_window_seconds,
         "deadline_at": iso(attempt_section.deadline_at),
         "n_answered": answered,

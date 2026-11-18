@@ -466,22 +466,35 @@ def test_report_lists_every_error(valid):
 # --- Avertissements -----------------------------------------------------------------------------
 
 
-def test_warning_long_option(valid):
+def test_warning_long_correct_answer(valid):
     _, data = valid
     item = first(data, "CE", "B2")
-    item["options"][2] = item["options"][2] + " avec beaucoup de mots en plus pour la rallonger"
+    correct = item["correct_index"]
+    item["options"][correct] += " avec beaucoup de mots en plus pour la rallonger"
     result = run(data)
     assert result.test is not None
-    assert has(result, "L'option C est bien plus longue que les autres.", "warnings")
+    assert has(result, f"La bonne réponse ({'ABCD'[correct]},", "warnings")
 
 
-def test_warning_correct_answer_often_longest(valid):
+def test_no_warning_for_a_long_wrong_answer(valid):
+    _, data = valid
+    item = first(data, "CE", "B2")
+    wrong = (item["correct_index"] + 1) % 4
+    item["options"][wrong] += " avec beaucoup de mots en plus pour la rallonger"
+    assert not has(run(data), "bien plus longue", "warnings")
+
+
+def test_warning_correct_answer_often_strictly_longest_in_co_and_ce_only(valid):
     _, data = valid
     for item in data["items"]:
-        if item["section"] == "MSL":
-            item["options"][item["correct_index"]] = "option nettement la plus longue"
+        if item["section"] in ("MSL", "CE"):
+            item["options"][item["correct_index"]] += " et un peu plus"
     result = run(data)
-    assert has(result, "MSL : la bonne réponse est l'option la plus longue", "warnings")
+    assert has(result, "CE : la bonne réponse est strictement l'option la plus longue", "warnings")
+    assert not has(result, "MSL : la bonne réponse", "warnings")
+    assert not any(
+        "MSL" in w.message and "plus longue" in w.message for w in result.report.warnings
+    )
 
 
 def test_warning_tags_out_of_vocabulary(valid):

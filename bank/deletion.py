@@ -82,3 +82,10 @@ def _remove_files(paths: list[str]) -> None:
     for path in paths:
         if path and default_storage.exists(path):
             default_storage.delete(path)
+
+
+def remove_unused_files(paths: list[str]) -> None:
+    """Supprime les fichiers audio qu'aucun AudioAsset n'utilise plus (à appeler après la
+    transaction : un fichier nommé d'après son contenu peut servir à un autre item)."""
+    still_used = set(AudioAsset.objects.filter(file__in=paths).values_list("file", flat=True))
+    _remove_files(sorted(set(paths) - still_used))

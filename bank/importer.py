@@ -11,8 +11,11 @@ from django.db import IntegrityError, transaction
 from rapidfuzz import fuzz, process
 
 from bank.constants import (
+    CORRECT_LENGTH_EXCESS,
+    CORRECT_LENGTH_MIN_CHARS,
     CORRECT_LONGEST_SHARE,
     LANGUAGE_POINTS,
+    LENGTH_WARNING_SECTIONS,
     LETTERS,
     LEVELS,
     MAX_IMPORT_FILE_BYTES,
@@ -20,10 +23,8 @@ from bank.constants import (
     MAX_SPEAKERS,
     MSL_BLANK,
     NEAR_DUPLICATE_RATIO,
-    OPTION_LENGTH_EXCESS,
     QUESTION_REPONSE,
     QUESTION_REPONSE_TEXT,
-    SECTIONS,
     SKILLS,
     expected_options_mode,
     subtypes_for,
@@ -32,6 +33,7 @@ from bank.content import (
     comparison_text,
     content_hash,
     doc_length,
+    item_fields,
     length_check,
     normalize,
     support_text,
@@ -345,23 +347,43 @@ def _check_duplicates(items: list[dict], report: ImportReport, exclude=()) -> No
 # --- Étape 4 : avertissements -------------------------------------------------------------------
 
 
+def correct_length_warning(item: dict) -> str | None:
+    """La bonne réponse se repère à sa longueur : elle dépasse la moyenne des trois autres options
+    d'au moins 40 % et d'au moins 12 caractères (CO et CE seulement)."""
+    if item["section"] not in LENGTH_WARNING_SECTIONS:
+        return None
+    lengths = [len(option) for option in item["options"]]
+    index = item["correct_index"]
+    if not 0 <= index < len(lengths):
+        return None
+    others = lengths[:index] + lengths[index + 1 :]
+    mean = sum(others) / len(others)
+    correct = lengths[index]
+    if correct >= mean * (1 + CORRECT_LENGTH_EXCESS) and correct - mean >= CORRECT_LENGTH_MIN_CHARS:
+        return (
+            f"La bonne réponse ({LETTERS[index]}, {correct} caractères) est bien plus longue que "
+            f"les autres options ({round(mean)} en moyenne)."
+        )
+    return None
+
+
 def _warnings(items: list[dict], report: ImportReport) -> None:
     theme_ids = themes()
     correct_longest = Counter()
     per_section = Counter()
     for item in items:
         file, slot, section = item["_file"], item["slot"], item["section"]
-        lengths = [len(option) for option in item["options"]]
-        for index, length in enumerate(lengths):
-            others = lengths[:index] + lengths[index + 1 :]
-            mean = sum(others) / len(others)
-            if mean and length > mean * (1 + OPTION_LENGTH_EXCESS):
-                report.warning(
-                    f"L'option {LETTERS[index]} est bien plus longue que les autres.", file, slot
-                )
-        per_section[section] += 1
-        if lengths[item["correct_index"]] == max(lengths) and lengths.count(max(lengths)) == 1:
-            correct_longest[section] += 1
+        if section in LENGTH_WARNING_SECTIONS:
+            warning = correct_length_warning(item)
+            if warning:
+                report.warning(warning, file, slot)
+            per_section[section] += 1
+            lengths = [len(option) for option in item["options"]]
+            correct = lengths[item["correct_index"]]
+            if all(
+                correct > length for i, length in enumerate(lengths) if i != item["correct_index"]
+            ):
+                correct_longest[section] += 1
 
         tags = item["tags"]
         if tags["skill"] not in SKILLS[section]:
@@ -378,13 +400,13 @@ def _warnings(items: list[dict], report: ImportReport) -> None:
                 slot,
             )
 
-    for section in SECTIONS:
+    for section in LENGTH_WARNING_SECTIONS:
         if (
             per_section[section]
             and correct_longest[section] / per_section[section] > CORRECT_LONGEST_SHARE
         ):
             report.warning(
-                f"{section} : la bonne réponse est l'option la plus longue dans "
+                f"{section} : la bonne réponse est strictement l'option la plus longue dans "
                 f"{correct_longest[section]} items sur {per_section[section]}."
             )
 
@@ -487,3 +509,35 @@ def import_files(files: list[tuple[str, bytes]], user=None) -> ImportResult:
         report.error("Enregistrement impossible : un test ou un item identique vient d'être créé.")
         return _reject(parsed, filenames, report, user)
     return ImportResult(report, test, test.import_batch)
+
+
+# --- Avertissements recalculés (règles modifiées, corrections) ----------------------------------
+
+
+def refresh_warnings(test: Test) -> list[Issue]:
+    """Recalcule les avertissements d'un test en brouillon à partir de ses questions actuelles,
+    avec les règles en vigueur, et les range dans le rapport de son import."""
+    batch = test.import_batch
+    if batch is None:
+        return []
+    items = []
+    for test_item in test.test_items.select_related("item").order_by("slot"):
+        item = test_item.item
+        fields = item_fields(item)
+        tags = {k: v for k, v in fields["tags"].items() if k != "doc_length"}
+        items.append(
+            {
+                **fields,
+                "tags": tags,
+                "explanation": item.explanation,
+                "slot": test_item.slot,
+                "_file": None,
+            }
+        )
+    report = ImportReport()
+    if batch.brief is not None:
+        _check_slots(_Parsed(exam_format=test.format, brief=batch.brief, items=items), report)
+    _warnings(items, report)
+    batch.report = {**(batch.report or {}), "warnings": [w.as_dict() for w in report.warnings]}
+    batch.save(update_fields=["report"])
+    return report.warnings

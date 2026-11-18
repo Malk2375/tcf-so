@@ -44,6 +44,7 @@ document.addEventListener("alpine:init", () => {
     coPhase: "idle", // ready | listening | answering | sending
     coShownAt: 0,
     countdownEnd: 0,
+    answerInFlight: null,
     audioReported: false,
     // MSL et CE
     items: [],
@@ -185,7 +186,13 @@ document.addEventListener("alpine:init", () => {
       return Object.keys(this.queue).length;
     },
 
-    async sendAnswer(payload) {
+    sendAnswer(payload) {
+      // Gardé pour que « Valider » attende l'enregistrement du choix avant de passer.
+      this.answerInFlight = this.postAnswer(payload);
+      return this.answerInFlight;
+    },
+
+    async postAnswer(payload) {
       // Un envoi plus récent remplace toute réponse en attente pour la même question.
       delete this.queue[payload.test_item_id];
       this.saveQueue();
@@ -385,6 +392,31 @@ document.addEventListener("alpine:init", () => {
       if (!this.coItem) return 0;
       const total = this.coItem.answer_window_seconds * 1000;
       return Math.max(0, Math.min(100, ((this.countdownEnd - this.now) / total) * 100));
+    },
+
+    // « Valider » (allow_early_next) : actif une fois l'audio terminé et une réponse choisie.
+    get canValidate() {
+      return (
+        !!this.section &&
+        this.section.allow_early_next &&
+        this.phase === "co" &&
+        this.coPhase === "answering" &&
+        !!this.coItem &&
+        this.coItem.selected_index !== null &&
+        this.coItem.selected_index !== undefined &&
+        !this.queued
+      );
+    },
+
+    async validateCoItem() {
+      if (!this.canValidate) return;
+      this.coPhase = "sending";
+      await this.answerInFlight; // le choix est enregistré avant de clore la question
+      if (this.queued) {
+        this.coPhase = "answering"; // hors ligne : la question se clôt à la fin du décompte
+        return;
+      }
+      return this.nextCoItem();
     },
 
     async nextCoItem() {

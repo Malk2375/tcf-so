@@ -44,7 +44,7 @@
       {% for attempt in attempts %}
         <li class="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p class="font-medium">{{ attempt.test.format.label }}, test n° {{ attempt.test.number }}</p>
+            <p class="font-medium">{{ attempt.test.format.label }}, {{ attempt.test.public_label }}</p>
             <p class="text-sm text-slate-600">{{ attempt.started_at|date:"j F Y à H:i" }}</p>
           </div>
           {% if attempt.status == "completed" %}

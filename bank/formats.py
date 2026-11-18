@@ -62,6 +62,7 @@ def seed_formats() -> list[ExamFormat]:
                 level_distribution=dict(zip(LEVELS, distribution, strict=True)),
                 allow_back=not is_co,
                 auto_advance=is_co,
+                allow_early_next=False,  # option gardée, désactivée (4.2, 19)
                 answer_window_seconds=CO_ANSWER_WINDOW_SECONDS if is_co else None,
             )
             format_section.full_clean(exclude=["format"], validate_unique=False)
@@ -77,6 +78,7 @@ def seed_formats() -> list[ExamFormat]:
                         "level_distribution",
                         "allow_back",
                         "auto_advance",
+                        "allow_early_next",
                         "answer_window_seconds",
                     ]
                 },

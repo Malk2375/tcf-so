@@ -16,18 +16,20 @@ from bank.content import (
     doc_length,
     item_fields,
     normalize,
+    script_hash,
     support_text,
     word_count,
 )
+from bank.deletion import remove_unused_files
 from bank.importer import (
     ImportReport,
     _check_duplicates,
     _check_item,
     _check_slots,
     _Parsed,
-    _warnings,
+    refresh_warnings,
 )
-from bank.models import Brief, Item, Test
+from bank.models import AudioAsset, Brief, Item, Test
 from bank.review import require_draft
 from bank.schema import StrictJSONError, parse_pasted_json, schema_errors
 
@@ -129,27 +131,22 @@ def import_corrections(test: Test, raw: bytes | str, source: str = "texte collé
         result.unchanged.sort()
         return result
 
-    # Avertissements recalculés sur le test tel qu'il sera après remplacement.
     new_slots = {item["slot"] for item in changed}
-    merged = changed + [
-        {**_current(it, slot), "_file": None}
-        for slot, it in by_slot.items()
-        if slot not in new_slots
-    ]
-    merged_report = ImportReport(warnings=list(report.warnings))
-    _warnings(merged, merged_report)
+    orphans: list[str] = []
     with transaction.atomic():
         test = Test.objects.select_for_update().get(pk=test.pk)
         require_draft(test)
         for data_item in changed:
-            _replace(by_slot[data_item["slot"]], data_item)
-        _update_trace(test, new_slots, merged_report)
+            orphans += _replace(by_slot[data_item["slot"]], data_item)
         if test.import_batch.brief_id is None:  # lien réparé une fois les corrections acceptées
             test.import_batch.brief = brief
             test.import_batch.save(update_fields=["brief"])
+        _update_trace(test, new_slots)
+        # Avertissements recalculés sur tout le test, avec les règles en vigueur.
+        report.warnings = refresh_warnings(test)
+    remove_unused_files(orphans)
     result.replaced = sorted(new_slots)
     result.unchanged.sort()
-    report.warnings = merged_report.warnings
     return result
 
 
@@ -166,8 +163,15 @@ def _matching_brief(test: Test, brief_id: str) -> Brief | None:
     return brief if expected == actual else None
 
 
-def _replace(item: Item, data: dict) -> None:
-    """L'item repasse en brouillon ; l'audio devient périmé si ce qui est lu a changé."""
+def _replace(item: Item, data: dict) -> list[str]:
+    """L'item repasse en brouillon. Si ce qui est lu a changé, l'ancien audio est supprimé :
+    la nouvelle version n'a jamais été synthétisée, « Générer l'audio du test » la produira.
+    Renvoie les fichiers audio à supprimer s'ils ne servent plus."""
+    removed = []
+    asset = AudioAsset.objects.filter(item=item).first()
+    if asset is not None and asset.script_hash != script_hash(data):
+        removed.append(asset.file.name)
+        asset.delete()
     item.level = data["level"]
     item.subtype = data["subtype"]
     item.stimulus_text = data.get("stimulus_text") or ""
@@ -183,11 +187,12 @@ def _replace(item: Item, data: dict) -> None:
     item.status = Item.Status.DRAFT
     item.reviewed_at = None
     item.save()
+    return removed
 
 
-def _update_trace(test: Test, slots: set[int], report: ImportReport) -> None:
-    """Résultat du contrôle à l'aveugle effacé pour les items remplacés ; avertissements mis à
-    jour ; trace des corrections dans le rapport d'import."""
+def _update_trace(test: Test, slots: set[int]) -> None:
+    """Résultat du contrôle à l'aveugle effacé pour les items remplacés ; trace des corrections
+    dans le rapport d'import."""
     keys = {str(slot) for slot in slots}
     blind = dict(test.blind_check or {})
     for part in ("answers", "doubts"):
@@ -198,11 +203,8 @@ def _update_trace(test: Test, slots: set[int], report: ImportReport) -> None:
 
     batch = test.import_batch
     old = batch.report or {}
-    kept = [w for w in old.get("warnings", []) if w.get("slot") not in (None, *slots)]
-    new = [w.as_dict() for w in report.warnings if w.slot is None or w.slot in slots]
     batch.report = {
         **old,
-        "warnings": kept + new,
         "corrections": [
             *old.get("corrections", []),
             {"at": timezone.now().isoformat(), "slots": sorted(slots)},

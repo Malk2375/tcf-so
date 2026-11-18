@@ -53,8 +53,12 @@ Ses textes sont faits de pseudo-mots : ils ont la bonne longueur, pas de sens.
    Fermer la page n'est pas grave : un nouveau clic reprend là où la synthèse s'était arrêtée, sans rien refaire.
    La génération est refusée si le test ne tient pas dans le quota du mois (95 % du quota gratuit).
    Un script modifié rend son audio « périmé » : « Régénérer cet audio », présent sous une question dès que son audio existe, refait cet item seul.
+   « Approuver les N questions sans alerte » (dans le bilan, avec confirmation) approuve d'un coup les questions
+   en brouillon où le relecteur est d'accord, sans doute ni avertissement ; les autres se traitent une par une.
 7. « Publier » : possible seulement quand toutes les questions sont approuvées et tous les audio à jour.
    Le test est alors figé ; seule action possible ensuite : « Archiver ».
+   La publication donne au test son **numéro public** (« Test 1 », « Test 2 »… par mode, jamais réutilisé), seul montré
+   aux utilisateurs ; le back-office affiche les deux (« test n° 4 · publié comme Test 2 »).
 
 Autres pages : `/bo/` (stock, quota vocal du mois, dépense API, derniers imports), `/bo/voices/` (écoute des voix,
 distribution), `/bo/usage/` (journal des consommations). `uv run python manage.py tts_list_voices` affiche les voix
@@ -69,6 +73,8 @@ quand `docs/` est présent : après une modification de `docs/`, recopier les fi
 Sur le tableau de bord, choisir un mode puis « Commencer » : la plateforme propose le plus ancien test publié
 pas encore terminé. Le lecteur enchaîne les consignes et les trois épreuves (CO, MSL, CE), puis affiche
 les résultats, la correction (`/attempts/<id>/review/`) et l'historique (`/history/`).
+En compréhension orale, pas de passage anticipé : chaque question se termine à la fin de son décompte. L'option
+`allow_early_next` d'une épreuve (bouton « Valider », désactivé partout) reste disponible dans l'admin Django.
 
 Les échéances sont tenues par le serveur. Un passage interrompu se reprend depuis le tableau de bord ;
 il est abandonné d'office 30 minutes après la durée prévue du test.
@@ -100,7 +106,8 @@ et n'est autorisée que dans ce mode. Fermez d'abord `demo.cmd` (même port 8001
 est téléchargé depuis les publications officielles de Cloudflare sur GitHub dans `.tools/`, avec vérification de son
 empreinte. Tant que la fenêtre est ouverte, toute personne qui connaît l'adresse peut voir la démonstration.
 
-**`demarrer.cmd`** met à jour la structure de la base réelle (`migrate`), lance le site sur le port 8000 et ouvre
+**`demarrer.cmd`** met à jour la structure de la base réelle (`migrate`), recalcule les avertissements des tests
+en brouillon avec les règles en vigueur (`refresh_warnings`), lance le site sur le port 8000 et ouvre
 le navigateur. À utiliser après chaque étape validée, pour que les nouvelles pages fonctionnent.
 
 **Tests factices et remise à zéro de la démonstration** (dans PowerShell, depuis le dossier du projet,

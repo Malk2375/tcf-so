@@ -145,6 +145,16 @@
               </template>
             </ul>
           </template>
+          {# Passer avant la fin du décompte (allow_early_next, 4.2 et 8.5). #}
+          <template x-if="section && section.allow_early_next">
+            <div class="mt-6">
+              <button type="button" class="btn btn-primary w-full sm:w-auto" :disabled="!canValidate"
+                      @click="validateCoItem()">Valider</button>
+              <p class="mt-2 text-sm text-slate-600" x-show="!canValidate && coPhase !== 'sending'">
+                Actif une fois l'écoute terminée et une réponse choisie.
+              </p>
+            </div>
+          </template>
         </div>
       </template>
     </section>
