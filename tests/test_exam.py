@@ -185,12 +185,13 @@ def test_dashboard_card_when_every_test_is_passed(user_client, user, published, 
     second = make_dev_test("rapide", rng=random.Random(12))
     third = make_dev_test("rapide", rng=random.Random(13))
     html = user_client.get(reverse("dashboard")).content.decode()
-    assert "3 tests disponibles · 3 à passer" in html
+    assert "0 passé · 3 à passer" in html
     for test in (published, second, third):
         completed(user, test)
     html = user_client.get(reverse("dashboard")).content.decode()
     assert (
-        "Vous avez passé les 3 tests rapides disponibles. De nouveaux tests seront ajoutés." in html
+        "Vous avez passé les 3 entraînements rapides disponibles. "
+        "De nouveaux entraînements seront ajoutés." in html
     )
     assert "Commencer" not in html  # seul le mode rapide a des tests
 
@@ -198,7 +199,7 @@ def test_dashboard_card_when_every_test_is_passed(user_client, user, published, 
 def test_single_test_card_wording(user_client, user, published):
     completed(user, published)
     html = user_client.get(reverse("dashboard")).content.decode()
-    assert "Vous avez passé le seul test rapide disponible." in html
+    assert "Vous avez passé le seul entraînement rapide disponible." in html
 
 
 @pytest.mark.parametrize("staff", [False, True])
@@ -210,7 +211,7 @@ def test_post_attempts_refuses_a_completed_test(client, published, formats, staf
     client.force_login(user)
     response = client.post(reverse("attempt_create"), {"mode": "rapide"})
     assert response.status_code == 409
-    assert "Vous avez déjà passé ce test." in response.content.decode()
+    assert "Vous avez déjà passé cet entraînement." in response.content.decode()
     assert Attempt.objects.filter(user=user).count() == 1
     with pytest.raises(services.AttemptError) as error:
         services.create_attempt(user, published)

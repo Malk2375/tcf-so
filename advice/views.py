@@ -7,7 +7,7 @@ from advice import eligibility, services
 from advice.content import resources
 from advice.models import Advice
 from exam.models import Attempt
-from exam.services import proposed_test
+from exam.services import proposed_test, published_tests
 
 
 def _cards(advice: Advice) -> list[dict]:
@@ -65,6 +65,7 @@ def _advice_context(advice: Advice) -> dict:
         "cards": _cards(advice),
         "next_mode": mode,
         "next_test": proposed_test(advice.user, mode),
+        "all_done": mode.names.all_done(published_tests(mode).count()),
     }
 
 

@@ -10,6 +10,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods, require_POST
 
+from accounts import lockout
 from accounts.reset import make_reset_link
 from backoffice.decorators import staff_required
 from backoffice.forms import BriefForm, ImportForm
@@ -39,8 +40,15 @@ def users(request):
     generated = None
     if request.method == "POST":
         user = get_object_or_404(User, pk=request.POST.get("user_id"))
+        if request.POST.get("action") == "unlock":
+            # Débloquer la connexion (SPEC 13) : efface le compteur d'échecs de ce compte.
+            lockout.unlock(user.email)
+            messages.success(request, f"Connexion débloquée pour {user.email}.")
+            return redirect("backoffice:users")
         generated = {"user": user, "link": make_reset_link(user)}
-    accounts = User.objects.order_by("-date_joined")
+    accounts = list(User.objects.order_by("-date_joined"))
+    for account in accounts:
+        account.login_locked = bool(account.email) and lockout.is_locked(account.email)
     return render(request, "backoffice/users.html", {"accounts": accounts, "generated": generated})
 
 

@@ -55,14 +55,16 @@ def completed_test_ids(user, exam_format=None) -> set[int]:
 
 
 def published_tests(exam_format):
+    """Tests publiés du mode, dans l'ordre de leur numéro public (ordre de mise en ligne)."""
     return Test.objects.filter(format=exam_format, status=Test.Status.PUBLISHED).order_by(
-        "published_at", "number"
+        "public_number", "number"
     )
 
 
 def proposed_test(user, exam_format) -> Test | None:
-    """Le plus ancien test publié de ce mode que l'utilisateur n'a pas terminé (un passage
-    abandonné ne compte pas) ; None s'il les a tous passés ou s'il n'y en a aucun."""
+    """Le test publié de ce mode au plus petit numéro public que l'utilisateur n'a pas terminé
+    (un passage abandonné ne compte pas) ; None s'il les a tous passés ou s'il n'y en a aucun.
+    L'utilisateur ne choisit pas : les tests se passent dans l'ordre (8.1)."""
     done = completed_test_ids(user, exam_format)
     return published_tests(exam_format).exclude(pk__in=done).first()
 
@@ -106,15 +108,12 @@ def section_duration_seconds(test: Test, fs: FormatSection) -> float:
 # --- Création ------------------------------------------------------------------------------------
 
 
-ALREADY_DONE = "Vous avez déjà passé ce test."
-
-
 def create_attempt(user, test: Test, now: datetime | None = None) -> Attempt:
     """Nouveau passage. Un test ne se passe qu'une fois (8.1), pour tous les comptes."""
     if in_progress_attempt(user):
         raise AttemptError("attempt_in_progress", "Un passage est déjà en cours.")
     if test.pk in completed_test_ids(user):
-        raise AttemptError("test_already_completed", ALREADY_DONE)
+        raise AttemptError("test_already_completed", test.format.names.already_done)
     now = now or timezone.now()
     sections = list(test.format.sections.order_by("order"))
     total = sum(section_duration_seconds(test, fs) for fs in sections)

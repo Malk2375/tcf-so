@@ -1,9 +1,12 @@
 {% extends "base.html" %}
-{% block head_title %}Test déjà passé{% endblock %}
+{% block head_title %}Déjà passé{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold sm:text-3xl">Test déjà passé</h1>
+<h1 class="text-2xl font-bold sm:text-3xl">Déjà passé</h1>
 <section class="card mt-6">
-  <p class="text-slate-800">{{ message }} Un test ne se passe qu'une fois.</p>
-  <a href="{% url 'dashboard' %}" class="btn btn-primary mt-4 w-full sm:w-auto">Retour au tableau de bord</a>
+  <p class="text-slate-800">{{ message }} Chaque {{ names.noun }} ne se passe qu'une fois ; ses résultats et sa correction restent consultables.</p>
+  <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+    <a href="{% url 'mode_tests' mode %}" class="btn btn-primary">{{ names.see_all }}</a>
+    <a href="{% url 'dashboard' %}" class="btn btn-secondary">Retour au tableau de bord</a>
+  </div>
 </section>
 {% endblock %}

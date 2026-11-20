@@ -27,13 +27,23 @@
           Inscrit le {{ account.date_joined|date:"j F Y" }}
           {% if account.is_staff %} · administrateur{% endif %}
           {% if not account.is_active %} · désactivé{% endif %}
+          {% if account.login_locked %} · <span class="font-semibold text-red-800">connexion bloquée</span>{% endif %}
         </p>
       </div>
-      <form method="post">
-        {% csrf_token %}
-        <input type="hidden" name="user_id" value="{{ account.pk }}">
-        <button type="submit" class="btn btn-secondary w-full sm:w-auto">Générer un lien de réinitialisation</button>
-      </form>
+      <div class="flex flex-col gap-2 sm:flex-row">
+        <form method="post"
+              x-data @submit="if (!confirm('Débloquer la connexion de {{ account.email|escapejs }} ? Son compteur d’échecs de connexion sera effacé.')) $event.preventDefault()">
+          {% csrf_token %}
+          <input type="hidden" name="user_id" value="{{ account.pk }}">
+          <input type="hidden" name="action" value="unlock">
+          <button type="submit" class="btn btn-secondary w-full sm:w-auto">Débloquer la connexion</button>
+        </form>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="user_id" value="{{ account.pk }}">
+          <button type="submit" class="btn btn-secondary w-full sm:w-auto">Générer un lien de réinitialisation</button>
+        </form>
+      </div>
     </li>
   {% empty %}
     <li class="text-slate-600">Aucun compte.</li>

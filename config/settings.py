@@ -197,6 +197,18 @@ if DEMO:
     SESSION_COOKIE_NAME = "tcf_demo_sessionid"
     CSRF_COOKIE_NAME = "tcf_demo_csrftoken"
 
+# --- Cache partagé (limitation des connexions) --------------------------------------------------
+# Un cache en mémoire serait propre à chaque processus : chaque worker gunicorn compterait ses
+# propres échecs de connexion, et `unlock_login` ne pourrait rien effacer. Les fichiers de
+# data/cache/ sont lus par tous les processus (workers et commandes manage.py).
+CACHE_DIR = BASE_DIR / "data" / ("demo-cache" if DEMO else "cache")
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": str(CACHE_DIR),
+    }
+}
+
 # Démonstration sur téléphone (telephone.cmd) : le site est joint par un Cloudflare Quick Tunnel,
 # en HTTPS, à une adresse *.trycloudflare.com. Ce domaine n'est autorisé que dans ce mode.
 PHONE_TUNNEL = DEMO and env.bool("PHONE_TUNNEL", default=False)
@@ -235,6 +247,12 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_SIGNUP_FORM_CLASS = "accounts.forms.SignupCodeForm"
+ACCOUNT_ADAPTER = "accounts.adapter.AccountAdapter"
+# Limitation des tentatives : valeurs par défaut d'allauth (« login_failed » : 10/m/ip et 5 échecs
+# en 5 minutes par compte). En production, Caddy est le seul proxy et remplace l'en-tête
+# X-Forwarded-For par l'adresse du visiteur : on lui fait confiance pour avoir la vraie adresse IP.
+# En développement, aucun proxy : l'en-tête est ignoré.
+ALLAUTH_TRUSTED_PROXY_COUNT = 0 if DEBUG else 1
 
 # --- Sécurité en production ---------------------------------------------------------------------
 

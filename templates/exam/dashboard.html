@@ -7,7 +7,7 @@
   <section class="mt-6 rounded-lg border border-amber-300 bg-amber-50 p-5" aria-labelledby="en-cours-titre">
     <h2 id="en-cours-titre" class="text-lg font-semibold text-amber-950">Passage en cours</h2>
     <p class="mt-1 text-amber-950">
-      {{ current.test.format.label }}, {{ current.test.public_label }}, commencé le {{ current.started_at|date:"j F à H:i" }}.
+      {{ current.test.format.names.name }}, {{ current.test.public_label }}, commencé le {{ current.started_at|date:"j F à H:i" }}.
     </p>
     <div class="mt-4 flex flex-col gap-3 sm:flex-row">
       <a href="{% url 'attempt_player' current.pk %}" class="btn btn-primary">Reprendre</a>
@@ -25,7 +25,7 @@
     <h2 id="niveau-titre" class="text-lg font-semibold">Dernier niveau estimé</h2>
     <p class="mt-2 text-3xl font-bold text-blue-900">{{ last.level_range }}</p>
     <p class="mt-1 text-slate-700">
-      {{ last.global_score }} / 699 · mode {{ last.test.format.get_mode_display|lower }}, le {{ last.finished_at|date:"j F Y" }}
+      {{ last.global_score }} / 699 · {{ last.test.format.names.singular }}, le {{ last.finished_at|date:"j F Y" }}
     </p>
     <p class="mt-3 flex flex-wrap gap-x-4">
       <a href="{% url 'attempt_results' last.pk %}" class="link inline-flex min-h-11 items-center">Voir les résultats</a>
@@ -52,27 +52,16 @@
   <ul class="mt-4 grid gap-4 sm:grid-cols-3">
     {% for mode in modes %}
     <li class="card flex flex-col">
-      <h3 class="text-lg font-semibold text-blue-900">{{ mode.label }}</h3>
+      {# Nom et durée côte à côte, même taille de police (SPEC 10). #}
+      <h3 class="text-lg font-semibold text-blue-900">{{ mode.names.name }} · {{ mode.minutes }} min</h3>
       <p class="mt-2 text-slate-700">{{ mode.questions }} questions</p>
-      <p class="text-slate-700">{{ mode.minutes }} minutes</p>
-      <p class="mt-1 text-sm text-slate-600">
-        {# En français, 0 et 1 sont au singulier. #}
-        {{ mode.available }} test{% if mode.available > 1 %}s{% endif %} disponible{% if mode.available > 1 %}s{% endif %}{% if mode.available %} · {{ mode.remaining }} à passer{% endif %}
-      </p>
+      {% if mode.available or mode.passed %}
+        <p class="mt-1 text-sm text-slate-600">{{ mode.passed }} passé{% if mode.passed > 1 %}s{% endif %} · {{ mode.remaining }} à passer</p>
+      {% endif %}
       <div class="mt-auto pt-4">
-        {% if mode.test %}
-          <p class="mb-2 text-sm text-slate-600">{{ mode.test.public_label }}</p>
-          <form method="post" action="{% url 'attempt_create' %}">
-            {% csrf_token %}
-            <input type="hidden" name="mode" value="{{ mode.format.mode }}">
-            <button type="submit" class="btn btn-primary w-full" {% if current %}disabled aria-disabled="true"{% endif %}>
-              Commencer
-            </button>
-          </form>
-        {% elif mode.all_done %}
-          <p class="text-sm text-slate-700">{{ mode.all_done }}</p>
-        {% else %}
-          <p class="text-sm text-slate-600">Aucun test disponible pour le moment.</p>
+        {% include "exam/includes/mode_action.html" %}
+        {% if mode.available or mode.passed %}
+          <a href="{% url 'mode_tests' mode.format.mode %}" class="link mt-2 inline-flex min-h-11 items-center">{{ mode.names.see_all }}</a>
         {% endif %}
       </div>
     </li>

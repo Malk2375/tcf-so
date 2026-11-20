@@ -5,6 +5,7 @@ from exam import api, views
 urlpatterns = [
     path("dashboard/", views.dashboard, name="dashboard"),
     path("history/", views.history, name="history"),
+    path("modes/<str:mode>/", views.mode_tests, name="mode_tests"),
     path("attempts/", views.attempt_create, name="attempt_create"),
     path("attempts/<int:pk>/", views.attempt_player, name="attempt_player"),
     path("attempts/<int:pk>/abandon/", views.attempt_abandon, name="attempt_abandon"),

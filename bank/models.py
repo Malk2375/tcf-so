@@ -22,9 +22,9 @@ class Level(models.TextChoices):
 
 class ExamFormat(models.Model):
     class Mode(models.TextChoices):
-        RAPIDE = "rapide", "Rapide"
-        MOYEN = "moyen", "Moyen"
-        REEL = "reel", "Réel"
+        RAPIDE = "rapide", "Entraînement rapide"
+        MOYEN = "moyen", "Entraînement moyen"
+        REEL = "reel", "Test en conditions réelles"
 
     code = models.SlugField(unique=True)
     mode = models.CharField(max_length=10, choices=Mode.choices, unique=True)
@@ -42,6 +42,13 @@ class ExamFormat(models.Model):
 
     def __str__(self):
         return self.label
+
+    @property
+    def names(self):
+        """Noms montrés aux utilisateurs (nom, pluriel, article) : bank.modes."""
+        from bank.modes import mode_names
+
+        return mode_names(self.mode)
 
     @property
     def n_items(self) -> int:
@@ -249,8 +256,10 @@ class Test(models.Model):
 
     @property
     def public_label(self) -> str:
-        """Ce que voient les utilisateurs : « Test 3 »."""
-        return f"Test {self.public_number}" if self.public_number else "Test"
+        """Ce que voient les utilisateurs : « Entraînement 3 », ou « Test 3 » en conditions
+        réelles."""
+        item = self.format.names.item
+        return f"{item} {self.public_number}" if self.public_number else item
 
     @property
     def admin_label(self) -> str:

@@ -90,12 +90,13 @@ et le compte à utiliser. Pour arrêter un site, fermer sa fenêtre.
 | `demo.cmd` | Démonstration, pour les essais | <http://localhost:8001> | `data/demo.sqlite3` | factices, toujours |
 | `demarrer.cmd` | Site réel | <http://localhost:8000> | `data/db.sqlite3` | ceux de `.env` (payants si configurés) |
 | `telephone.cmd` | Démonstration, depuis un téléphone | `https://….trycloudflare.com` (affichée) | `data/demo.sqlite3` | factices, toujours |
+| `debloquer.cmd` | Débloque la connexion d'un compte (démonstration ou site réel, au choix) | — | selon le choix | — |
 
 **Une seule fois :** dans PowerShell, depuis le dossier du projet, `uv sync` (installe les dépendances).
 
 **`demo.cmd`** crée la base de démonstration la première fois (`reset_demo` : formats d'examen, tests factices,
 compte **admin@demo.test**, mot de passe **demo-tcf-2026**, et compte **candidat@demo.test**, même mot de passe,
-qui a déjà passé les trois tests rapides avec des erreurs sur les pronoms), met sa structure à jour, lance le site sur le port 8001 et ouvre
+qui a déjà passé les trois entraînements rapides avec des erreurs sur les pronoms), met sa structure à jour, lance le site sur le port 8001 et ouvre
 le navigateur. Chaque page affiche un bandeau orange « DÉMONSTRATION ». Ses cookies portent d'autres noms que ceux
 du site réel : on peut être connecté aux deux en même temps. Même si `.env` contient des clés, la démonstration
 n'appelle jamais Google ni Claude, et ses fichiers audio vont dans `data/demo-media`.
@@ -134,12 +135,24 @@ le refait avec Google. Les synthèses factices sont journalisées mais ne compte
 le numéro du test. Impossible pour un test publié (l'archiver d'abord) ou passé par un compte non administrateur ;
 le message nomme alors le ou les comptes en cause.
 
+**Modes** : « Entraînement rapide » (24 questions, 26 min), « Entraînement moyen » (46 questions, 48 min) et
+« Test en conditions réelles » (91 questions, 95 min). Les utilisateurs voient « Entraînement 1, 2… » ou « Test 1, 2… » ;
+le back-office garde « test n° … ». Chaque carte du tableau de bord mène à la liste du mode (`/modes/rapide/` …),
+rangée dans l'ordre de mise en ligne : date, score et niveau des tests passés, avec leurs liens « Résultats »
+et « Correction » (même après archivage). « Commencer » lance toujours le prochain test non passé.
+
 **Un test ne se passe qu'une fois**, pour tous les comptes. Un test terminé n'est plus proposé ; quand tous les tests
 d'un mode sont passés, la carte du mode le dit. Pour qu'un compte repasse un test, supprimez son passage dans
 `/admin/` → Passages (la suppression emporte ses réponses et le conseil qu'il a déclenché). Un passage abandonné
 ne compte pas.
 
-**Conseils personnalisés** (`/advice/`) : disponibles après 3 tests rapides distincts, ou 2 moyens, ou 1 réel (terminés).
+**Connexions bloquées** : après 5 mots de passe faux en 5 minutes, le compte est bloqué 5 minutes (limitation
+de django-allauth, aussi pour `/admin/`). Pour le débloquer aussitôt : bouton « Débloquer la connexion » dans
+le back-office (Comptes), ou double-clic sur `debloquer.cmd` (choisir D ou R, puis taper l'adresse e-mail).
+Les compteurs sont des fichiers dans `data/cache/` (`data/demo-cache/` pour la démonstration).
+
+**Conseils personnalisés** (`/advice/`) : disponibles après 3 entraînements rapides distincts, ou 2 moyens, ou 1 test en
+conditions réelles (terminés).
 Ils sont rédigés à l'ouverture de la page de résultats : de 0 à 3 conseils, seulement sur des difficultés nettes,
 sans aucun pourcentage. Sans difficulté nette, un résumé seul. Avec `LLM_PROVIDER=fake`, ils viennent des modèles
 de secours (`advice/fallbacks/fallbacks.json`). Les anciens conseils (objectif, plan de la semaine) restent affichés

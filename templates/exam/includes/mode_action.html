@@ -1,0 +1,17 @@
+{# Bouton d'un mode (SPEC 8.1, 8.1 bis, 10) : Reprendre, Commencer, « tous passés » ou rien. #}
+{% if mode.current %}
+  <a href="{% url 'attempt_player' mode.current.pk %}" class="btn btn-primary w-full sm:w-auto">Reprendre</a>
+{% elif mode.next_test %}
+  <form method="post" action="{% url 'attempt_create' %}">
+    {% csrf_token %}
+    <input type="hidden" name="mode" value="{{ mode.format.mode }}">
+    <button type="submit" class="btn btn-primary w-full sm:w-auto" {% if mode.other_current %}disabled aria-disabled="true"{% endif %}>
+      Commencer
+    </button>
+  </form>
+  {% if mode.other_current %}<p class="mt-2 text-sm text-slate-600">Un autre passage est en cours.</p>{% endif %}
+{% elif mode.all_done %}
+  <p class="text-sm text-slate-700">{{ mode.all_done }}</p>
+{% else %}
+  <p class="text-sm text-slate-600">Aucun {{ mode.names.noun }} disponible pour le moment.</p>
+{% endif %}

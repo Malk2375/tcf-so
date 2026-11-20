@@ -616,7 +616,7 @@ def test_eligibility_counts_distinct_tests(user, tests_by_mode):
     bare_attempt(user, rapide[1], minutes=2)
     assert not eligibility.is_eligible(user)  # 2 tests distincts, pas 3
     assert eligibility.remaining_message(user) == (
-        "encore 1 test rapide, ou 2 tests moyens, ou 1 test réel"
+        "encore 1 entraînement rapide, ou 2 entraînements moyens, ou 1 test en conditions réelles"
     )
     assert [a.test for a in eligibility.retained_attempts(user)] == [rapide[1], rapide[0]]
     bare_attempt(user, rapide[2], minutes=3)
@@ -627,7 +627,7 @@ def test_eligibility_counts_distinct_tests(user, tests_by_mode):
 def test_eligibility_thresholds_do_not_add_up_across_modes(user, tests_by_mode):
     rapide, moyen = tests_by_mode["rapide"], tests_by_mode["moyen"]
     assert eligibility.remaining_message(user) == (
-        "encore 3 tests rapides, ou 2 tests moyens, ou 1 test réel"
+        "encore 3 entraînements rapides, ou 2 entraînements moyens, ou 1 test en conditions réelles"
     )
     bare_attempt(user, rapide[0])
     bare_attempt(user, rapide[1])
@@ -647,10 +647,13 @@ def test_one_reel_is_enough(user, formats):
 def test_before_the_threshold_pages_say_what_is_left(user_client, user, tests_by_mode):
     attempt = complete(user, tests_by_mode["rapide"][0])
     html = user_client.post(reverse("attempt_advice", args=[attempt.pk])).content.decode()
-    assert "2 tests rapides, ou 2 tests moyens, ou 1 test réel" in html
+    assert (
+        "2 entraînements rapides, ou 2 entraînements moyens, ou 1 test en conditions réelles"
+        in html
+    )
     assert Advice.objects.count() == 0
     page = user_client.get(reverse("advice")).content.decode()
-    assert "Il vous reste à passer encore 2 tests rapides" in page
+    assert "Il vous reste à passer encore 2 entraînements rapides" in page
 
 
 def eligible_user(user, tests_by_mode, wrong=never):
@@ -671,8 +674,8 @@ def test_eligible_without_finding_sees_the_summary_alone(user_client, user, test
     assert "aucune difficulté nette" in block and "Voir vos conseils" not in block
     page = user_client.get(reverse("advice")).content.decode()
     assert "aucune difficulté nette" in page and "Diagnostic" not in page
-    # Les trois tests rapides sont passés : plus de bouton, la mention le dit.
-    assert "Vous avez passé tous les tests rapides disponibles." in page
+    # Les trois entraînements rapides sont passés : plus de bouton, la mention le dit.
+    assert "Vous avez passé les 3 entraînements rapides disponibles." in page
 
 
 @pytest.mark.django_db
@@ -681,7 +684,7 @@ def test_summary_alone_offers_the_next_test(user_client, user, tests_by_mode, fo
     make_dev_test("rapide", rng=random.Random(40))
     services.advice_for(Attempt.objects.order_by("-finished_at").first())
     page = user_client.get(reverse("advice")).content.decode()
-    assert "Passer le test suivant (rapide)" in page
+    assert "Passer l&#x27;entraînement suivant (entraînement rapide)" in page
     assert reverse("attempt_create") in page
 
 

@@ -19,6 +19,18 @@ def _media_root(settings, tmp_path):
     settings.MEDIA_ROOT = tmp_path / "media"
 
 
+@pytest.fixture(autouse=True)
+def _cache(settings, tmp_path):
+    """Cache de fichiers propre à chaque test : jamais data/cache/, et aucun compteur de
+    limitation des connexions qui passe d'un test à l'autre."""
+    settings.CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+            "LOCATION": str(tmp_path / "cache"),
+        }
+    }
+
+
 LOOPBACK = {"127.0.0.1", "::1", "localhost"}
 
 

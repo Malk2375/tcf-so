@@ -366,6 +366,7 @@ def screens(transactional_db, formats):
         "pages": {
             "accueil (déconnecté)": None,
             "tableau de bord": "/dashboard/",
+            "liste d'un mode": "/modes/rapide/",
             "historique": "/history/",
             "résultats": f"/attempts/{attempts[-1].pk}/results/",
             "correction": f"/attempts/{attempts[-1].pk}/review/",

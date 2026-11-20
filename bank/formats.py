@@ -13,7 +13,7 @@ FORMATS = [
     (
         "tcf_tp_so_rapide",
         "rapide",
-        "Mode rapide",
+        "Entraînement rapide",
         [
             ("CO", 1, 9, 480, [1, 2, 2, 2, 1, 1]),
             ("MSL", 2, 6, 300, [1, 1, 1, 1, 1, 1]),
@@ -23,7 +23,7 @@ FORMATS = [
     (
         "tcf_tp_so_moyen",
         "moyen",
-        "Mode moyen",
+        "Entraînement moyen",
         [
             ("CO", 1, 17, 900, [3, 3, 3, 3, 3, 2]),
             ("MSL", 2, 12, 540, [2, 2, 2, 2, 2, 2]),
@@ -33,7 +33,7 @@ FORMATS = [
     (
         "tcf_tp_so_reel",
         "reel",
-        "Mode réel",
+        "Test en conditions réelles",
         [
             ("CO", 1, 34, 1740, [5, 6, 6, 6, 6, 5]),
             ("MSL", 2, 23, 1080, [4, 4, 4, 4, 4, 3]),

@@ -9,7 +9,7 @@ def mode_cards() -> list[dict]:
     return [
         {
             "format": exam_format,
-            "label": exam_format.get_mode_display(),
+            "label": exam_format.names.name,
             "questions": exam_format.n_items,
             "minutes": round(exam_format.duration_seconds / 60),
         }

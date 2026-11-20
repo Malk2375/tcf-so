@@ -194,3 +194,26 @@ def test_telephone_launcher():
         r"scripts\phone.py",
     ):
         assert fragment in text
+
+
+def test_unlock_launcher():
+    """debloquer.cmd : choix démonstration ou site réel, sans variable à taper (SPEC 13)."""
+    raw = (ROOT / "debloquer.cmd").read_bytes()
+    assert b"\r\n" in raw and b"\n" not in raw.replace(b"\r\n", b"")
+    text = raw.decode("ascii")
+    for fragment in (
+        'set "DATABASE_URL=sqlite:///data/demo.sqlite3"',
+        'set "DATABASE_URL="',
+        "unlock_login --all",
+        'unlock_login "%EMAIL%"',
+    ):
+        assert fragment in text
+
+
+def test_demo_and_real_sites_keep_separate_caches():
+    """Les compteurs de connexion de la démonstration ne touchent pas ceux du site réel."""
+    import config.settings as project_settings
+
+    assert project_settings.CACHE_DIR.name in {"cache", "demo-cache"}
+    text = Path(project_settings.__file__).read_text(encoding="utf-8")
+    assert '("demo-cache" if DEMO else "cache")' in text

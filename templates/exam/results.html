@@ -13,7 +13,7 @@
   <p class="mt-1 text-slate-700">Score global : <strong>{{ attempt.global_score }}</strong> / 699</p>
   {% if margin %}
     <p class="mt-2 text-sm text-slate-600">
-      Fourchette de ± {{ margin }} points : un test {{ attempt.test.format.get_mode_display|lower }} compte peu de questions.
+      Fourchette de ± {{ margin }} points : {{ attempt.test.format.names.the }} compte peu de questions.
     </p>
   {% endif %}
   <p class="mt-3 text-sm font-medium text-slate-700">Estimation non officielle. Questions générées par IA.</p>

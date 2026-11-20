@@ -10,10 +10,10 @@
       <form method="post" action="{% url 'attempt_create' %}" class="mt-4">
         {% csrf_token %}
         <input type="hidden" name="mode" value="{{ next_mode.mode }}">
-        <button type="submit" class="btn btn-primary w-full sm:w-auto">Passer le test suivant ({{ next_mode.get_mode_display|lower }})</button>
+        <button type="submit" class="btn btn-primary w-full sm:w-auto">Passer {{ next_mode.names.next }} ({{ next_mode.names.singular }})</button>
       </form>
     {% else %}
-      <p class="mt-3 text-slate-700">Vous avez passé tous les tests {{ next_mode.get_mode_display|lower }}s disponibles. De nouveaux tests seront ajoutés.</p>
+      <p class="mt-3 text-slate-700">{{ all_done }}</p>
     {% endif %}
   {% endif %}
   <p class="mt-3 text-sm text-slate-600">

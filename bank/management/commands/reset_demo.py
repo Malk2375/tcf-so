@@ -14,9 +14,9 @@ from exam.devattempts import finished_attempts
 
 DEMO_EMAIL = "admin@demo.test"
 DEMO_PASSWORD = "demo-tcf-2026"
-# Candidat qui a déjà passé les trois tests rapides, avec des erreurs groupées sur les pronoms :
-# la carte « tous les tests passés » et un conseil des modèles de secours se vérifient sans
-# passer trois tests.
+# Candidat qui a déjà passé les trois entraînements rapides, avec des erreurs groupées sur les
+# pronoms : la carte « tous passés », la liste du mode et un conseil des modèles de secours se
+# vérifient sans passer trois tests.
 CANDIDATE_EMAIL = "candidat@demo.test"
 CANDIDATE_WRONG_FAMILIES = {"pronoms"}
 
@@ -46,7 +46,7 @@ def populate(with_tests: bool = True) -> list[str]:
     candidate = get_user_model().objects.create_user("candidat", CANDIDATE_EMAIL, DEMO_PASSWORD)
     rapides = [test for test in tests if test.format.mode == "rapide"]
     finished_attempts(candidate, rapides, CANDIDATE_WRONG_FAMILIES)
-    created.append(f"Compte {CANDIDATE_EMAIL} : {len(rapides)} tests rapides déjà passés")
+    created.append(f"Compte {CANDIDATE_EMAIL} : {len(rapides)} entraînements rapides déjà passés")
     return created
 
 

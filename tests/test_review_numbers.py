@@ -130,8 +130,8 @@ def test_public_number_given_at_publication_per_mode(formats, staff_user):
     other_mode = make_dev_test("moyen", rng=random.Random(4))
     assert (first.public_number, second.public_number, other_mode.public_number) == (1, 2, 1)
     assert first.number != first.public_number  # le brouillon a pris le numéro interne 1
-    assert second.public_label == "Test 2"
-    assert first.admin_label == f"test n° {first.number} · publié comme Test 1"
+    assert second.public_label == "Entraînement 2"
+    assert first.admin_label == f"test n° {first.number} · publié comme Entraînement 1"
 
 
 def test_public_number_is_never_reused(formats, staff_user):
@@ -174,7 +174,7 @@ def test_users_only_see_the_public_number(client, user, formats, staff_user):
     pages = [reverse("dashboard")]
     for page in pages:
         html = client.get(page).content.decode()
-        assert "Test 1" in html
+        assert "Entraînement 1" in html
         assert "n° 3" not in html and "test n°" not in html.lower()
     from tests.test_advice import complete
 
@@ -182,16 +182,16 @@ def test_users_only_see_the_public_number(client, user, formats, staff_user):
     done = complete(user, test)
     for name in ("attempt_results", "attempt_review"):
         html = client.get(reverse(name, args=[done.pk])).content.decode()
-        assert "Test 1" in html and "n° 3" not in html
+        assert "Entraînement 1" in html and "n° 3" not in html
     html = client.get(reverse("history")).content.decode()
-    assert "Test 1" in html and "n° 3" not in html
+    assert "Entraînement 1" in html and "n° 3" not in html
 
 
 def test_backoffice_shows_both_numbers(client, staff_user, formats):
     test = make_dev_test("rapide", rng=random.Random(3))
     client.force_login(staff_user)
-    assert "test n° 1 · publié comme Test 1" in client.get(bo("tests")).content.decode()
-    assert "publié comme Test 1" in client.get(bo("test_review", test.pk)).content.decode()
+    assert "test n° 1 · publié comme Entraînement 1" in client.get(bo("tests")).content.decode()
+    assert "publié comme Entraînement 1" in client.get(bo("test_review", test.pk)).content.decode()
 
 
 def test_transferred_tests_get_server_public_numbers(formats, tmp_path):

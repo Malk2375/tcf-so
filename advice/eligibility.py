@@ -5,15 +5,11 @@ l'utilisateur. Les doublons enregistrés avant la règle « un test ne se passe 
 (section 8.1) sont ignorés, pour le seuil comme pour les constats.
 """
 
+from bank.modes import mode_names
 from exam.models import Attempt
 
 # Tests distincts terminés nécessaires, par mode.
 THRESHOLDS = {"rapide": 3, "moyen": 2, "reel": 1}
-MODE_WORDS = {
-    "rapide": ("rapide", "rapides"),
-    "moyen": ("moyen", "moyens"),
-    "reel": ("réel", "réels"),
-}
 
 
 def retained_attempts(user) -> list[Attempt]:
@@ -62,12 +58,9 @@ def remaining(user) -> dict[str, int]:
 
 
 def remaining_message(user) -> str:
-    """« encore 2 tests rapides, ou 2 tests moyens, ou 1 test réel » ; vide si éligible."""
+    """« encore 2 entraînements rapides, ou 2 entraînements moyens, ou 1 test en conditions
+    réelles » ; vide si éligible."""
     left = remaining(user)
     if not left:
         return ""
-    parts = []
-    for mode, n in left.items():
-        singular, plural = MODE_WORDS[mode]
-        parts.append(f"{n} test {singular}" if n == 1 else f"{n} tests {plural}")
-    return "encore " + ", ou ".join(parts)
+    return "encore " + ", ou ".join(mode_names(mode).count(n) for mode, n in left.items())
