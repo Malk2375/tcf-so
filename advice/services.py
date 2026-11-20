@@ -102,16 +102,20 @@ def generate(attempt: Attempt, provider: LLMProvider | None = None) -> Advice:
                 output_tokens=result.output_tokens,
                 cost_usd=amount,
             )
-            problems = (
-                advice_content.validate(result.content, findings)
+            kept, problems = (
+                advice_content.screen(result.content, findings)
                 if result.content is not None
-                else ["Réponse vide, refusée ou tronquée."]
+                else (None, ["Réponse vide, refusée ou tronquée."])
             )
             if problems:
-                data["fallback_reason"] = ("Réponse invalide : " + " ; ".join(problems))[:300]
                 logger.warning("Conseils du passage %s : %s", attempt.pk, problems)
+            if kept is None:
+                data["fallback_reason"] = ("Réponse inutilisable : " + " ; ".join(problems))[:300]
             else:
-                content, data["source"] = result.content, Advice.Source.LLM
+                content, data["source"] = kept, Advice.Source.LLM
+                if problems:
+                    # Journal : conseils retirés, les autres gardés (12.3).
+                    data["fallback_reason"] = " ; ".join(problems)[:300]
     if content is None:
         content = advice_content.fallback_content(findings)
     try:
@@ -133,6 +137,8 @@ def advice_for(attempt: Attempt, provider: LLMProvider | None = None) -> Advice 
     """Conseils d'un passage terminé : existants, ou produits si l'utilisateur est éligible."""
     if attempt.status != Attempt.Status.COMPLETED:
         return None
+    if not eligibility.is_retained(attempt):
+        return None  # doublon enregistré avant la règle « un test ne se passe qu'une fois »
     existing = Advice.objects.filter(attempt=attempt).first()
     if existing:
         return existing

@@ -5,6 +5,17 @@
   {% if advice.content.next_goal %}
     <p class="mt-3 rounded-md bg-blue-50 p-3 text-blue-950"><span class="font-semibold">Objectif du prochain test :</span> {{ advice.content.next_goal }}</p>
   {% endif %}
+  {% if not cards %}
+    {% if next_test %}
+      <form method="post" action="{% url 'attempt_create' %}" class="mt-4">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="{{ next_mode.mode }}">
+        <button type="submit" class="btn btn-primary w-full sm:w-auto">Passer le test suivant ({{ next_mode.get_mode_display|lower }})</button>
+      </form>
+    {% else %}
+      <p class="mt-3 text-slate-700">Vous avez passé tous les tests {{ next_mode.get_mode_display|lower }}s disponibles. De nouveaux tests seront ajoutés.</p>
+    {% endif %}
+  {% endif %}
   <p class="mt-3 text-sm text-slate-600">
     Rédigés le {{ advice.created_at|date:"j F Y" }}, à partir de {{ advice.attempt_ids|length }} test{{ advice.attempt_ids|length|fr_plural }}.
   </p>
@@ -42,11 +53,11 @@
                 <li class="rounded-md border border-slate-200 p-3">
                   {% if review.error %}
                     <p class="text-sm text-slate-600">{{ review.error.section }} · {{ review.error.level }}</p>
-                    {% if review.error.question %}<p class="font-medium">{{ review.error.question }}</p>{% endif %}
+                    {% if review.error.question %}<p class="font-medium">{{ review.error.question }}</p>{% elif review.error.section == "MSL" %}<p class="font-medium">{{ review.error.support }}</p>{% endif %}
                   {% endif %}
                   <p class="mt-1 text-slate-800">{{ review.why_wrong }}</p>
                   <p class="mt-1 text-slate-800"><span class="font-semibold">L'indice :</span> {{ review.how_to_find }}</p>
-                  {% if review.error %}
+                  {% if review.linkable %}
                     <a href="{% url 'attempt_review' review.error.attempt_id %}#q-{{ review.test_item_id }}" class="link mt-1 inline-flex min-h-11 items-center">Revoir la question dans la correction</a>
                   {% endif %}
                 </li>
@@ -55,11 +66,14 @@
           </section>
         {% endif %}
 
-        <section>
-          <h3 class="font-semibold">Le jour de l'examen</h3>
-          <p class="mt-1 text-slate-800">{{ item.exam_strategy }}</p>
-        </section>
+        {% if item.exam_strategy %}
+          <section>
+            <h3 class="font-semibold">Le jour de l'examen</h3>
+            <p class="mt-1 text-slate-800">{{ item.exam_strategy }}</p>
+          </section>
+        {% endif %}
 
+        {% if item.practice %}
         <section>
           <h3 class="font-semibold">Entraînement</h3>
           <ol class="mt-2 space-y-4">
@@ -85,7 +99,19 @@
             {% endfor %}
           </ol>
         </section>
+        {% endif %}
 
+        {% if card.resource %}
+          <section>
+            <h3 class="font-semibold">Pour aller plus loin</h3>
+            <p class="mt-1 text-slate-800">
+              <a href="{{ card.resource.url }}" class="link" target="_blank" rel="noopener">{{ card.resource.label }}</a> :
+              {{ card.resource.what_to_do }}
+            </p>
+          </section>
+        {% endif %}
+
+        {% if card.plan %}
         <section>
           <h3 class="font-semibold">Votre plan de la semaine</h3>
           <ul class="mt-2 space-y-2">
@@ -105,6 +131,7 @@
             {% endfor %}
           </ul>
         </section>
+        {% endif %}
       </div>
     </details>
     {% endwith %}

@@ -110,8 +110,27 @@ def test_reset_demo_creates_tests_to_pass_and_a_draft(db, monkeypatch):
 
     monkeypatch.setattr(audio, "encode_mp3", lambda pcm: b"MP3" + pcm[:64])
     created = populate()
-    assert len(created) == 5
+    assert len(created) == 6
     published = Test.objects.filter(status=Test.Status.PUBLISHED)
     assert sorted(t.format.mode for t in published) == ["moyen", "rapide", "rapide", "rapide"]
     draft = Test.objects.get(status=Test.Status.DRAFT)
     assert draft.import_batch.uploaded_by.email == DEMO_EMAIL  # corrections possibles
+
+
+def test_reset_demo_candidate_has_passed_the_quick_tests_and_gets_msl_advice(db, monkeypatch):
+    from advice import services as advice_services
+    from bank import audio
+    from bank.management.commands.reset_demo import CANDIDATE_EMAIL
+    from exam import services as exam_services
+    from exam.models import Attempt
+
+    monkeypatch.setattr(audio, "encode_mp3", lambda pcm: b"MP3" + pcm[:64])
+    populate()
+    candidate = get_user_model().objects.get(email=CANDIDATE_EMAIL)
+    assert candidate.check_password(DEMO_PASSWORD) and not candidate.is_staff
+    rapide = ExamFormat.objects.get(mode="rapide")
+    assert exam_services.proposed_test(candidate, rapide) is None  # tous passés
+    last = Attempt.objects.filter(user=candidate).order_by("-finished_at").first()
+    advice = advice_services.advice_for(last)  # à l'ouverture des résultats
+    assert advice.source == "fallback"
+    assert "msl_family:pronoms" in [f["id"] for f in advice.findings]

@@ -8,7 +8,7 @@ from django.templatetags.static import static
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
-from advice.eligibility import remaining_message
+from advice.eligibility import MODE_WORDS, remaining_message
 from advice.models import Advice
 from bank.constants import LEVELS, SECTION_LABELS
 from bank.models import ExamFormat
@@ -31,13 +31,21 @@ def dashboard(request):
     current = services.in_progress_attempt(request.user)
     cards = []
     for card in mode_cards():
-        test, last_done = services.proposed_test(request.user, card["format"])
+        exam_format = card["format"]
+        published = services.published_tests(exam_format)
+        available = published.count()
+        remaining = published.exclude(
+            pk__in=services.completed_test_ids(request.user, exam_format)
+        ).count()
         cards.append(
             {
                 **card,
-                "available": card["format"].tests.filter(status="published").count(),
-                "test": test,
-                "last_done": last_done,
+                "available": available,
+                "remaining": remaining,
+                "test": services.proposed_test(request.user, exam_format),
+                "all_done": all_done_message(exam_format.mode, available)
+                if available and not remaining
+                else "",
             }
         )
     last = (
@@ -58,17 +66,36 @@ def dashboard(request):
 @login_required
 @require_POST
 def attempt_create(request):
+    """Lance le test proposé pour ce mode. Un test déjà terminé est refusé (409, section 8.1),
+    même par une requête forgée : le serveur choisit le test, et `create_attempt` vérifie."""
     exam_format = get_object_or_404(ExamFormat, mode=request.POST.get("mode"), is_active=True)
-    test, _ = services.proposed_test(request.user, exam_format)
+    test = services.proposed_test(request.user, exam_format)
     if test is None:
+        if services.published_tests(exam_format).exists():
+            return _refused(request, services.ALREADY_DONE)
         messages.error(request, "Aucun test n'est disponible pour ce mode.")
         return redirect("dashboard")
     try:
         attempt = services.create_attempt(request.user, test)
-    except AttemptError:
+    except AttemptError as exc:
+        if exc.code == "test_already_completed":
+            return _refused(request, exc.message)
         messages.error(request, "Un passage est déjà en cours : reprenez-le ou abandonnez-le.")
         return redirect("dashboard")
     return redirect("attempt_player", pk=attempt.pk)
+
+
+def all_done_message(mode: str, available: int) -> str:
+    singular, plural = MODE_WORDS[mode]
+    if available == 1:
+        passed = f"Vous avez passé le seul test {singular} disponible."
+    else:
+        passed = f"Vous avez passé les {available} tests {plural} disponibles."
+    return f"{passed} De nouveaux tests seront ajoutés."
+
+
+def _refused(request, message: str):
+    return render(request, "exam/refused.html", {"message": message}, status=409)
 
 
 @login_required

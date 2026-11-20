@@ -1,5 +1,7 @@
 """Règles de contenu des questions (SPEC 4.3, 4.4, 6.1 et 6.3), regroupées en un seul endroit."""
 
+from bank.language_points import points_at
+
 SECTIONS = ["CO", "MSL", "CE"]
 SECTION_LABELS = {
     "CO": "Compréhension orale",
@@ -70,50 +72,9 @@ QUESTION_REPONSE_TEXT = "Choisissez la réponse qui convient."
 # Niveaux où les options d'une question-réponse sont lues à voix haute (6.1).
 AUDIO_LETTERS_LEVELS = ["A1", "A2"]
 
-LANGUAGE_POINTS = {
-    "A1": [
-        "present",
-        "articles",
-        "negation",
-        "prepositions_lieu",
-        "possessifs",
-        "lexique_quotidien",
-    ],
-    "A2": [
-        "passe_compose",
-        "futur_proche",
-        "pronoms_cod_coi",
-        "comparatif",
-        "imperatif",
-        "lexique_courant",
-    ],
-    "B1": [
-        "passe_compose_imparfait",
-        "pronoms_relatifs_simples",
-        "futur_conditionnel",
-        "pronoms_y_en",
-        "connecteurs_logiques",
-        "subjonctif_present",
-    ],
-    "B2": [
-        "subjonctif_emplois",
-        "plus_que_parfait",
-        "conditionnel_passe",
-        "pronoms_relatifs_composes",
-        "voix_passive",
-        "discours_rapporte",
-        "registre",
-    ],
-    "C1": [
-        "concordance_des_temps",
-        "participe_gerondif",
-        "connecteurs_avances",
-        "expressions_idiomatiques",
-        "nominalisation",
-        "registre_soutenu",
-    ],
-    "C2": ["temps_litteraires", "nuances_lexicales", "figures_de_style", "collocations_rares"],
-}
+# Points de langue valides par niveau, lus dans bank/data/language_points.json (familles : voir
+# bank/language_points.py).
+LANGUAGE_POINTS = {level: points_at(level) for level in LEVELS}
 
 SKILLS = {
     "CO": ["explicite", "global", "inference", "opinion"],

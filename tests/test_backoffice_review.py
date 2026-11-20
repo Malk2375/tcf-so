@@ -86,8 +86,7 @@ def test_import_review_one_click_audio_publish_then_users_see_it(staff_client, d
     assert {item.status for item in items_of(draft)} == {Item.Status.PUBLISHED}
 
     user = get_user_model().objects.create_user("c", "c@example.com", PASSWORD)
-    test, _ = services.proposed_test(user, draft.format)
-    assert test == draft
+    assert services.proposed_test(user, draft.format) == draft
 
 
 def test_closing_the_page_then_clicking_again_resumes(staff_client, draft):
@@ -176,7 +175,7 @@ def test_published_test_is_frozen_then_archived(staff_client, draft):
     draft.refresh_from_db()
     assert draft.status == Test.Status.ARCHIVED
     user = get_user_model().objects.create_user("c", "c@example.com", PASSWORD)
-    assert services.proposed_test(user, draft.format)[0] is None
+    assert services.proposed_test(user, draft.format) is None
 
 
 # --- Modification d'un item ---------------------------------------------------------------------

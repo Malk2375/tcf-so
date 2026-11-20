@@ -1,0 +1,87 @@
+{
+  "level_break:CO": {
+    "title": "Écouter des documents plus longs et plus denses",
+    "diagnostic": "En compréhension orale, vos réponses deviennent {often} moins sûres à partir du niveau {to_level}, alors que le niveau {from_level} est bien maîtrisé.",
+    "lesson": "À partir de ce niveau, les documents oraux sont plus longs et l'information utile n'est plus dite une seule fois : elle est nuancée, corrigée ou opposée à une autre. Écoutez avec un but précis, donné par la question, et repérez les mots qui organisent le discours : « mais », « en revanche », « finalement », « en fait ». L'information qui compte suit souvent ces mots. Par exemple, dans « Le concert devait avoir lieu samedi, mais il est reporté à dimanche », la réponse est dimanche. Dans « Beaucoup pensent que c'est trop cher ; pour ma part, je trouve le prix justifié », l'avis du locuteur vient après « pour ma part ». Ne cherchez pas à tout comprendre : visez l'idée qui répond à la question."
+  },
+  "level_break:MSL": {
+    "title": "Passer aux structures du niveau supérieur",
+    "diagnostic": "En structures de la langue, vos réponses deviennent {often} moins sûres à partir du niveau {to_level}, alors que le niveau {from_level} est bien maîtrisé.",
+    "lesson": "Au niveau supérieur, la phrase entière décide de la bonne forme : un mot placé loin du blanc impose un mode, une préposition ou un registre. Lisez toute la phrase avant de regarder les options, puis cherchez l'indice qui commande le blanc : un verbe d'opinion, une conjonction, un registre soutenu. Par exemple, dans « Bien qu'il ___ tard, elle a continué », c'est « bien que » qui impose le subjonctif : « soit ». Dans « Il a agi à l'insu de ___ supérieurs », le registre soutenu de la phrase oriente vers « ses » et non vers une forme familière. Entraînez-vous à nommer la règle qui justifie votre choix avant de cocher."
+  },
+  "level_break:CE": {
+    "title": "Lire des textes plus longs et plus argumentés",
+    "diagnostic": "En compréhension écrite, vos réponses deviennent {often} moins sûres à partir du niveau {to_level}, alors que le niveau {from_level} est bien maîtrisé.",
+    "lesson": "À partir de ce niveau, les textes avancent une idée, l'opposent à une autre et nuancent leur conclusion. Lisez d'abord la question, puis parcourez le texte en repérant son plan : l'introduction annonce le sujet, les connecteurs comme « pourtant », « en effet » ou « ainsi » signalent le rôle de chaque paragraphe. Une option qui reprend les mots exacts du texte n'est pas forcément juste : vérifiez qu'elle dit la même chose. Par exemple, si le texte écrit « Certains y voient un progrès ; l'auteur reste prudent », l'avis de l'auteur est la prudence. Si un article décrit une mesure « saluée par les uns, critiquée par les autres », il ne prend pas parti."
+  },
+  "doc_type:CO": {
+    "title": "Mieux comprendre ce type de document oral",
+    "diagnostic": "En compréhension orale, les {subtype} vous posent {often} plus de difficultés que les autres documents de même niveau.",
+    "lesson": "Chaque type de document oral suit un schéma qu'on peut anticiper. Une annonce donne un lieu, une heure, un changement ; un message vocal dit qui appelle, pourquoi, et ce qu'il faut faire ; une interview oppose les questions du journaliste et l'avis de l'invité ; une émission ou un exposé annonce son sujet puis le développe. Avant l'écoute, demandez-vous ce que ce type de document contient presque toujours. Par exemple, dans un message vocal, la demande arrive souvent à la fin : « Rappelle-moi avant ce soir. » Dans une interview, l'opinion de l'invité suit souvent « à mon avis » ou « ce qui me frappe ». Écoutez la partie du schéma visée par la question."
+  },
+  "doc_type:CE": {
+    "title": "Mieux lire ce type de document écrit",
+    "diagnostic": "En compréhension écrite, les {subtype} vous posent {often} plus de difficultés que les autres documents de même niveau.",
+    "lesson": "Chaque type de texte a sa construction. Une affiche ou une petite annonce se lit par repérage : dates, prix, conditions. Un courrier dit qui écrit, à qui, dans quel but, et la demande arrive souvent à la fin. Un article présente un fait puis des réactions. Un texte argumentatif défend une thèse et réfute un avis contraire. Avant de lire en détail, identifiez le type de texte et ce qu'il contient d'habitude. Par exemple, dans une lettre de réclamation, le but est souvent annoncé dès la première phrase : « Je vous écris pour contester… ». Dans un texte argumentatif, la position de l'auteur se lit dans la conclusion, après « c'est pourquoi » ou « il faut donc »."
+  },
+  "skill:explicite": {
+    "title": "Repérer l'information exacte",
+    "diagnostic": "En {section}, les questions qui demandent de repérer une information précise vous posent {often} des difficultés.",
+    "lesson": "Une question d'information explicite porte sur un détail dit clairement : une heure, un lieu, un prix, une raison. Le piège tient dans les informations voisines : un horaire habituel et un horaire modifié, un premier choix puis un second. Cherchez dans le document le passage qui correspond à la question, puis comparez chaque option avec ce passage, mot à mot. Par exemple, dans « Le magasin ferme d'habitude à 19 h, mais ce samedi à 17 h », la question « À quelle heure ferme-t-il samedi ? » vise 17 h. Dans « Je voulais prendre le train, finalement je prendrai le car », le moyen retenu est le car. La dernière information donnée est souvent celle qui compte."
+  },
+  "skill:global": {
+    "title": "Saisir le sens général",
+    "diagnostic": "En {section}, les questions sur le sens général du document vous posent {often} des difficultés.",
+    "lesson": "Une question globale demande le thème, le but ou l'idée principale, pas un détail. L'erreur courante est de choisir une option qui reprend un détail réel du document mais trop étroit. Demandez-vous : de quoi parle le document du début à la fin, et pourquoi a-t-il été écrit ou prononcé ? L'option juste couvre l'ensemble. Par exemple, un message qui mentionne une panne, un retard et des excuses a pour but de prévenir d'un retard, pas de parler de la panne. Un article qui cite plusieurs villes pour décrire la hausse des loyers parle des loyers, pas de ces villes. Résumez le document en une phrase avant de lire les options."
+  },
+  "skill:inference": {
+    "title": "Déduire ce qui n'est pas dit",
+    "diagnostic": "En {section}, les questions qui demandent de déduire une information implicite vous posent {often} des difficultés.",
+    "lesson": "Une question d'inférence porte sur ce que le document laisse comprendre sans le dire : un sentiment, une conséquence, une intention. La bonne réponse s'appuie toujours sur un indice précis du document ; une option qui demande d'imaginer au-delà de cet indice est fausse. Cherchez l'indice, puis demandez-vous ce qu'il implique forcément. Par exemple, « Elle a relu trois fois sa lettre avant de l'envoyer » laisse comprendre qu'elle tient à ne pas se tromper. « Le restaurant affiche complet tous les soirs depuis l'ouverture » laisse comprendre qu'il a du succès. Méfiez-vous des options vraisemblables mais sans appui dans le texte."
+  },
+  "skill:opinion": {
+    "title": "Identifier une opinion ou une intention",
+    "diagnostic": "En {section}, les questions sur l'opinion ou l'intention de l'auteur ou du locuteur vous posent {often} des difficultés.",
+    "lesson": "Pour trouver une opinion, distinguez qui parle : l'auteur rapporte souvent l'avis des autres avant de donner le sien. Les marques de l'opinion sont des verbes (« je regrette », « je doute »), des adjectifs (« regrettable », « bienvenu ») et des connecteurs qui introduisent la position personnelle (« pour ma part », « reste que »). Le ton compte aussi : l'ironie dit le contraire des mots. Par exemple, « Beaucoup applaudissent cette réforme ; je crains qu'elle ne règle rien » exprime le doute de l'auteur. « Quelle excellente idée de fermer la gare le jour des départs en vacances ! » est ironique : c'est une critique."
+  },
+  "msl_family:verbes": {
+    "title": "Les verbes : temps, modes et accords",
+    "diagnostic": "En structures de la langue, les questions sur les verbes (temps, modes, accords) vous posent {often} des difficultés, aux niveaux {levels}.",
+    "lesson": "Le bon temps ou le bon mode est commandé par un mot de la phrase. Cherchez-le avant de regarder les options : une conjonction (« bien que », « avant que », « pour que » imposent le subjonctif), un verbe d'opinion à la forme négative (« je ne crois pas que » appelle aussi le subjonctif), un marqueur de temps (« hier », « depuis », « quand j'étais petit ») ou une condition (« si » suivi de l'imparfait appelle le conditionnel présent). Par exemple : « Il faut que tu viennes », car « il faut que » impose le subjonctif. « Si j'avais su, je serais venu », car « si » suivi du plus-que-parfait appelle le conditionnel passé. Nommez l'indice, puis choisissez la forme."
+  },
+  "msl_family:pronoms": {
+    "title": "Les pronoms",
+    "diagnostic": "En structures de la langue, les questions sur les pronoms vous posent {often} des difficultés, aux niveaux {levels}.",
+    "lesson": "Le pronom dépend de la construction du verbe ou du mot qu'il remplace. Pour un pronom complément, demandez-vous si le verbe se construit avec « à » ou « de » : « parler à quelqu'un » donne « lui », « parler de quelque chose » donne « en ». Pour un pronom relatif, regardez la fonction dans la proposition qui suit : sujet (« qui »), complément direct (« que »), complément avec « de » (« dont »), avec une autre préposition (« avec lequel », « auquel »). Par exemple : « C'est le livre dont je t'ai parlé », car on dit « parler de ce livre ». « Voici l'outil avec lequel il travaille », car on travaille avec un outil."
+  },
+  "msl_family:prepositions": {
+    "title": "Les déterminants et les prépositions",
+    "diagnostic": "En structures de la langue, les questions sur les déterminants et les prépositions vous posent {often} des difficultés, aux niveaux {levels}.",
+    "lesson": "Beaucoup de prépositions ne se devinent pas : elles sont imposées par le mot qui les précède ou par le nom qui suit. Apprenez les verbes et les adjectifs avec leur préposition (« penser à », « se souvenir de », « être fier de »), et les règles des noms de lieux : « à » devant une ville, « en » devant un pays féminin, « au » devant un pays masculin. Pour les déterminants, la négation change l'article : « Je bois du café » devient « Je ne bois pas de café ». Par exemple : « Elle habite au Portugal, à Lisbonne. » « Il a renoncé à son projet faute de moyens », où « faute de » exprime le manque."
+  },
+  "msl_family:phrase": {
+    "title": "La construction de la phrase et les connecteurs",
+    "diagnostic": "En structures de la langue, les questions sur la construction de la phrase et les connecteurs vous posent {often} des difficultés, aux niveaux {levels}.",
+    "lesson": "Pour choisir un connecteur, identifiez d'abord le lien logique entre les deux parties de la phrase : cause, conséquence, opposition, concession ou but. Ensuite seulement, vérifiez la construction qu'il impose : « malgré » est suivi d'un nom, « bien que » d'un verbe au subjonctif, « même si » d'un verbe à l'indicatif. Par exemple, « Il est sorti malgré la pluie » et « Il est sorti bien qu'il pleuve » disent la même concession avec deux constructions. « Il a travaillé tard, si bien qu'il est épuisé » exprime une conséquence, tandis que « Il est épuisé parce qu'il a travaillé tard » exprime une cause. Le sens d'abord, la grammaire ensuite."
+  },
+  "msl_family:lexique": {
+    "title": "Le vocabulaire",
+    "diagnostic": "En structures de la langue, les questions de vocabulaire vous posent {often} des difficultés, aux niveaux {levels}.",
+    "lesson": "Dans une question de vocabulaire, plusieurs options ont un sens proche : une seule convient exactement au contexte et au registre de la phrase. Regardez avec quels mots le blanc s'associe : on « prend » une décision, on « porte » plainte, on « tient » compte d'un avis. Vérifiez aussi le registre : un mot familier ne convient pas dans une lettre officielle. Méfiez-vous des mots qui se ressemblent à l'oreille. Par exemple : « Le juge a infirmé la décision », c'est-à-dire l'a annulée, alors qu'« affirmer » signifie soutenir. « Un danger imminent » est un danger tout proche, tandis qu'« un savant éminent » est un savant remarquable. Notez ces paires dans un carnet."
+  },
+  "msl_family:expressions": {
+    "title": "Les expressions",
+    "diagnostic": "En structures de la langue, les questions sur les expressions vous posent {often} des difficultés, aux niveaux {levels}.",
+    "lesson": "Une expression figée ne se comprend pas mot à mot et ne se modifie pas : on dit « avoir besoin de », jamais « avoir un besoin de » dans ce sens courant. Pour la reconnaître, demandez-vous si la phrase prend un sens imagé, puis cherchez l'option qui complète la formule connue. Apprenez les expressions entières, avec leur sens et un exemple. Par exemple : « Il m'a posé un lapin » signifie qu'il n'est pas venu au rendez-vous. « Cette voiture coûte les yeux de la tête » signifie qu'elle est très chère. Aux niveaux avancés, repérez aussi les figures de style : « Ce n'est pas mauvais » peut vouloir dire « c'est très bon »."
+  },
+  "time_pressure": {
+    "title": "Mieux répartir votre temps",
+    "diagnostic": "En structures de la langue et en compréhension écrite, votre temps n'est pas bien réparti : des questions restent sans réponse en fin d'épreuve, ou les premières questions vous prennent trop de temps.",
+    "lesson": "Les questions sont rangées par niveau : les premières, plus simples, doivent aller vite pour garder du temps pour les textes longs de la fin. Gardez en tête le repère de temps par question et vérifiez l'horloge régulièrement, par exemple tous les cinq numéros. Si une question vous bloque, choisissez la réponse la plus probable, signalez-la et passez : vous y reviendrez s'il reste du temps. Avant la fin, assurez-vous qu'aucune question n'est vide, car une réponse au hasard ne coûte rien. Par exemple, une phrase à trou de niveau A2 doit se régler en quelques secondes, tandis qu'un texte de niveau C1 mérite plusieurs minutes."
+  },
+  "answer_changes": {
+    "title": "Changer de réponse à bon escient",
+    "diagnostic": "Quand vous changez de réponse, vous remplacez {often} une bonne réponse par une mauvaise.",
+    "lesson": "Votre premier choix est souvent le bon : un changement par simple doute vous fait perdre plus qu'il ne vous rapporte. Ne modifiez une réponse que si vous trouvez une raison précise : un mot du texte que vous aviez mal lu, une règle de grammaire que vous venez de vous rappeler, une option que vous n'aviez pas vue. Sans raison de ce type, gardez votre première réponse. Par exemple, si vous hésitez entre « dont » et « que » et que vous retrouvez « parler de », vous avez une raison de changer. Si vous changez seulement parce que la réponse vous semble trop simple, gardez-la."
+  }
+}

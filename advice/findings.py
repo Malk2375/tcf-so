@@ -1,8 +1,9 @@
 """Constats calculés sans IA à partir des réponses de l'utilisateur (SPEC 12.2).
 
-Chaque constat est un dictionnaire JSON (stocké dans `Advice.findings` et envoyé au modèle) :
-`id`, `type`, `section`, `label`, `filter` (le groupe de questions concerné), `n`, `rate`,
-`reference_rate`, `gap`, `strength` (écart × nombre de questions), `details`, `errors`.
+Chaque constat est un dictionnaire JSON stocké dans `Advice.findings` : `id`, `type`, `section`,
+`label`, `filter` (le groupe de questions concerné), `n`, `rate`, `reference_rate`, `gap`,
+`strength` (écart × nombre de questions), `intensity`, `details`, `errors`.
+Les taux restent dans la base : le modèle n'en reçoit aucun (voir `advice.llm.model_findings`).
 """
 
 import statistics
@@ -11,35 +12,35 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from fractions import Fraction
 
-from advice.labels import (
-    DOC_LENGTH_LABELS,
-    LANGUAGE_POINT_LABELS,
-    SECTION_SHORT,
-    SKILL_LABELS,
-    SUBTYPE_LABELS,
-)
+from advice.eligibility import retained_attempts
+from advice.labels import SECTION_SHORT, SKILL_LABELS, SUBTYPE_LABELS
 from bank.constants import CE_WORDS, LEVELS, MSL_WORDS
+from bank.language_points import FAMILY_LABELS, family_of
 from bank.models import FormatSection
-from exam.models import Answer, Attempt
+from exam.models import Answer, Attempt, Level
 from exam.scoring import round_half_up
 
 RECENT_ATTEMPTS = 10
-MAX_FINDINGS = 4
+MAX_FINDINGS = 3
 MAX_ERRORS = 3
+MSL_FAMILY_MAX_ERRORS = 4
 # Constat `progress` : les 2 derniers passages comparés aux précédents.
 PROGRESS_RECENT = 2
 
 # Seuils de la section 12.2.
 LEVEL_BREAK_DROP = 30
 LEVEL_BREAK_MIN = 4
-LANGUAGE_POINT_MIN = 4
-LANGUAGE_POINT_MAX_RATE = 50
+MSL_FAMILY_MIN = 3
+MSL_FAMILY_MIN_ERRORS = 2
+MSL_FAMILY_MAX_RATE = 50
 GROUP_MIN = 5
 GROUP_GAP = 15
 TRAILING_UNANSWERED_PER_TEST = 2
 FIRST_HALF_SHARE = 60
 CHANGES_MIN = 6
 UNFAVORABLE_SHARE = 50
+# Intensité : « très marqué » à partir de 30 points d'écart, « marqué » sinon.
+STRONG_GAP = 30
 
 QCM_TIMED = ("MSL", "CE")  # épreuves à échéance, où le temps se gère
 
@@ -72,11 +73,8 @@ def pct(part: int, total: int) -> int:
 
 
 def recent_attempts(user, limit: int = RECENT_ATTEMPTS) -> list[Attempt]:
-    return list(
-        Attempt.objects.filter(user=user, status=Attempt.Status.COMPLETED)
-        .select_related("test__format")
-        .order_by("-finished_at", "-pk")[:limit]
-    )
+    """Les 10 derniers passages retenus : le premier passage terminé de chaque test."""
+    return retained_attempts(user)[:limit]
 
 
 def load_rows(attempts: list[Attempt]) -> list[Row]:
@@ -111,7 +109,8 @@ def load_rows(attempts: list[Attempt]) -> list[Row]:
 
 
 def matches(row: Row, group: dict) -> bool:
-    """Filtre d'un constat : épreuve, niveau, sous-type, longueur, compétence, point de langue."""
+    """Filtre d'un constat : épreuve, niveau, sous-type, longueur, compétence, point de langue,
+    famille de MSL et niveau maximal."""
     checks = {
         "section": row.section,
         "level": row.level,
@@ -119,9 +118,13 @@ def matches(row: Row, group: dict) -> bool:
         "doc_length": row.tags.get("doc_length"),
         "skill": row.tags.get("skill"),
         "language_point": row.tags.get("language_point"),
+        "family": family_of(row.tags.get("language_point")),
     }
     sections = group.get("sections")
     if sections and row.section not in sections:
+        return False
+    max_level = group.get("max_level")
+    if max_level and LEVELS.index(row.level) > LEVELS.index(max_level):
         return False
     return all(checks[key] == value for key, value in group.items() if key in checks)
 
@@ -167,13 +170,35 @@ def error_payload(row: Row) -> dict:
         "chosen_index": row.selected,
         "correct_index": item.correct_index,
         "explanation": item.explanation,
+        "language_point": row.tags.get("language_point") if row.section == "MSL" else None,
     }
 
 
-def recent_errors(rows: list[Row], limit: int = MAX_ERRORS) -> list[dict]:
+def _missed(rows: list[Row]) -> list[Row]:
     missed = [r for r in rows if not r.correct]
     missed.sort(key=lambda r: (-r.finished_at.timestamp(), r.selected is None, r.position))
-    return [error_payload(r) for r in missed[:limit]]
+    return missed
+
+
+def recent_errors(rows: list[Row], limit: int = MAX_ERRORS) -> list[dict]:
+    return [error_payload(r) for r in _missed(rows)[:limit]]
+
+
+def varied_errors(rows: list[Row], limit: int = MSL_FAMILY_MAX_ERRORS) -> list[dict]:
+    """Les erreurs les plus récentes, de points de langue différents si possible."""
+    missed = _missed(rows)
+    chosen, points = [], set()
+    for row in missed:
+        point = row.tags.get("language_point")
+        if point not in points:
+            chosen.append(row)
+            points.add(point)
+    chosen += [r for r in missed if r not in chosen]
+    return [error_payload(r) for r in chosen[:limit]]
+
+
+def intensity(gap: int) -> str:
+    return "très marqué" if gap >= STRONG_GAP else "marqué"
 
 
 def finding(
@@ -201,12 +226,13 @@ def finding(
         "reference_rate": reference,
         "gap": gap,
         "strength": gap * n,
+        "intensity": intensity(gap),
         "details": details or {},
         "errors": recent_errors(rows) if errors is None else errors,
     }
 
 
-# --- Les sept types de constats -----------------------------------------------------------------
+# --- Les types de constats ----------------------------------------------------------------------
 
 
 def level_breaks(rows: list[Row]) -> list[dict]:
@@ -246,31 +272,61 @@ def level_breaks(rows: list[Row]) -> list[dict]:
     return found
 
 
-def language_points(rows: list[Row]) -> list[dict]:
+def msl_level(attempts: list[Attempt]) -> str | None:
+    """Niveau MSL estimé : celui de l'épreuve de MSL du dernier passage retenu ; « A1 non
+    atteint » compte comme A1."""
+    if not attempts:
+        return None
+    section = attempts[0].sections.filter(section="MSL").first()
+    if section is None or not section.level:
+        return None
+    return "A1" if section.level == Level.BELOW_A1 else section.level
+
+
+def msl_families(rows: list[Row], estimated_level: str | None) -> list[dict]:
+    """Taux par famille de points de langue, sur les questions de MSL de niveau inférieur ou égal
+    au niveau MSL estimé + 1 : au moins 3 questions, au moins 2 erreurs, et au plus la moitié
+    de bonnes réponses."""
     msl = [r for r in rows if r.section == "MSL"]
     msl_rate = rate_of(msl)
+    max_level = None
+    if estimated_level:
+        max_level = LEVELS[min(LEVELS.index(estimated_level) + 1, len(LEVELS) - 1)]
     groups = defaultdict(list)
     for row in msl:
-        if row.tags.get("language_point"):
-            groups[row.tags["language_point"]].append(row)
+        family = family_of(row.tags.get("language_point"))
+        if family and (max_level is None or LEVELS.index(row.level) <= LEVELS.index(max_level)):
+            groups[family].append(row)
     found = []
-    for point, group_rows in sorted(groups.items()):
-        rate = rate_of(group_rows)
-        if len(group_rows) < LANGUAGE_POINT_MIN or rate > LANGUAGE_POINT_MAX_RATE:
+    for family, group_rows in sorted(groups.items()):
+        n, n_correct = len(group_rows), sum(r.correct for r in group_rows)
+        if n < MSL_FAMILY_MIN or n - n_correct < MSL_FAMILY_MIN_ERRORS or 2 * n_correct > n:
             continue
+        rate = rate_of(group_rows)
         # Écart : à la moyenne de l'utilisateur en MSL, ou au seuil de 50 % s'il est plus grand.
-        gap = max(msl_rate - rate, LANGUAGE_POINT_MAX_RATE - rate)
+        gap = max(msl_rate - rate, MSL_FAMILY_MAX_RATE - rate)
+        group = {"section": "MSL", "family": family}
+        if max_level:
+            group["max_level"] = max_level
         found.append(
             finding(
-                "language_point",
-                point,
+                "msl_family",
+                family,
                 "MSL",
-                f"Structures de la langue : {LANGUAGE_POINT_LABELS.get(point, point)}",
-                {"section": "MSL", "language_point": point},
+                f"Structures de la langue : {FAMILY_LABELS[family]}",
+                group,
                 group_rows,
                 reference=msl_rate,
                 gap=gap,
-                details={"language_point": point, "levels": sorted({r.level for r in group_rows})},
+                details={
+                    "family": family,
+                    "levels": sorted({r.level for r in group_rows}),
+                    "language_points": sorted(
+                        {r.tags["language_point"] for r in group_rows if not r.correct}
+                    ),
+                    "max_level": max_level,
+                },
+                errors=varied_errors(group_rows),
             )
         )
     return found
@@ -311,14 +367,14 @@ def _below_average_groups(rows: list[Row], kind: str, tag: str, sections, labels
 
 
 def doc_types(rows: list[Row]) -> list[dict]:
-    """Taux par sous-type et par longueur (CO, CE), comparé au taux moyen au même niveau."""
-    return _below_average_groups(
-        rows, "doc_type", "subtype", ("CO", "CE"), SUBTYPE_LABELS
-    ) + _below_average_groups(rows, "doc_type", "doc_length", ("CO", "CE"), DOC_LENGTH_LABELS)
+    """Taux par sous-type (CO, CE), comparé au taux moyen de l'utilisateur au même niveau.
+    La longueur découle du niveau : elle n'est pas un critère séparé."""
+    return _below_average_groups(rows, "doc_type", "subtype", ("CO", "CE"), SUBTYPE_LABELS)
 
 
 def skills(rows: list[Row]) -> list[dict]:
-    return _below_average_groups(rows, "skill", "skill", ("CO", "MSL", "CE"), SKILL_LABELS)
+    """Compétences de CO et de CE seulement : la MSL passe par `msl_family`."""
+    return _below_average_groups(rows, "skill", "skill", ("CO", "CE"), SKILL_LABELS)
 
 
 def _midpoint(section: str, level: str) -> Fraction:
@@ -421,7 +477,12 @@ def time_pressure(rows: list[Row], attempts: list[Attempt]) -> list[dict]:
             reference=50,
             gap=gap,
             n=metrics["questions"],
-            details={**metrics, "targets": target_seconds(attempts)},
+            details={
+                **metrics,
+                "unanswered_at_end": too_slow_at_end,
+                "slow_start": front_loaded,
+                "targets": target_seconds(attempts),
+            },
             errors=[error_payload(r) for r in trailing_rows[:MAX_ERRORS]],
         )
     ]
@@ -494,13 +555,28 @@ def _metric(previous: dict, rows: list[Row]) -> dict:
     return {"n": len(group), "rate": rate_of(group)}
 
 
+def trend(entry: dict) -> str:
+    """Évolution dite avec des mots, pour le modèle et les modèles de secours."""
+    if "delta" in entry:
+        delta = entry["delta"]
+        return "en hausse" if delta > 0 else "en baisse" if delta < 0 else "stable"
+    recent, earlier = entry["recent"], entry["earlier"]
+    for key, better_when_lower in (("trailing_per_test", True), ("unfavorable_share", True)):
+        if key in recent and recent.get("n") and earlier.get("n"):
+            if recent[key] == earlier[key]:
+                return "stable"
+            return "en hausse" if (recent[key] < earlier[key]) == better_when_lower else "en baisse"
+    return "non mesurable"
+
+
 def progress(rows: list[Row], attempts: list[Attempt], previous_findings: list[dict]) -> dict:
     recent_ids = {a.pk for a in attempts[:PROGRESS_RECENT]}
     recent = [r for r in rows if r.attempt_id in recent_ids]
     earlier = [r for r in rows if r.attempt_id not in recent_ids]
     entries = []
     for previous in previous_findings:
-        if previous["type"] == "progress":
+        # `language_point` : ancien type de constat, remplacé par `msl_family`.
+        if previous["type"] in {"progress", "language_point"}:
             continue
         entry = {
             "finding_id": previous["id"],
@@ -510,6 +586,7 @@ def progress(rows: list[Row], attempts: list[Attempt], previous_findings: list[d
         }
         if "rate" in entry["recent"] and entry["recent"]["n"] and entry["earlier"]["n"]:
             entry["delta"] = entry["recent"]["rate"] - entry["earlier"]["rate"]
+        entry["trend"] = trend(entry)
         entries.append(entry)
     return {
         "id": "progress",
@@ -523,41 +600,11 @@ def progress(rows: list[Row], attempts: list[Attempt], previous_findings: list[d
 # --- Sélection ---------------------------------------------------------------------------------
 
 
-def weakest_skill(rows: list[Row]) -> list[dict]:
-    """Aucun constat marqué : la compétence la plus faible (4 questions au moins), pour que le
-    conseil reste utile. Marquée `forced`."""
-    by_level = section_level_rates(rows)
-    groups = defaultdict(list)
-    for row in rows:
-        if row.tags.get("skill"):
-            groups[(row.section, row.tags["skill"])].append(row)
-    candidates = [
-        (rate_of(g), -len(g), section, skill, g)
-        for (section, skill), g in sorted(groups.items())
-        if len(g) >= LANGUAGE_POINT_MIN and not all(r.correct for r in g)
-    ]
-    if not candidates:
-        return []
-    rate, _, section, skill, group_rows = min(candidates)
-    expected = expected_rate(group_rows, by_level)
-    result = finding(
-        "skill",
-        f"{section}:{skill}",
-        section,
-        f"{SECTION_SHORT[section].capitalize()} : {SKILL_LABELS.get(skill, skill)}",
-        {"section": section, "skill": skill},
-        group_rows,
-        reference=expected,
-        gap=max(0, expected - rate),
-        details={"skill": skill, "forced": True},
-    )
-    return [result]
-
-
 def compute_findings(
     user, previous_findings: list[dict] | None = None
 ) -> tuple[list[dict], list[int]]:
-    """Les 4 constats les plus marqués, `progress` en plus si un conseil précédent existe.
+    """Les 3 constats les plus marqués, `progress` en plus si un conseil précédent existe.
+    Aucun constat retenu : aucun conseil (plus de « point le moins solide »).
 
     Renvoie (constats, identifiants des passages utilisés).
     """
@@ -565,14 +612,14 @@ def compute_findings(
     rows = load_rows(attempts)
     candidates = (
         level_breaks(rows)
-        + language_points(rows)
+        + msl_families(rows, msl_level(attempts))
         + doc_types(rows)
         + skills(rows)
         + time_pressure(rows, attempts)
         + answer_changes(rows)
     )
     candidates.sort(key=lambda f: (-f["strength"], f["id"]))
-    selected = candidates[:MAX_FINDINGS] or weakest_skill(rows)
+    selected = candidates[:MAX_FINDINGS]
     if previous_findings:
         selected.append(progress(rows, attempts, previous_findings))
     return selected, [a.pk for a in attempts]

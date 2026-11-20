@@ -4,7 +4,14 @@ from collections import Counter
 
 import pytest
 
-from bank.brief import _avoid_lines, balanced_letters, build_brief, create_brief
+from bank.brief import (
+    BriefError,
+    _avoid_lines,
+    assign_language_points,
+    balanced_letters,
+    build_brief,
+    create_brief,
+)
 from bank.constants import (
     LANGUAGE_POINTS,
     LEVELS,
@@ -13,6 +20,7 @@ from bank.constants import (
     length_target,
     subtypes_for,
 )
+from bank.language_points import FAMILIES, FAMILY_QUOTAS, expected_skill, language_points
 from bank.models import Item
 
 pytestmark = pytest.mark.django_db
@@ -155,3 +163,82 @@ def test_create_brief_numbers_increase(formats, staff_user, rng):
     assert (first.number, second.number, other.number) == (1, 2, 1)
     assert second.brief_id == "tcf_tp_so_rapide-0002"
     assert second.filename == "brief_tcf_tp_so_rapide_0002.json"
+
+
+# --- MSL : familles et points de langue (4.4, 6.1) ---------------------------------------------
+
+
+@pytest.mark.parametrize("mode", ["rapide", "moyen", "reel"])
+@pytest.mark.parametrize("seed", range(5))
+def test_family_quotas_are_exact(formats, mode, seed):
+    content = build_brief(formats[mode], 1, random.Random(seed))
+    msl = by_section(content)["MSL"]
+    assert Counter(s["language_family"] for s in msl) == Counter(FAMILY_QUOTAS[mode])
+    for slot in msl:
+        point = language_points()[slot["language_point"]]
+        assert point["family"] == slot["language_family"]
+        assert slot["level"] in point["levels"]  # point disponible au niveau de l'emplacement
+        assert slot["language_hint"] == point["hint"]
+    assert len({s["language_point"] for s in msl}) == len(msl)
+
+
+def test_twenty_moyen_briefs_never_repeat_a_point(formats):
+    for seed in range(20):
+        msl = by_section(build_brief(formats["moyen"], 1, random.Random(seed)))["MSL"]
+        points = [s["language_point"] for s in msl]
+        assert len(points) == len(set(points)) == 12, seed
+
+
+def test_family_assignment_is_drawn_at_random(formats):
+    drawn = {
+        tuple(
+            s["language_family"] for s in by_section(build_brief(formats["rapide"], 1, rng))["MSL"]
+        )
+        for rng in (random.Random(seed) for seed in range(10))
+    }
+    assert len(drawn) > 1
+
+
+def test_least_used_point_of_the_family_comes_first(rng):
+    """A1, famille « prepositions » : articles et possessifs déjà en banque → prepositions_lieu."""
+    usage = Counter({"articles": 3, "possessifs": 1})
+    result = assign_language_points(["A1"], {"prepositions": 1}, usage, rng)
+    assert result == [("prepositions", "prepositions_lieu")]
+
+
+def test_impossible_quotas_raise_an_explicit_error(rng):
+    # Les pronoms n'ont aucun point en C2 ; les expressions n'en ont qu'un pour A2 et B1.
+    with pytest.raises(BriefError, match="quotas de familles"):
+        assign_language_points(["C2"], {"pronoms": 1}, Counter(), rng)
+    with pytest.raises(BriefError):
+        assign_language_points(["A2", "B1"], {"expressions": 2}, Counter(), rng)
+    with pytest.raises(BriefError):
+        assign_language_points(["A1"], {"verbes": 2}, Counter(), rng)
+
+
+def test_language_points_table():
+    points = language_points()
+    assert len(points) == 56
+    assert {p["family"] for p in points.values()} == set(FAMILIES)
+    for point in points.values():
+        assert point["levels"] and set(point["levels"]) <= set(LEVELS)
+        assert point["hint"]
+    for mode, quotas in FAMILY_QUOTAS.items():
+        assert sum(quotas.values()) == {"rapide": 6, "moyen": 12, "reel": 23}[mode]
+    # Les verbes ne font plus qu'un quart environ d'un test moyen ou réel.
+    assert FAMILY_QUOTAS["moyen"]["verbes"] / 12 == 0.25
+    assert expected_skill("registre_soutenu") == "registre"
+    assert expected_skill("pronoms_y_en") == "grammaire"
+    assert expected_skill("paronymes") == "lexique"
+
+
+def test_old_language_point_ids_are_kept():
+    """Aucune migration des items : les identifiants d'avant le 20 novembre 2026 restent valides."""
+    old = {
+        "A1": ["present", "articles", "negation", "prepositions_lieu", "possessifs"],
+        "B2": ["subjonctif_emplois", "registre", "discours_rapporte"],
+        "C1": ["expressions_idiomatiques", "nominalisation", "registre_soutenu"],
+        "C2": ["temps_litteraires", "nuances_lexicales", "figures_de_style", "collocations_rares"],
+    }
+    for level, ids in old.items():
+        assert set(ids) <= set(LANGUAGE_POINTS[level])

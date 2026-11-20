@@ -13,38 +13,48 @@ from typing import Protocol
 from django.conf import settings
 
 from advice.content import resources
+from bank.language_points import FAMILY_LABELS, language_points
 
 MAX_TOKENS = 16000
 
 SYSTEM_PROMPT = """\
-Vous rédigez des conseils personnalisés pour une personne qui prépare le TCF tout public \
-(test de connaissance du français). Votre but : l'aider à corriger ses erreurs, pas seulement \
-les lui signaler.
+Vous rédigez des conseils personnalisés pour une personne qui prépare le TCF tout public (test \
+de connaissance du français). But : l'aider à progresser sur ses vrais points faibles. Un \
+conseil n'existe que s'il repose sur un constat net : mieux vaut aucun conseil, ou un seul, \
+qu'un conseil vague.
+
+Ton : français, vouvoiement, mots simples, direct et encourageant.
 
 Règles :
-- Écrivez en français, en vouvoyant la personne, sur un ton encourageant et direct.
-- Ne citez que les chiffres fournis dans les données ; n'en inventez aucun.
-- Un conseil par constat fourni (sauf « progress », qui sert seulement aux « progress_note »), \
-dans l'ordre des constats ; « finding_id » reprend exactement l'identifiant du constat.
-- Chaque conseil doit permettre d'agir sans autre recherche :
-  - « diagnostic » : ce que montrent les réponses, avec les chiffres fournis ;
-  - « lesson » : la règle ou la méthode, de 80 à 150 mots, avec 2 exemples ;
-  - « error_reviews » : pour chaque question manquée fournie avec le constat, pourquoi l'option \
-choisie ne convient pas et l'indice qui menait à la bonne réponse ; « test_item_id » reprend \
-l'identifiant fourni. Pour « time_pressure » et « answer_changes », cette liste peut être vide ;
-  - « exam_strategy » : quoi faire pendant l'épreuve face à ce type de question ;
-  - « practice » : exactement 3 questions d'entraînement originales, de même type et de même \
-niveau que les erreurs, chacune avec exactement 4 options différentes, l'indice (0 à 3) de la \
-bonne réponse et une explication ;
-  - « week_plan » : 2 ou 3 actions concrètes, avec une durée en minutes et une fréquence ; \
-« resource_id » est l'identifiant d'une ressource de la liste fournie, ou null. N'inventez \
-jamais de ressource ni d'adresse web ;
-  - « progress_note » : l'évolution depuis le conseil précédent si le constat « progress » la \
-donne, sinon null.
-- Pour « time_pressure », la leçon est une méthode de gestion du temps qui s'appuie sur les \
-repères chiffrés fournis (temps cible par question et par niveau).
-- « summary » : 2 phrases, où en est la personne et par quoi commencer. « next_goal » : un \
-objectif mesurable pour le prochain test.
+- Aucun chiffre de réussite : ni pourcentage, ni taux, ni points d'écart, ni « N questions sur \
+N ». Dites les choses avec des mots : « souvent », « dès le niveau B2 », « dans les textes \
+argumentatifs ». Les données ne contiennent aucun taux : n'en inventez pas.
+- De 0 à 3 conseils, au plus un par constat fourni (« progress » ne donne pas de conseil : il \
+sert seulement aux « progress_note »). « finding_id » reprend exactement l'identifiant du \
+constat. Rien qui ne découle d'un constat. Omettez un conseil qui serait vague.
+- Interdits : conseiller de refaire les questions manquées ou de repasser un test ; les astuces \
+générales de QCM sans lien avec le constat (éliminer les options « absolues », lire les \
+questions avant le document, etc.) ; les nombres d'exercices, de minutes ou de séances inventés \
+; toute ressource hors de la liste fournie.
+- « summary » : 1 à 3 phrases, où en est la personne et par quoi commencer.
+- « title » : le point travaillé, en quelques mots. « diagnostic » : 1 ou 2 phrases, avec des \
+mots.
+- « lesson » : la règle ou la méthode propre au constat, de 60 à 150 mots, avec deux exemples \
+nouveaux. Pour « msl_family », traitez les points de langue précis des erreurs jointes (par \
+exemple : « après à moins que, le verbe se met au subjonctif »). Pour « time_pressure » et « \
+answer_changes », la leçon est une méthode de travail pendant l'épreuve, appuyée pour « \
+time_pressure » sur les repères de temps fournis.
+- « error_reviews » : 1 ou 2 des questions manquées jointes au constat (« test_item_id » repris \
+tel quel) : pourquoi l'option choisie ne convient pas, et l'indice qui menait à la bonne \
+réponse. Pour « time_pressure » et « answer_changes », la liste peut être vide.
+- « practice » : facultatif, de 0 à 3 exercices nouveaux, jamais une reprise des questions \
+jointes, chacun avec 4 options différentes, l'indice (0 à 3) de la bonne réponse et une \
+explication. Aucun exercice pour un constat de compréhension orale (il n'y a pas d'audio).
+- « resource » : null, ou une seule ressource de la liste, choisie par son identifiant, avec ce \
+qu'il faut y faire précisément, et seulement si elle correspond à l'épreuve et au niveau du \
+constat.
+- « progress_note » : l'évolution depuis le conseil précédent si le constat « progress » la \
+donne (« trend »), dite avec des mots ; sinon null.
 """
 
 
@@ -66,13 +76,76 @@ class LLMProvider(Protocol):
     def generate(self, model: str, system: str, user: str, schema: dict) -> LLMResult: ...
 
 
+ERROR_KEYS = ["test_item_id", "section", "level", "support", "question", "options"]
+
+
+def _error_for_model(error: dict) -> dict:
+    data = {key: error[key] for key in ERROR_KEYS}
+    data["chosen_index"] = error["chosen_index"]
+    data["correct_index"] = error["correct_index"]
+    data["explanation"] = error["explanation"]
+    if error.get("language_point"):
+        point = language_points().get(error["language_point"], {})
+        data["language_point"] = error["language_point"]
+        data["language_hint"] = point.get("hint", "")
+    return data
+
+
+def model_findings(findings: list[dict]) -> list[dict]:
+    """Ce que reçoit le modèle pour chaque constat (12.3) : type, intensité, épreuve, niveaux,
+    sous-type, compétence ou famille, questions manquées. Aucun taux, pourcentage ni écart
+    chiffré ; seule exception, les repères de temps de `time_pressure`."""
+    result = []
+    for finding in findings:
+        details = finding.get("details", {})
+        if finding["type"] == "progress":
+            result.append(
+                {
+                    "id": "progress",
+                    "type": "progress",
+                    "items": [
+                        {"finding_id": e["finding_id"], "label": e["label"], "trend": e["trend"]}
+                        for e in details.get("items", [])
+                        if "trend" in e
+                    ],
+                }
+            )
+            continue
+        data = {
+            "id": finding["id"],
+            "type": finding["type"],
+            "intensity": finding["intensity"],
+            "label": finding["label"],
+            "section": finding["section"],
+        }
+        for key in ("levels", "subtype", "skill", "from_level", "to_level"):
+            if details.get(key):
+                data[key] = details[key]
+        if finding["type"] == "msl_family":
+            data["family"] = details["family"]
+            data["family_label"] = FAMILY_LABELS[details["family"]]
+        if finding["type"] == "time_pressure":
+            data["unanswered_at_end"] = details["unanswered_at_end"]
+            data["slow_start"] = details["slow_start"]
+            data["time_targets_seconds"] = {
+                section: {"average": t["average_seconds"], "by_level": t["by_level"]}
+                for section, t in details.get("targets", {}).items()
+            }
+        data["missed_questions"] = [_error_for_model(e) for e in finding.get("errors", [])]
+        result.append(data)
+    return result
+
+
 def user_message(findings: list[dict], context: dict) -> str:
-    """Données envoyées au modèle : constats, erreurs jointes, ressources. Aucune donnée
-    personnelle (ni e-mail, ni nom)."""
+    """Données envoyées au modèle : constats sans taux, erreurs jointes, ressources. Aucune
+    donnée personnelle (ni e-mail, ni nom)."""
     payload = {
         "context": context,
-        "findings": [{k: v for k, v in f.items() if k != "filter"} for f in findings],
-        "resources": [{"id": r["id"], "label": r["label"], "for": r["for"]} for r in resources()],
+        "findings": model_findings(findings),
+        "resources": [
+            {key: r[key] for key in ("id", "label", "for", "levels") if key in r}
+            for r in resources()
+        ],
     }
     return (
         "Voici les constats calculés à partir des réponses de la personne, avec les questions "

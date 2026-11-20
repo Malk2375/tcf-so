@@ -152,34 +152,83 @@ def test_dashboard_starts_oldest_unfinished_test(user_client, user, published, f
     assert newer.number > published.number
 
 
-def test_proposed_test_cycles_through_completed_tests(user, published, formats):
-    second = make_dev_test("rapide", rng=random.Random(12))
+def completed(user, test, days=1, status=Attempt.Status.COMPLETED):
     now = timezone.now()
-    for test, days in [(published, 3), (second, 1)]:
-        Attempt.objects.create(
-            user=user,
-            test=test,
-            status=Attempt.Status.COMPLETED,
-            started_at=now - timedelta(days=days),
-            finished_at=now - timedelta(days=days),
-            expires_at=now,
-        )
-    test, last_done = services.proposed_test(user, formats["rapide"])
-    assert test == published  # le plus anciennement passé
-    assert last_done.date() == (now - timedelta(days=3)).date()
-
-
-def test_dashboard_mentions_already_passed(user_client, user, published):
-    now = timezone.now()
-    Attempt.objects.create(
+    return Attempt.objects.create(
         user=user,
-        test=published,
-        status=Attempt.Status.COMPLETED,
-        started_at=now,
-        finished_at=now,
+        test=test,
+        status=status,
+        started_at=now - timedelta(days=days),
+        finished_at=now - timedelta(days=days),
         expires_at=now,
     )
-    assert "déjà passé le" in user_client.get(reverse("dashboard")).content.decode()
+
+
+# --- Un test ne se passe qu'une fois (8.1) -------------------------------------------------------
+
+
+def test_completed_test_is_no_longer_proposed(user, published, formats):
+    second = make_dev_test("rapide", rng=random.Random(12))
+    completed(user, published)
+    assert services.proposed_test(user, formats["rapide"]) == second
+    completed(user, second)
+    assert services.proposed_test(user, formats["rapide"]) is None
+
+
+def test_abandoned_test_is_still_proposed(user, published, formats):
+    completed(user, published, status=Attempt.Status.ABANDONED)
+    assert services.proposed_test(user, formats["rapide"]) == published
+    assert services.create_attempt(user, published).test == published
+
+
+def test_dashboard_card_when_every_test_is_passed(user_client, user, published, formats):
+    second = make_dev_test("rapide", rng=random.Random(12))
+    third = make_dev_test("rapide", rng=random.Random(13))
+    html = user_client.get(reverse("dashboard")).content.decode()
+    assert "3 tests disponibles · 3 à passer" in html
+    for test in (published, second, third):
+        completed(user, test)
+    html = user_client.get(reverse("dashboard")).content.decode()
+    assert (
+        "Vous avez passé les 3 tests rapides disponibles. De nouveaux tests seront ajoutés." in html
+    )
+    assert "Commencer" not in html  # seul le mode rapide a des tests
+
+
+def test_single_test_card_wording(user_client, user, published):
+    completed(user, published)
+    html = user_client.get(reverse("dashboard")).content.decode()
+    assert "Vous avez passé le seul test rapide disponible." in html
+
+
+@pytest.mark.parametrize("staff", [False, True])
+def test_post_attempts_refuses_a_completed_test(client, published, formats, staff):
+    """Requête forgée : le formulaire n'est plus affiché, mais le POST est refusé (409), pour
+    tous les comptes, administrateurs compris."""
+    user = get_user_model().objects.create_user("x", "x@example.com", PASSWORD, is_staff=staff)
+    completed(user, published)
+    client.force_login(user)
+    response = client.post(reverse("attempt_create"), {"mode": "rapide"})
+    assert response.status_code == 409
+    assert "Vous avez déjà passé ce test." in response.content.decode()
+    assert Attempt.objects.filter(user=user).count() == 1
+    with pytest.raises(services.AttemptError) as error:
+        services.create_attempt(user, published)
+    assert error.value.code == "test_already_completed"
+
+
+def test_deleting_the_attempt_in_admin_allows_a_new_pass(client, published, formats):
+    admin = get_user_model().objects.create_superuser("adm", "adm@example.com", PASSWORD)
+    user = get_user_model().objects.create_user("y", "y@example.com", PASSWORD)
+    attempt = completed(user, published)
+    client.force_login(admin)
+    page = client.get(reverse("admin:exam_attempt_changelist")).content.decode()
+    assert ">y<" in page
+    assert client.get(reverse("admin:exam_attempt_change", args=[attempt.pk])).status_code == 200
+    response = client.post(reverse("admin:exam_attempt_delete", args=[attempt.pk]), {"post": "yes"})
+    assert response.status_code == 302
+    assert not Attempt.objects.exists()
+    assert services.proposed_test(user, formats["rapide"]) == published
 
 
 def test_only_one_attempt_in_progress(user_client, user, attempt):

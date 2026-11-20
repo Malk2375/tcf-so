@@ -24,9 +24,11 @@ class Advice(models.Model):
     input_tokens = models.PositiveIntegerField(default=0)
     output_tokens = models.PositiveIntegerField(default=0)
     cost_usd = models.DecimalField(max_digits=10, decimal_places=6, default=0)
-    # Raison du recours aux modèles de secours (journal, affichée dans l'admin seulement).
+    # Journal, affiché dans l'admin seulement : raison du recours aux modèles de secours, ou
+    # conseils retirés par les contrôles (les autres étant gardés).
     fallback_reason = models.CharField(max_length=300, blank=True)
-    # Cases cochées du plan de la semaine : ["<index du conseil>-<index de l'action>", …].
+    # Anciens conseils seulement : cases cochées du plan de la semaine,
+    # ["<index du conseil>-<index de l'action>", …].
     plan_done = models.JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

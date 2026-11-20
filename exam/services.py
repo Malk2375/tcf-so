@@ -8,7 +8,6 @@ import functools
 from datetime import datetime, timedelta
 
 from django.db import transaction
-from django.db.models import Max
 from django.utils import timezone
 
 from bank.content import estimated_seconds
@@ -47,27 +46,25 @@ def in_progress_attempt(user) -> Attempt | None:
     return attempt
 
 
-def proposed_test(user, exam_format) -> tuple[Test | None, datetime | None]:
-    """Le plus ancien test publié pas encore terminé ; sinon le plus anciennement passé.
+def completed_test_ids(user, exam_format=None) -> set[int]:
+    """Tests que l'utilisateur a terminés : ils ne lui sont plus proposés (8.1)."""
+    attempts = Attempt.objects.filter(user=user, status=Attempt.Status.COMPLETED)
+    if exam_format is not None:
+        attempts = attempts.filter(test__format=exam_format)
+    return set(attempts.values_list("test_id", flat=True))
 
-    Renvoie (test, date du dernier passage terminé, ou None si jamais terminé).
-    """
-    published = Test.objects.filter(format=exam_format, status=Test.Status.PUBLISHED).order_by(
+
+def published_tests(exam_format):
+    return Test.objects.filter(format=exam_format, status=Test.Status.PUBLISHED).order_by(
         "published_at", "number"
     )
-    completed = dict(
-        Attempt.objects.filter(user=user, status=Attempt.Status.COMPLETED, test__in=published)
-        .values("test")
-        .annotate(last=Max("finished_at"))
-        .values_list("test", "last")
-    )
-    for test in published:
-        if test.pk not in completed:
-            return test, None
-    if not completed:
-        return None, None
-    test_id = min(completed, key=completed.get)
-    return published.get(pk=test_id), completed[test_id]
+
+
+def proposed_test(user, exam_format) -> Test | None:
+    """Le plus ancien test publié de ce mode que l'utilisateur n'a pas terminé (un passage
+    abandonné ne compte pas) ; None s'il les a tous passés ou s'il n'y en a aucun."""
+    done = completed_test_ids(user, exam_format)
+    return published_tests(exam_format).exclude(pk__in=done).first()
 
 
 # --- Durées --------------------------------------------------------------------------------------
@@ -109,9 +106,15 @@ def section_duration_seconds(test: Test, fs: FormatSection) -> float:
 # --- Création ------------------------------------------------------------------------------------
 
 
+ALREADY_DONE = "Vous avez déjà passé ce test."
+
+
 def create_attempt(user, test: Test, now: datetime | None = None) -> Attempt:
+    """Nouveau passage. Un test ne se passe qu'une fois (8.1), pour tous les comptes."""
     if in_progress_attempt(user):
         raise AttemptError("attempt_in_progress", "Un passage est déjà en cours.")
+    if test.pk in completed_test_ids(user):
+        raise AttemptError("test_already_completed", ALREADY_DONE)
     now = now or timezone.now()
     sections = list(test.format.sections.order_by("order"))
     total = sum(section_duration_seconds(test, fs) for fs in sections)

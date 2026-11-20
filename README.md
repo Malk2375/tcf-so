@@ -93,8 +93,9 @@ et le compte à utiliser. Pour arrêter un site, fermer sa fenêtre.
 
 **Une seule fois :** dans PowerShell, depuis le dossier du projet, `uv sync` (installe les dépendances).
 
-**`demo.cmd`** crée la base de démonstration la première fois (`reset_demo` : formats d'examen et compte
-**admin@demo.test**, mot de passe **demo-tcf-2026**), met sa structure à jour, lance le site sur le port 8001 et ouvre
+**`demo.cmd`** crée la base de démonstration la première fois (`reset_demo` : formats d'examen, tests factices,
+compte **admin@demo.test**, mot de passe **demo-tcf-2026**, et compte **candidat@demo.test**, même mot de passe,
+qui a déjà passé les trois tests rapides avec des erreurs sur les pronoms), met sa structure à jour, lance le site sur le port 8001 et ouvre
 le navigateur. Chaque page affiche un bandeau orange « DÉMONSTRATION ». Ses cookies portent d'autres noms que ceux
 du site réel : on peut être connecté aux deux en même temps. Même si `.env` contient des clés, la démonstration
 n'appelle jamais Google ni Claude, et ses fichiers audio vont dans `data/demo-media`.
@@ -133,9 +134,19 @@ le refait avec Google. Les synthèses factices sont journalisées mais ne compte
 le numéro du test. Impossible pour un test publié (l'archiver d'abord) ou passé par un compte non administrateur ;
 le message nomme alors le ou les comptes en cause.
 
-**Conseils personnalisés** (`/advice/`) : disponibles après 3 tests rapides, ou 2 moyens, ou 1 réel (terminés).
-Ils sont rédigés à l'ouverture de la page de résultats. Avec `LLM_PROVIDER=fake`, ils viennent des modèles de secours
-(`advice/fallbacks/`).
+**Un test ne se passe qu'une fois**, pour tous les comptes. Un test terminé n'est plus proposé ; quand tous les tests
+d'un mode sont passés, la carte du mode le dit. Pour qu'un compte repasse un test, supprimez son passage dans
+`/admin/` → Passages (la suppression emporte ses réponses et le conseil qu'il a déclenché). Un passage abandonné
+ne compte pas.
+
+**Conseils personnalisés** (`/advice/`) : disponibles après 3 tests rapides distincts, ou 2 moyens, ou 1 réel (terminés).
+Ils sont rédigés à l'ouverture de la page de résultats : de 0 à 3 conseils, seulement sur des difficultés nettes,
+sans aucun pourcentage. Sans difficulté nette, un résumé seul. Avec `LLM_PROVIDER=fake`, ils viennent des modèles
+de secours (`advice/fallbacks/fallbacks.json`). Les anciens conseils (objectif, plan de la semaine) restent affichés
+tels quels ; ceux qui vous semblent injustifiés se suppriment dans `/admin/` → Conseils.
+
+**Briefs de MSL** : chaque test reçoit un nombre fixe de questions par famille de points de langue (verbes, pronoms,
+prépositions, phrase, vocabulaire, expressions), d'après `bank/data/language_points.json`.
 
 **Application installable.** Le site est une application web installable (manifeste, icônes, service worker,
 page hors ligne). La page « Installer l'application » (lien en bas de chaque page, `/install/`) explique l'installation
@@ -146,7 +157,7 @@ sur Android, iPhone et ordinateur. Un téléphone n'installe l'application que d
 Les tests publiés sur l'ordinateur passent sur le serveur sans régénérer l'audio : `uv run python manage.py export_tests`
 (dans PowerShell, base réelle) crée `tests_<date>.zip`, que `import_tests` recrée sur le serveur (section 8 du pas-à-pas).
 
-**Vérifier tous les tests automatiques :** `uv run pytest` (aucun appel réseau, `.env` est ignoré ; environ 3 minutes).
+**Vérifier tous les tests automatiques :** `uv run pytest` (aucun appel réseau, `.env` est ignoré ; environ 5 minutes).
 Les tests de bout en bout pilotent Chromium : la première fois, `uv run playwright install chromium`
 (sans lui, ces tests sont ignorés avec un message). Les icônes se régénèrent avec
 `uv run python scripts/make_icons.py` à partir de `assets/icons/icon.svg`.

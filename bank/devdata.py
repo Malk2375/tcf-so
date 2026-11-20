@@ -14,6 +14,7 @@ from bank.constants import (
     QUESTION_REPONSE_TEXT,
     SKILLS,
 )
+from bank.language_points import expected_skill
 
 _CONSONANTS = "bcdfglmnprstvz"
 _VOWELS = ["a", "e", "i", "o", "u", "é", "ou", "an", "on"]
@@ -96,6 +97,7 @@ def fake_item(slot: dict, rng: random.Random) -> dict:
             # Options de même longueur, comme les options d'un seul mot de l'examen.
             item["options"] = [_word(rng, 2) + letter.lower() for letter in LETTERS]
             item["tags"]["language_point"] = slot["language_point"]
+            item["tags"]["skill"] = expected_skill(slot["language_point"])
         else:
             item["stimulus_text"] = _text_of_words(rng, n)
     return item

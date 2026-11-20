@@ -507,6 +507,19 @@ def test_warning_tags_out_of_vocabulary(valid):
     assert has(result, "Compétence « grammaire » hors vocabulaire en CO.", "warnings")
 
 
+def test_language_point_valid_when_the_item_level_is_in_its_levels(valid):
+    """bank/data/language_points.json : un point vaut pour les niveaux de sa ligne (4.4)."""
+    _, data = valid
+    c1 = first(data, "MSL", "C1")
+    c1["tags"]["language_point"] = "prepositions_soutenues"  # C1 et C2 : valide
+    a1 = first(data, "MSL", "A1")
+    a1["tags"]["language_point"] = "paronymes"  # C1 seulement : hors liste en A1
+    result = run(data)
+    assert result.test is not None
+    assert not has(result, "« prepositions_soutenues » hors de la liste", "warnings")
+    assert has(result, "Point de langue « paronymes » hors de la liste du niveau A1.", "warnings")
+
+
 def test_warning_tts_quota(valid):
     _, data = valid
     settings_row = SiteSettings.load()

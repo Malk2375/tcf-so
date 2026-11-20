@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block head_title %}Test déjà passé{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold sm:text-3xl">Test déjà passé</h1>
+<section class="card mt-6">
+  <p class="text-slate-800">{{ message }} Un test ne se passe qu'une fois.</p>
+  <a href="{% url 'dashboard' %}" class="btn btn-primary mt-4 w-full sm:w-auto">Retour au tableau de bord</a>
+</section>
+{% endblock %}

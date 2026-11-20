@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db.utils import DatabaseError
 
-from bank.management.commands.reset_demo import DEMO_EMAIL, DEMO_PASSWORD
+from bank.management.commands.reset_demo import CANDIDATE_EMAIL, DEMO_EMAIL, DEMO_PASSWORD
 
 VOICES = {"fake": "factices (aucun appel à Google)", "google": "Google Chirp 3 HD (quota réel)"}
 ADVICE = {"fake": "modèles de secours (aucun appel à Claude)", "anthropic": "API Claude (payant)"}
@@ -33,7 +33,10 @@ class Command(BaseCommand):
 
     def account(self) -> str:
         if settings.DEMO:
-            return f"{DEMO_EMAIL} / mot de passe {DEMO_PASSWORD}"
+            return (
+                f"{DEMO_EMAIL} / mot de passe {DEMO_PASSWORD}"
+                f" (ou {CANDIDATE_EMAIL}, même mot de passe)"
+            )
         try:
             emails = list(
                 get_user_model()

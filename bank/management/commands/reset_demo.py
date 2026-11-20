@@ -10,9 +10,15 @@ from django.db import connections
 from bank.demo import require_demo
 from bank.devtest import make_dev_draft, make_dev_test
 from bank.formats import seed_formats
+from exam.devattempts import finished_attempts
 
 DEMO_EMAIL = "admin@demo.test"
 DEMO_PASSWORD = "demo-tcf-2026"
+# Candidat qui a déjà passé les trois tests rapides, avec des erreurs groupées sur les pronoms :
+# la carte « tous les tests passés » et un conseil des modèles de secours se vérifient sans
+# passer trois tests.
+CANDIDATE_EMAIL = "candidat@demo.test"
+CANDIDATE_WRONG_FAMILIES = {"pronoms"}
 
 
 def remove_demo_files(db_path: Path, media_root: Path) -> None:
@@ -34,8 +40,13 @@ def populate(with_tests: bool = True) -> list[str]:
     admin = get_user_model().objects.create_superuser("demo", DEMO_EMAIL, DEMO_PASSWORD)
     if not with_tests:
         return []
-    created = [str(make_dev_test(mode)) for mode in DEMO_TESTS]
+    tests = [make_dev_test(mode) for mode in DEMO_TESTS]
+    created = [str(test) for test in tests]
     created += [f"{make_dev_draft(mode, user=admin)} (brouillon)" for mode in DEMO_DRAFTS]
+    candidate = get_user_model().objects.create_user("candidat", CANDIDATE_EMAIL, DEMO_PASSWORD)
+    rapides = [test for test in tests if test.format.mode == "rapide"]
+    finished_attempts(candidate, rapides, CANDIDATE_WRONG_FAMILIES)
+    created.append(f"Compte {CANDIDATE_EMAIL} : {len(rapides)} tests rapides déjà passés")
     return created
 
 

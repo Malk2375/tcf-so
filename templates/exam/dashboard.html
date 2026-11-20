@@ -57,15 +57,11 @@
       <p class="text-slate-700">{{ mode.minutes }} minutes</p>
       <p class="mt-1 text-sm text-slate-600">
         {# En français, 0 et 1 sont au singulier. #}
-        {{ mode.available }} test{% if mode.available > 1 %}s{% endif %} disponible{% if mode.available > 1 %}s{% endif %}
+        {{ mode.available }} test{% if mode.available > 1 %}s{% endif %} disponible{% if mode.available > 1 %}s{% endif %}{% if mode.available %} · {{ mode.remaining }} à passer{% endif %}
       </p>
       <div class="mt-auto pt-4">
         {% if mode.test %}
-          {% if mode.last_done %}
-            <p class="mb-2 text-sm text-slate-600">{{ mode.test.public_label }}, déjà passé le {{ mode.last_done|date:"j F Y" }}.</p>
-          {% else %}
-            <p class="mb-2 text-sm text-slate-600">{{ mode.test.public_label }}</p>
-          {% endif %}
+          <p class="mb-2 text-sm text-slate-600">{{ mode.test.public_label }}</p>
           <form method="post" action="{% url 'attempt_create' %}">
             {% csrf_token %}
             <input type="hidden" name="mode" value="{{ mode.format.mode }}">
@@ -73,6 +69,8 @@
               Commencer
             </button>
           </form>
+        {% elif mode.all_done %}
+          <p class="text-sm text-slate-700">{{ mode.all_done }}</p>
         {% else %}
           <p class="text-sm text-slate-600">Aucun test disponible pour le moment.</p>
         {% endif %}

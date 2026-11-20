@@ -533,22 +533,22 @@
       "section": "MSL",
       "level": "A2",
       "subtype": "phrase_a_trou",
-      "stimulus_text": "Hier soir, nous ___ au restaurant pour l'anniversaire de Paul.",
+      "stimulus_text": "Pour ouvrir un compte à la banque, vous avez ___ d'une pièce d'identité.",
       "audio_script": null,
       "question": "",
       "options": [
-        "avons allé",
-        "allons",
-        "sommes allés",
-        "irons"
+        "envie",
+        "peur",
+        "besoin",
+        "raison"
       ],
       "correct_index": 2,
       "options_mode": "text",
-      "explanation": "« Hier soir » demande un temps du passé, et le verbe aller se conjugue avec l'auxiliaire être : « sommes allés ». « Allons » est un présent, « irons » un futur, et « avons allé » n'existe pas.",
+      "explanation": "On dit « avoir besoin de quelque chose » pour exprimer une nécessité : la pièce d'identité est obligatoire pour ouvrir un compte. « Avoir envie de » exprime un désir et « avoir peur de » une crainte, ce qui n'a pas de sens ici ; « avoir raison » veut dire ne pas se tromper.",
       "tags": {
-        "skill": "grammaire",
-        "theme": "sorties",
-        "language_point": "passe_compose"
+        "skill": "lexique",
+        "theme": "vie_quotidienne",
+        "language_point": "expressions_courantes"
       }
     },
     {
@@ -579,22 +579,22 @@
       "section": "MSL",
       "level": "B1",
       "subtype": "phrase_a_trou",
-      "stimulus_text": "Je ___ tranquillement un film quand quelqu'un a sonné à la porte.",
+      "stimulus_text": "Tu te souviens ___ ce petit restaurant où nous avions dîné à Lyon ?",
       "audio_script": null,
       "question": "",
       "options": [
-        "regardais",
-        "ai regardé",
-        "regarderai",
-        "regarde"
+        "de",
+        "à",
+        "sur",
+        "pour"
       ],
       "correct_index": 0,
       "options_mode": "text",
-      "explanation": "L'action en cours, interrompue par un événement soudain (« a sonné »), se met à l'imparfait : « regardais ». Le passé composé présenterait deux actions successives ; le futur et le présent ne s'accordent pas avec « a sonné ».",
+      "explanation": "Le verbe « se souvenir » se construit toujours avec « de » : on se souvient de quelqu'un ou de quelque chose. « À », « sur » et « pour » ne s'emploient pas après ce verbe. Attention : « se rappeler » se construit, lui, sans préposition.",
       "tags": {
         "skill": "grammaire",
-        "theme": "vie_quotidienne",
-        "language_point": "passe_compose_imparfait"
+        "theme": "voyages",
+        "language_point": "verbes_prepositions"
       }
     },
     {
@@ -671,22 +671,22 @@
       "section": "MSL",
       "level": "C1",
       "subtype": "phrase_a_trou",
-      "stimulus_text": "___ terminé son rapport plus tôt que prévu, elle a pu quitter le bureau avant la fermeture.",
+      "stimulus_text": "Interrogé sur la hausse des impôts, le ministre a préféré botter en ___ plutôt que de répondre clairement.",
       "audio_script": null,
       "question": "",
       "options": [
-        "Ayant",
-        "Étant",
-        "Avoir",
-        "Eut"
+        "touche",
+        "arrière",
+        "avant",
+        "corner"
       ],
       "correct_index": 0,
       "options_mode": "text",
-      "explanation": "Le participe passé composé exprime ici la cause et l'antériorité ; « terminer » se conjugue avec avoir : « Ayant terminé ». « Étant » supposerait l'auxiliaire être, l'infinitif « Avoir » et le passé simple « Eut » ne peuvent pas ouvrir cette proposition.",
+      "explanation": "« Botter en touche » signifie éviter une question gênante en détournant la discussion, ce qu'annonce « plutôt que de répondre clairement ». « Botter en arrière », « en avant » ou « en corner » ne forment pas d'expression en français.",
       "tags": {
-        "skill": "grammaire",
-        "theme": "travail",
-        "language_point": "participe_gerondif"
+        "skill": "lexique",
+        "theme": "vie_publique",
+        "language_point": "expressions_idiomatiques"
       }
     },
     {
@@ -709,7 +709,7 @@
       "tags": {
         "skill": "grammaire",
         "theme": "vie_publique",
-        "language_point": "connecteurs_avances"
+        "language_point": "concession_soutenue"
       }
     },
     {
