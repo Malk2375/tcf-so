@@ -5,6 +5,12 @@
 <h1 class="text-2xl font-bold sm:text-3xl">{{ mode.names.name }} · {{ mode.minutes }} min</h1>
 <p class="mt-1 text-slate-700">{{ mode.questions }} questions · {{ mode.passed }} passé{% if mode.passed > 1 %}s{% endif %} · {{ mode.remaining }} à passer</p>
 {# Pas de bouton global : chaque test à passer a le sien (SPEC 8.1 bis). #}
+{% if mode.parts_allowed %}
+  <p class="mt-3 max-w-2xl text-sm text-slate-700">
+    Vous pouvez passer chaque {{ mode.names.noun }} en entier, ou une épreuve à la fois. Chaque épreuve ne se passe qu'une fois ;
+    un {{ mode.names.noun }} dont les trois épreuves sont faites compte comme passé.
+  </p>
+{% endif %}
 {% if mode.all_done %}
   <p class="mt-3 text-slate-700">{{ mode.all_done }}</p>
 {% endif %}
@@ -19,36 +25,75 @@
   {% if mode.rows %}
     <ol class="mt-3 divide-y divide-slate-200 rounded-md border border-slate-200 bg-white">
       {% for row in mode.rows %}
-        <li class="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between" data-state="{{ row.state }}">
-          <div class="min-w-0">
-            <p class="font-medium">
-              {{ row.test.public_label }}
-              {% if row.is_next %}<span class="ml-1 rounded bg-blue-50 px-2 py-0.5 text-sm font-normal text-blue-900">prochain</span>{% endif %}
-            </p>
-            {% if row.state == "passed" %}
-              <p class="text-sm text-slate-700">
-                Passé le {{ row.attempt.finished_at|date:"j F Y" }} · {{ row.attempt.global_score }} / 699 · {{ row.attempt.level_range }}
+        <li class="px-4 py-3" data-state="{{ row.state }}">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div class="min-w-0">
+              <p class="font-medium">
+                {{ row.test.public_label }}
+                {% if row.is_next %}<span class="ml-1 rounded bg-blue-50 px-2 py-0.5 text-sm font-normal text-blue-900">prochain</span>{% endif %}
               </p>
+              {% if row.state == "passed" and row.attempt %}
+                <p class="text-sm text-slate-700">
+                  Passé le {{ row.attempt.finished_at|date:"j F Y" }} · {{ row.attempt.global_score }} / 699 · {{ row.attempt.level_range }}
+                </p>
+              {% elif row.state == "passed" %}
+                <p class="text-sm text-slate-700">Passé, épreuve par épreuve</p>
+              {% elif row.state == "in_progress" %}
+                <p class="text-sm text-amber-800">En cours</p>
+              {% else %}
+                <p class="text-sm text-slate-600">À passer</p>
+              {% endif %}
+            </div>
+            {% if row.state == "passed" and row.attempt %}
+              <div class="flex gap-4">
+                <a href="{% url 'attempt_results' row.attempt.pk %}" class="link inline-flex min-h-11 items-center">Résultats</a>
+                <a href="{% url 'attempt_review' row.attempt.pk %}" class="link inline-flex min-h-11 items-center">Correction</a>
+              </div>
             {% elif row.state == "in_progress" %}
-              <p class="text-sm text-amber-800">En cours</p>
-            {% else %}
-              <p class="text-sm text-slate-600">À passer</p>
+              <a href="{% url 'attempt_player' row.attempt.pk %}" class="link inline-flex min-h-11 items-center">Reprendre</a>
+            {% elif row.can_start_full %}
+              <form method="post" action="{% url 'attempt_create' %}">
+                {% csrf_token %}
+                <input type="hidden" name="test" value="{{ row.test.pk }}">
+                <button type="submit" class="btn {% if row.is_next %}btn-primary{% else %}btn-secondary{% endif %} w-full sm:w-auto"
+                        aria-label="Commencer {{ row.test.public_label }}{% if mode.parts_allowed %}, test complet{% endif %}">{% if mode.parts_allowed %}Test complet{% else %}Commencer{% endif %}</button>
+              </form>
             {% endif %}
           </div>
-          {% if row.state == "passed" %}
-            <div class="flex gap-4">
-              <a href="{% url 'attempt_results' row.attempt.pk %}" class="link inline-flex min-h-11 items-center">Résultats</a>
-              <a href="{% url 'attempt_review' row.attempt.pk %}" class="link inline-flex min-h-11 items-center">Correction</a>
-            </div>
-          {% elif row.state == "in_progress" %}
-            <a href="{% url 'attempt_player' row.attempt.pk %}" class="link inline-flex min-h-11 items-center">Reprendre</a>
-          {% else %}
-            <form method="post" action="{% url 'attempt_create' %}">
-              {% csrf_token %}
-              <input type="hidden" name="test" value="{{ row.test.pk }}">
-              <button type="submit" class="btn {% if row.is_next %}btn-primary{% else %}btn-secondary{% endif %} w-full sm:w-auto"
-                      aria-label="Commencer {{ row.test.public_label }}">Commencer</button>
-            </form>
+          {% if row.parts %}
+            {# Une ligne par épreuve, à passer seule (8.1 ter). #}
+            <ul class="mt-3 space-y-2 border-l-2 border-slate-200 pl-3 sm:ml-2" aria-label="Épreuves de {{ row.test.public_label }}">
+              {% for part in row.parts %}
+                <li class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between" data-part="{{ part.section }}" data-part-state="{{ part.state }}">
+                  <div class="min-w-0">
+                    <p class="text-sm font-medium">{{ part.label }}</p>
+                    {% if part.state == "passed" %}
+                      <p class="text-sm text-slate-700">Passée le {{ part.attempt.finished_at|date:"j F Y" }} · {{ part.attempt.part_score }} / 699 · {{ part.attempt.part_level }}</p>
+                    {% elif part.state == "in_progress" %}
+                      <p class="text-sm text-amber-800">En cours</p>
+                    {% else %}
+                      <p class="text-sm text-slate-600">À passer</p>
+                    {% endif %}
+                  </div>
+                  {% if part.state == "passed" %}
+                    <div class="flex gap-4">
+                      <a href="{% url 'attempt_results' part.attempt.pk %}" class="link inline-flex min-h-11 items-center" aria-label="Résultats : {{ part.label }}">Résultats</a>
+                      <a href="{% url 'attempt_review' part.attempt.pk %}" class="link inline-flex min-h-11 items-center" aria-label="Correction : {{ part.label }}">Correction</a>
+                    </div>
+                  {% elif part.state == "in_progress" %}
+                    <a href="{% url 'attempt_player' part.attempt.pk %}" class="link inline-flex min-h-11 items-center">Reprendre</a>
+                  {% elif part.can_start %}
+                    <form method="post" action="{% url 'attempt_create' %}">
+                      {% csrf_token %}
+                      <input type="hidden" name="test" value="{{ row.test.pk }}">
+                      <input type="hidden" name="scope" value="{{ part.section }}">
+                      <button type="submit" class="btn btn-secondary w-full sm:w-auto"
+                              aria-label="Commencer {{ part.label|lower }}, {{ row.test.public_label }}">Commencer</button>
+                    </form>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
           {% endif %}
         </li>
       {% endfor %}

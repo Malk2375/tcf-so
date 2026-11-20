@@ -1,0 +1,127 @@
+[
+  {
+    "file": "197124__*",
+    "categories": [
+      "train"
+    ],
+    "start": null,
+    "end": null,
+    "title": "Empty train moving slowly, recorded inside passenger car",
+    "author": "avakas",
+    "source_url": "https://freesound.org/s/197124/",
+    "license": "CC0"
+  },
+  {
+    "file": "262638__*",
+    "categories": [
+      "metro_bus",
+      "gare"
+    ],
+    "start": 0,
+    "end": 16,
+    "title": "Ambience Vienna underground station, train leave, people walk",
+    "author": "magedu",
+    "source_url": "https://freesound.org/s/262638/",
+    "license": "CC0"
+  },
+  {
+    "file": "369183__*",
+    "categories": [
+      "cafe_restaurant"
+    ],
+    "start": null,
+    "end": null,
+    "title": "Ambience café",
+    "author": "arnaud coutancier",
+    "source_url": "https://freesound.org/s/369183/",
+    "license": "CC0"
+  },
+  {
+    "file": "451734__*",
+    "categories": [
+      "rue"
+    ],
+    "start": null,
+    "end": null,
+    "title": "Shopping street ambience",
+    "author": "florianreichelt",
+    "source_url": "https://freesound.org/s/451734/",
+    "license": "CC0"
+  },
+  {
+    "file": "455654__*",
+    "categories": [
+      "aeroport"
+    ],
+    "start": null,
+    "end": null,
+    "title": "Airport terminal waiting area, quiet, ventilation, light activity",
+    "author": "kyles",
+    "source_url": "https://freesound.org/s/455654/",
+    "license": "CC0",
+    "notes": "Le titre annonce des annonces en espagnol : écouter, puis remplir start et end sur un passage sans annonce."
+  },
+  {
+    "file": "460014__*",
+    "categories": [
+      "bureau"
+    ],
+    "start": null,
+    "end": null,
+    "title": "Office / oficina, Latin America",
+    "author": "jochefernandez",
+    "source_url": "https://freesound.org/s/460014/",
+    "license": "CC0",
+    "notes": "Vérifier qu'aucune parole n'est compréhensible au niveau du mixage."
+  },
+  {
+    "file": "707510__*",
+    "categories": [
+      "ecole"
+    ],
+    "start": null,
+    "end": null,
+    "title": "Classroom ambience",
+    "author": "tallis0410",
+    "source_url": "https://freesound.org/s/707510/",
+    "license": "CC0",
+    "notes": "Vérifier qu'aucune parole n'est compréhensible au niveau du mixage."
+  },
+  {
+    "file": "720574__*",
+    "categories": [
+      "carillon"
+    ],
+    "start": null,
+    "end": null,
+    "title": "Moscow metro line 5 buzzer/chime",
+    "author": "chungus43a",
+    "source_url": "https://freesound.org/s/720574/",
+    "license": "CC0",
+    "notes": "Garder seulement le carillon : couper une éventuelle annonce en russe avec end."
+  },
+  {
+    "file": "849391__*",
+    "categories": [
+      "marche"
+    ],
+    "start": null,
+    "end": null,
+    "title": "Market hall ambience in Stuttgart, Germany",
+    "author": "scheueanita",
+    "source_url": "https://freesound.org/s/849391/",
+    "license": "CC0"
+  },
+  {
+    "file": "849393__*",
+    "categories": [
+      "lieu_public"
+    ],
+    "start": null,
+    "end": null,
+    "title": "Museum entrance hall ambience in Stuttgart, Germany",
+    "author": "scheueanita",
+    "source_url": "https://freesound.org/s/849393/",
+    "license": "CC0"
+  }
+]

@@ -28,7 +28,20 @@ def default_tts_casting():
             "fr-FR-Chirp3-HD-Fenrir",
             "fr-FR-Chirp3-HD-Orus",
         ],
+        # Voix québécoises (7.2), pour les locuteurs déclarés fr-CA.
+        "F_CA": ["fr-CA-Chirp3-HD-Kore", "fr-CA-Chirp3-HD-Leda", "fr-CA-Chirp3-HD-Aoede"],
+        "M_CA": ["fr-CA-Chirp3-HD-Charon", "fr-CA-Chirp3-HD-Puck", "fr-CA-Chirp3-HD-Orus"],
     }
+
+
+def default_accent_quotas():
+    """Emplacements de CO avec un locuteur québécois, par mode (7.5.2) ; 0 désactive."""
+    return {"rapide": 1, "moyen": 2, "reel": 4}
+
+
+def default_ambience_snr_db():
+    """Rapport voix / bruit de fond en dB, par tranche de niveaux (7.5.3)."""
+    return {"A1-B1": 20, "B2-C2": 16}
 
 
 def current_month() -> str:
@@ -54,6 +67,12 @@ class SiteSettings(models.Model):
         "modèle du contrôle de la clé", max_length=100, default="claude-haiku-5-5"
     )
     tts_casting = models.JSONField("distribution des voix", default=default_tts_casting)
+    accent_quotas = models.JSONField(
+        "emplacements de CO à l'accent québécois", default=default_accent_quotas
+    )
+    ambience_snr_db = models.JSONField(
+        "rapport voix / bruit de fond (dB)", default=default_ambience_snr_db
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

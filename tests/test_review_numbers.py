@@ -84,7 +84,8 @@ def test_early_next_shortens_the_section_but_not_the_next_items(user, formats):
     attempt = services.create_attempt(user, test, now=start)
     section = services.start_section(attempt, 1, now=start)
     first = services.current_co_answer(section)
-    window = services.format_section(section).answer_window_seconds
+    fs = services.format_section(section)
+    window = fs.answer_window_seconds
     deadline_before = section.deadline_at
     # Réponse choisie, puis « Valider » 10 s après l'apparition de la question.
     first.selected_index = 1
@@ -99,11 +100,12 @@ def test_early_next_shortens_the_section_but_not_the_next_items(user, formats):
     expected = clicked + timedelta(seconds=services.co_remaining_seconds(section, following))
     assert abs((section.deadline_at - expected).total_seconds()) < 0.01
     assert section.deadline_at < deadline_before  # le temps gagné raccourcit l'épreuve
-    # La question suivante garde tout son temps : audio + temps de réponse.
-    limit = services.co_item_limit(second, window)
+    # La question suivante garde tout son temps : lecture + audio + temps de réponse.
+    limit = services.co_item_limit(second, fs)
+    read = services.co_read_seconds(second.test_item, fs)
     assert (
         limit - clicked
-        == timedelta(seconds=services.co_item_seconds(second.test_item) + window)
+        == timedelta(seconds=read + services.co_item_seconds(second.test_item) + window)
         + services.CO_ITEM_GRACE
     )
     assert section.status == AttemptSection.Status.IN_PROGRESS

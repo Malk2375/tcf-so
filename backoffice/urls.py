@@ -1,6 +1,6 @@
 from django.urls import path
 
-from backoffice import review_views, views
+from backoffice import ambience_views, review_views, views
 
 app_name = "backoffice"
 
@@ -29,6 +29,9 @@ urlpatterns = [
     path("tests/<int:pk>/items/<int:item_pk>/audio", review_views.item_audio, name="item_audio"),
     path("voices/", views.voices, name="voices"),
     path("voices/sample", views.voice_sample, name="voice_sample"),
+    path("ambiences/", ambience_views.ambiences, name="ambiences"),
+    path("ambiences/<int:pk>/", ambience_views.ambience_update, name="ambience_update"),
+    path("ambiences/<int:pk>/trial", ambience_views.ambience_trial, name="ambience_trial"),
     path("usage/", views.usage, name="usage"),
     path("users/", views.users, name="users"),
 ]

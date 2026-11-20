@@ -7,6 +7,7 @@ from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connections
 
+from bank.ambiences import ensure_fake_ambiences
 from bank.demo import require_demo
 from bank.devtest import make_dev_draft, make_dev_test
 from bank.formats import seed_formats
@@ -30,7 +31,8 @@ def remove_demo_files(db_path: Path, media_root: Path) -> None:
 
 
 # Contenu de démonstration : de quoi passer des tests, obtenir des conseils et relire un brouillon.
-DEMO_TESTS = ["rapide", "rapide", "rapide", "moyen"]
+# Deux entraînements moyens : de quoi passer des épreuves seules (8.1 ter).
+DEMO_TESTS = ["rapide", "rapide", "rapide", "moyen", "moyen"]
 DEMO_DRAFTS = ["rapide"]
 
 
@@ -38,6 +40,8 @@ def populate(with_tests: bool = True) -> list[str]:
     """Formats d'examen, compte administrateur de démonstration et tests factices."""
     seed_formats()
     admin = get_user_model().objects.create_superuser("demo", DEMO_EMAIL, DEMO_PASSWORD)
+    # Bruits de fond factices (bruit rose ou brun, carillon), un par catégorie (7.5.4).
+    ensure_fake_ambiences()
     if not with_tests:
         return []
     tests = [make_dev_test(mode) for mode in DEMO_TESTS]

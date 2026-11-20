@@ -24,7 +24,9 @@ from bank.constants import CHARS_PER_SECOND
 
 SAMPLE_RATE = 24_000
 LANGUAGE = "fr-FR"
-CHIRP3_PREFIX = "fr-FR-Chirp3-HD-"
+LANGUAGES = ["fr-FR", "fr-CA"]  # français de France et du Canada (7.1)
+CHIRP3_PREFIXES = {language: f"{language}-Chirp3-HD-" for language in LANGUAGES}
+CHIRP3_PREFIX = CHIRP3_PREFIXES[LANGUAGE]
 
 
 class TTSError(Exception):
@@ -35,6 +37,12 @@ class TTSError(Exception):
 class Voice:
     name: str
     gender: str  # « F » ou « M » ; « » si l'API ne le précise pas
+    language: str = LANGUAGE  # fr-FR ou fr-CA
+
+
+def voice_language(voice: str) -> str:
+    """Langue d'une voix d'après son nom (« fr-CA-Chirp3-HD-Kore » → fr-CA)."""
+    return voice[:5] if voice[:5] in LANGUAGES else LANGUAGE
 
 
 class TTSProvider(Protocol):
@@ -44,7 +52,9 @@ class TTSProvider(Protocol):
         """WAV mono, PCM 16 bits."""
         ...
 
-    def list_voices(self) -> list[Voice]: ...
+    def list_voices(self) -> list[Voice]:
+        """Voix fr-FR et fr-CA disponibles."""
+        ...
 
 
 def wav_bytes(pcm: bytes, sample_rate: int = SAMPLE_RATE) -> bytes:
@@ -73,6 +83,15 @@ FAKE_VOICES = [
     Voice("fr-FR-Chirp3-HD-Fenrir", "M"),
     Voice("fr-FR-Chirp3-HD-Orus", "M"),
     Voice("fr-FR-Chirp3-HD-Iapetus", "M"),
+    # Voix québécoises factices : celles de la distribution par défaut et une de plus par genre.
+    Voice("fr-CA-Chirp3-HD-Kore", "F", "fr-CA"),
+    Voice("fr-CA-Chirp3-HD-Leda", "F", "fr-CA"),
+    Voice("fr-CA-Chirp3-HD-Aoede", "F", "fr-CA"),
+    Voice("fr-CA-Chirp3-HD-Zephyr", "F", "fr-CA"),
+    Voice("fr-CA-Chirp3-HD-Charon", "M", "fr-CA"),
+    Voice("fr-CA-Chirp3-HD-Puck", "M", "fr-CA"),
+    Voice("fr-CA-Chirp3-HD-Orus", "M", "fr-CA"),
+    Voice("fr-CA-Chirp3-HD-Fenrir", "M", "fr-CA"),
 ]
 # Fréquences qui divisent 24 000 : une période tient en un nombre entier d'échantillons.
 _FAKE_FREQUENCIES = [200, 240, 250, 300, 320, 375, 400, 480]
@@ -154,7 +173,7 @@ class GoogleChirp3Provider:
             audio_config["speakingRate"] = speaking_rate
         body = {
             "input": {"text": text},
-            "voice": {"languageCode": LANGUAGE, "name": voice},
+            "voice": {"languageCode": voice_language(voice), "name": voice},
             "audioConfig": audio_config,
         }
         payload = self._request("POST", "text:synthesize", body)
@@ -164,14 +183,16 @@ class GoogleChirp3Provider:
             raise TTSError("API Text-to-Speech : réponse sans audio.") from exc
 
     def list_voices(self) -> list[Voice]:
-        query = urllib.parse.urlencode({"languageCode": LANGUAGE})
-        payload = self._request("GET", f"voices?{query}")
-        voices = [
-            Voice(v["name"], _GENDERS.get(v.get("ssmlGender", ""), ""))
-            for v in payload.get("voices", [])
-            if LANGUAGE in v.get("languageCodes", [])
-        ]
-        return sorted(voices, key=lambda v: v.name)
+        voices = []
+        for language in LANGUAGES:
+            query = urllib.parse.urlencode({"languageCode": language})
+            payload = self._request("GET", f"voices?{query}")
+            voices += [
+                Voice(v["name"], _GENDERS.get(v.get("ssmlGender", ""), ""), language)
+                for v in payload.get("voices", [])
+                if language in v.get("languageCodes", [])
+            ]
+        return sorted(voices, key=lambda v: (LANGUAGES.index(v.language), v.name))
 
 
 # Moteur enregistré dans AudioAsset.engine pour chaque valeur de TTS_PROVIDER.
@@ -192,5 +213,5 @@ def get_provider() -> TTSProvider:
 
 
 def chirp3_voices(provider: TTSProvider) -> list[Voice]:
-    """Voix proposées sur /bo/voices/ : les voix fr-FR Chirp 3 HD."""
-    return [v for v in provider.list_voices() if v.name.startswith(CHIRP3_PREFIX)]
+    """Voix proposées sur /bo/voices/ : les voix Chirp 3 HD fr-FR, puis fr-CA."""
+    return [v for v in provider.list_voices() if v.name.startswith(CHIRP3_PREFIXES[v.language])]

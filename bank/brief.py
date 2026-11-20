@@ -7,10 +7,13 @@ from django.db import transaction
 from django.db.models import Max
 
 from bank.constants import (
+    ACCENT_SUBTYPES,
     AVOID_MAX_LINES,
     AVOID_SUPPORT_CHARS,
+    DEFAULT_SETTING,
     LETTERS,
     LEVELS,
+    allowed_combinations,
     expected_options_mode,
     length_target,
     subtypes_for,
@@ -18,6 +21,7 @@ from bank.constants import (
 from bank.language_points import FAMILY_QUOTAS, language_points, points_at
 from bank.models import Brief, ExamFormat, Item, Test
 from bank.themes import themes
+from usage.models import SiteSettings
 
 
 class BriefError(Exception):
@@ -116,6 +120,32 @@ def assign_language_points(
     return [(families[i], points[i]) for i in range(len(levels))]
 
 
+# --- CO : lieu, canal et accent (7.5.2) ----------------------------------------------------------
+
+
+def pick_sound(subtype: str, used: Counter, rng: random.Random) -> tuple[str, str]:
+    """(lieu, canal) tiré parmi les combinaisons du sous-type, en variant : jamais deux fois le
+    même lieu dans une épreuve tant qu'un autre lieu permis reste libre (« aucun » n'est pas un
+    lieu et peut revenir)."""
+    combinations = allowed_combinations(subtype)
+    lowest = min(0 if setting == DEFAULT_SETTING else used[setting] for _, setting in combinations)
+    candidates = [
+        (channel, setting)
+        for channel, setting in combinations
+        if setting == DEFAULT_SETTING or used[setting] == lowest
+    ]
+    channel, setting = rng.choice(candidates)
+    used[setting] += 1
+    return setting, channel
+
+
+def accent_slots(co_slots: list[dict], quota: int, rng: random.Random) -> set[int]:
+    """Numéros des emplacements de CO qui reçoivent l'accent québécois, parmi les sous-types
+    permis."""
+    eligible = [slot["slot"] for slot in co_slots if slot["subtype"] in ACCENT_SUBTYPES]
+    return set(rng.sample(eligible, min(max(quota, 0), len(eligible))))
+
+
 def next_number(exam_format: ExamFormat) -> int:
     """Numéro suivant pour ce format : ni un test ni un brief ne l'utilisent déjà."""
     highest = max(
@@ -162,6 +192,7 @@ def build_brief(exam_format: ExamFormat, number: int, rng: random.Random | None 
                 levels, FAMILY_QUOTAS[exam_format.mode], point_usage, rng
             )
 
+        used_settings: Counter = Counter()
         for index, level in enumerate(levels):
             subtype = rng.choice(subtypes_for(section, level))
             # Thème le moins utilisé en banque pour cette épreuve, jamais deux fois dans l'épreuve.
@@ -174,6 +205,8 @@ def build_brief(exam_format: ExamFormat, number: int, rng: random.Random | None 
                 "subtype": subtype,
                 "theme": theme,
             }
+            if section == "CO":
+                slot["setting"], slot["channel"] = pick_sound(subtype, used_settings, rng)
             if section == "MSL":
                 family, point = language[index]
                 slot["language_family"] = family
@@ -184,12 +217,26 @@ def build_brief(exam_format: ExamFormat, number: int, rng: random.Random | None 
             slot["options_mode"] = expected_options_mode(section, level, subtype)
             slots.append(slot)
 
+    quota = SiteSettings.load().accent_quotas.get(exam_format.mode, 0)
+    chosen = accent_slots([s for s in slots if s["section"] == "CO"], quota, rng)
+    slots = [_with_accent(slot) if slot["slot"] in chosen else slot for slot in slots]
+
     return {
         "brief_id": f"{exam_format.code}-{number:04d}",
         "format": exam_format.code,
         "slots": slots,
         "avoid": _avoid_lines({s["theme"] for s in slots}),
     }
+
+
+def _with_accent(slot: dict) -> dict:
+    """Ajoute "accent": "fr-CA" juste après le canal, comme dans l'exemple de la SPEC."""
+    ordered = {}
+    for key, value in slot.items():
+        ordered[key] = value
+        if key == "channel":
+            ordered["accent"] = "fr-CA"
+    return ordered
 
 
 @transaction.atomic

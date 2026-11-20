@@ -11,6 +11,8 @@
       "stimulus_text": null,
       "audio_script": {
         "style": "question posée lors d'une première rencontre, ton aimable",
+        "setting": "aucun",
+        "channel": "direct",
         "speakers": {
           "F1": {
             "gender": "F"
@@ -46,6 +48,8 @@
       "stimulus_text": null,
       "audio_script": {
         "style": "annonce au micro dans un magasin, ton neutre",
+        "setting": "magasin",
+        "channel": "haut_parleur",
         "speakers": {
           "F1": {
             "gender": "F"
@@ -81,6 +85,8 @@
       "stimulus_text": null,
       "audio_script": {
         "style": "message laissé sur un répondeur, ton amical et un peu gêné",
+        "setting": "aucun",
+        "channel": "telephone",
         "speakers": {
           "M1": {
             "gender": "M"
@@ -116,6 +122,8 @@
       "stimulus_text": null,
       "audio_script": {
         "style": "conversation téléphonique, ton poli",
+        "setting": "aucun",
+        "channel": "telephone",
         "speakers": {
           "F1": {
             "gender": "F"
@@ -166,12 +174,15 @@
       "stimulus_text": null,
       "audio_script": {
         "style": "conversation entre deux amis, ton détendu",
+        "setting": "cafe_restaurant",
+        "channel": "direct",
         "speakers": {
           "F1": {
             "gender": "F"
           },
           "M1": {
-            "gender": "M"
+            "gender": "M",
+            "accent": "fr-CA"
           }
         },
         "lines": [
@@ -216,6 +227,8 @@
       "stimulus_text": null,
       "audio_script": {
         "style": "interview pour une radio locale, ton chaleureux",
+        "setting": "aucun",
+        "channel": "radio",
         "speakers": {
           "F1": {
             "gender": "F"
@@ -258,6 +271,8 @@
       "stimulus_text": null,
       "audio_script": {
         "style": "interview d'une élue à la radio, ton posé",
+        "setting": "aucun",
+        "channel": "radio",
         "speakers": {
           "M1": {
             "gender": "M"
@@ -300,6 +315,8 @@
       "stimulus_text": null,
       "audio_script": {
         "style": "chronique économique à la radio, ton vif",
+        "setting": "aucun",
+        "channel": "radio",
         "speakers": {
           "F1": {
             "gender": "F"
@@ -335,6 +352,8 @@
       "stimulus_text": null,
       "audio_script": {
         "style": "billet d'humeur à la radio, ton mesuré et légèrement ironique",
+        "setting": "aucun",
+        "channel": "radio",
         "speakers": {
           "M1": {
             "gender": "M"
@@ -370,6 +389,8 @@
       "stimulus_text": null,
       "audio_script": {
         "style": "extrait de conférence, ton pédagogique",
+        "setting": "salle_conference",
+        "channel": "direct",
         "speakers": {
           "F1": {
             "gender": "F"
@@ -405,6 +426,8 @@
       "stimulus_text": null,
       "audio_script": {
         "style": "extrait de conférence d'un linguiste, ton érudit et un peu malicieux",
+        "setting": "salle_conference",
+        "channel": "direct",
         "speakers": {
           "M1": {
             "gender": "M"
@@ -440,6 +463,8 @@
       "stimulus_text": null,
       "audio_script": {
         "style": "débat radiophonique, échange courtois mais ferme",
+        "setting": "aucun",
+        "channel": "radio",
         "speakers": {
           "F1": {
             "gender": "F"

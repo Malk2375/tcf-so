@@ -1,0 +1,7 @@
+{% extends "backoffice/base.html" %}
+{% block head_title %}Essai · Bruits de fond · Back-office{% endblock %}
+{% block bo_content %}
+<p><a href="{% url 'backoffice:ambiences' %}#clip-{{ clip.pk }}" class="link inline-flex min-h-11 items-center">← Bruits de fond</a></p>
+<h1 class="text-2xl font-bold sm:text-3xl">Essai : {{ clip.title }}</h1>
+<div class="mt-4">{% include "backoffice/includes/ambience_trial.html" %}</div>
+{% endblock %}

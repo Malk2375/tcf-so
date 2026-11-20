@@ -2,8 +2,9 @@ import json
 
 from django import forms
 
-from bank.constants import MAX_IMPORT_FILES
-from bank.models import ExamFormat
+from bank.ambiences import MAX_SOURCE_BYTES
+from bank.constants import AMBIENCE_CATEGORIES, AMBIENCE_LABELS, MAX_IMPORT_FILES
+from bank.models import AmbienceClip, ExamFormat
 from bank.schema import StrictJSONError, parse_json
 
 
@@ -156,3 +157,45 @@ class CorrectionsForm(PasteOrFileForm):
         super().__init__(*args, **kwargs)
         self.fields["file"].label = "Corrections : fichier JSON"
         self.fields["text"].label = "ou contenu collé (JSON ou bloc ```json```)"
+
+
+class AmbienceForm(forms.Form):
+    """Envoi d'un bruit de fond ou d'un carillon (7.5.4)."""
+
+    file = forms.FileField(
+        label="Fichier audio",
+        help_text="WAV, AIFF, FLAC, MP3, OGG, M4A… (tout format lu par ffmpeg), 150 Mo au plus.",
+        widget=forms.ClearableFileInput(attrs={"accept": "audio/*,.aiff,.aif,.flac,.m4a"}),
+    )
+    categories = forms.MultipleChoiceField(
+        label="Catégories",
+        choices=[(c, AMBIENCE_LABELS[c]) for c in AMBIENCE_CATEGORIES],
+        widget=forms.CheckboxSelectMultiple,
+        help_text="Un même son peut servir à plusieurs lieux (par exemple métro et gare).",
+    )
+    start = forms.DecimalField(
+        label="Début (s)", required=False, min_value=0, decimal_places=3, max_digits=8
+    )
+    end = forms.DecimalField(
+        label="Fin (s)", required=False, min_value=0, decimal_places=3, max_digits=8
+    )
+    title = forms.CharField(label="Titre", max_length=200)
+    author = forms.CharField(label="Auteur", max_length=200, required=False)
+    source_url = forms.URLField(
+        label="Adresse de la page source", max_length=500, assume_scheme="https"
+    )
+    license = forms.ChoiceField(label="Licence", choices=AmbienceClip.License.choices)
+    notes = forms.CharField(label="Notes", required=False, widget=forms.Textarea(attrs={"rows": 2}))
+
+    def clean_file(self):
+        upload = self.cleaned_data["file"]
+        if upload.size > MAX_SOURCE_BYTES:
+            raise forms.ValidationError("Fichier de plus de 150 Mo.")
+        return upload
+
+    def clean(self):
+        data = super().clean()
+        start, end = data.get("start"), data.get("end")
+        if start is not None and end is not None and end <= start:
+            self.add_error("end", "La fin doit venir après le début.")
+        return data

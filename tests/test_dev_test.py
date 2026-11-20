@@ -5,14 +5,16 @@ from django.contrib.auth import get_user_model
 from django.core.files.storage import default_storage
 from django.core.management import CommandError, call_command
 
-from bank.content import item_fields, length_check, script_hash, within_tolerance
+from bank.audio import expected_hash
+from bank.constants import AMBIENCE_CATEGORIES
+from bank.content import item_fields, length_check, within_tolerance
 from bank.management.commands.reset_demo import (
     DEMO_EMAIL,
     DEMO_PASSWORD,
     populate,
     remove_demo_files,
 )
-from bank.models import AudioAsset, ExamFormat, Item, Test
+from bank.models import AmbienceClip, AudioAsset, ExamFormat, Item, Test
 
 pytestmark = pytest.mark.django_db
 
@@ -36,7 +38,7 @@ def test_make_dev_test_rapide(formats, demo_db):
         assert default_storage.exists(asset.file.name)
         assert default_storage.open(asset.file.name).read(3) in (b"ID3", b"\xff\xfb", b"\xff\xf3")
         assert asset.duration_ms > 0
-        assert asset.script_hash == script_hash(item_fields(item))
+        assert asset.script_hash == expected_hash(item)
     assert AudioAsset.objects.count() == 9
 
 
@@ -110,9 +112,17 @@ def test_reset_demo_creates_tests_to_pass_and_a_draft(db, monkeypatch):
 
     monkeypatch.setattr(audio, "encode_mp3", lambda pcm: b"MP3" + pcm[:64])
     created = populate()
-    assert len(created) == 6
+    assert len(created) == 7
     published = Test.objects.filter(status=Test.Status.PUBLISHED)
-    assert sorted(t.format.mode for t in published) == ["moyen", "rapide", "rapide", "rapide"]
+    assert sorted(t.format.mode for t in published) == [
+        "moyen",
+        "moyen",
+        "rapide",
+        "rapide",
+        "rapide",
+    ]
+    # Un bruit de fond factice par catégorie (7.5.4).
+    assert AmbienceClip.objects.filter(is_fake=True).count() == len(AMBIENCE_CATEGORIES)
     draft = Test.objects.get(status=Test.Status.DRAFT)
     assert draft.import_batch.uploaded_by.email == DEMO_EMAIL  # corrections possibles
 

@@ -4,9 +4,16 @@
 {% block content %}
 <h1 class="text-2xl font-bold sm:text-3xl">Résultats</h1>
 <p class="mt-1 text-slate-700">
-  {{ attempt.test.format.label }}, {{ attempt.test.public_label }} · terminé le {{ attempt.finished_at|date:"j F Y à H:i" }}
+  {{ attempt.display_label }} · terminé le {{ attempt.finished_at|date:"j F Y à H:i" }}
 </p>
 
+{% if attempt.is_part %}
+  {# Épreuve seule (8.1 ter) : score et niveau de l'épreuve, pas de score global. #}
+  <p class="mt-4 rounded-md bg-slate-50 p-3 text-sm text-slate-700">
+    Épreuve passée seule : pas de score global. Le niveau global du tableau de bord ne vient que des tests passés en entier.
+  </p>
+  <p class="mt-2 text-sm font-medium text-slate-700">Estimation non officielle. Questions générées par IA.</p>
+{% else %}
 <section class="card mt-6" aria-labelledby="global-titre">
   <h2 id="global-titre" class="text-lg font-semibold">Niveau global estimé</h2>
   <p class="mt-2 text-4xl font-bold text-blue-900">{{ attempt.level_range }}</p>
@@ -18,8 +25,9 @@
   {% endif %}
   <p class="mt-3 text-sm font-medium text-slate-700">Estimation non officielle. Questions générées par IA.</p>
 </section>
+{% endif %}
 
-<div class="mt-6 grid gap-4 lg:grid-cols-3">
+<div class="mt-6 grid gap-4 {% if not attempt.is_part %}lg:grid-cols-3{% endif %}">
   {% for s in sections %}
     <section class="card" aria-labelledby="epreuve-{{ s.obj.section }}">
       <h2 id="epreuve-{{ s.obj.section }}" class="font-semibold">{{ s.label }}</h2>

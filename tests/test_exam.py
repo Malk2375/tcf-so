@@ -137,7 +137,7 @@ def test_create_attempt_sets_sections_and_expiry(attempt, published):
         ("MSL", "pending"),
         ("CE", "pending"),
     ]
-    co = services.co_duration_seconds(published, 12)
+    co = services.co_duration_seconds(published, published.format.sections.get(section="CO"))
     total = co + 300 + 780
     expected = attempt.started_at + timedelta(seconds=total, minutes=30)
     assert abs((attempt.expires_at - expected).total_seconds()) < 1
@@ -348,7 +348,8 @@ def test_co_audio_can_restart_only_once(user_client, attempt):
 def test_co_item_left_open_is_closed_lazily(user_client, attempt, frozen):
     co = section_items(attempt.test, "CO")
     _, data = api(user_client, attempt, "api_section_start", 1)
-    first_limit = services.co_item_seconds(co[0]) + 12 + 30
+    fs = attempt.test.format.sections.get(section="CO")
+    first_limit = services.co_item_seconds(co[0]) + services.co_read_seconds(co[0], fs) + 12 + 30
 
     frozen.shift(timedelta(seconds=first_limit - 1))
     _, state = api(user_client, attempt, "api_attempt_state")
@@ -363,7 +364,8 @@ def test_co_item_left_open_is_closed_lazily(user_client, attempt, frozen):
 
 def test_co_section_runs_out_while_user_is_away(user_client, attempt, frozen):
     api(user_client, attempt, "api_section_start", 1)
-    co_total = services.co_duration_seconds(attempt.test, 12) + 9 * 30
+    fs = attempt.test.format.sections.get(section="CO")
+    co_total = services.co_duration_seconds(attempt.test, fs) + 9 * 30
     frozen.shift(timedelta(seconds=co_total + 1))
     _, state = api(user_client, attempt, "api_attempt_state")
     assert [s["status"] for s in state["sections"]] == ["done", "pending", "pending"]

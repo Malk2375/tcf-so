@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block head_title %}Crédits sonores{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold sm:text-3xl">Crédits sonores</h1>
+<p class="mt-3 max-w-2xl text-slate-700">
+  Les voix des documents de compréhension orale sont synthétisées à partir de textes rédigés pour la plateforme.
+  Les bruits de fond qui les accompagnent sont des enregistrements sous licence Creative Commons, utilisés
+  dans un cadre personnel et non commercial. Merci à leurs auteurs.
+</p>
+{% if clips %}
+  <ul class="mt-6 divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white">
+    {% for clip in clips %}
+      <li class="px-4 py-3">
+        <p class="font-medium break-words">« {{ clip.title }} »</p>
+        <p class="text-sm text-slate-700 break-words">
+          {% if clip.author %}par {{ clip.author }} · {% endif %}licence {{ clip.get_license_display }}
+        </p>
+        <p class="text-sm"><a href="{{ clip.source_url }}" class="link inline-flex min-h-11 items-center break-all" rel="noopener">Source et licence</a></p>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p class="mt-6 text-slate-600">Aucun bruit de fond n'est utilisé pour le moment.</p>
+{% endif %}
+{% endblock %}

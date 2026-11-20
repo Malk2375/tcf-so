@@ -1,4 +1,4 @@
-{# Bouton d'un mode (SPEC 8.1, 8.1 bis, 10) : Reprendre, Commencer, « tous passés » ou rien. #}
+{# Bouton d'un mode (SPEC 8.1, 8.1 bis, 8.1 ter, 10) : Reprendre, Commencer, épreuves à passer, « tous passés » ou rien. #}
 {% if mode.current %}
   <a href="{% url 'attempt_player' mode.current.pk %}" class="btn btn-primary w-full sm:w-auto">Reprendre</a>
 {% elif mode.next_test %}
@@ -10,6 +10,9 @@
     </button>
   </form>
   {% if mode.other_current %}<p class="mt-2 text-sm text-slate-600">Un autre passage est en cours.</p>{% endif %}
+{% elif mode.parts_left %}
+  {# Plus de test entier à lancer, mais des épreuves seules à passer (8.1 ter). #}
+  <a href="{% url 'mode_tests' mode.format.mode %}" class="btn btn-primary w-full sm:w-auto">Voir les épreuves à passer</a>
 {% elif mode.all_done %}
   <p class="text-sm text-slate-700">{{ mode.all_done }}</p>
 {% else %}

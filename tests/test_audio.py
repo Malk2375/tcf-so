@@ -23,7 +23,7 @@ from bank.audio import (
     is_up_to_date,
     plan_item,
 )
-from bank.content import item_fields, script_hash, tts_chars
+from bank.content import item_fields, tts_chars
 from bank.devtest import make_dev_draft
 from bank.models import AudioAsset, Item
 from bank.review import update_item
@@ -164,8 +164,16 @@ def test_google_provider_lists_french_voices_with_gender(monkeypatch):
 
     monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
     voices = GoogleChirp3Provider("cle").list_voices()
-    assert urls == ["https://texttospeech.googleapis.com/v1/voices?languageCode=fr-FR"]
-    assert voices == [Voice("fr-FR-Chirp3-HD-Kore", "F"), Voice("fr-FR-Chirp3-HD-Puck", "M")]
+    # Deux requêtes : voix françaises, puis québécoises (7.1).
+    assert urls == [
+        "https://texttospeech.googleapis.com/v1/voices?languageCode=fr-FR",
+        "https://texttospeech.googleapis.com/v1/voices?languageCode=fr-CA",
+    ]
+    assert voices == [
+        Voice("fr-FR-Chirp3-HD-Kore", "F"),
+        Voice("fr-FR-Chirp3-HD-Puck", "M"),
+        Voice("fr-CA-Chirp3-HD-Kore", "F", "fr-CA"),
+    ]
 
 
 def test_google_provider_errors_are_readable(monkeypatch, settings):
@@ -250,7 +258,8 @@ def test_synthesized_item_is_a_real_normalized_mp3(draft):
     assert abs(asset.duration_ms / 1000 - expected) < 0.05
     assert asset.engine == "fake"
     assert asset.chars_billed == plan.chars
-    assert asset.script_hash == script_hash(item_fields(item))
+    # Empreinte du script, plus le mixage si l'item a un lieu, un canal ou un accent (7.5.3).
+    assert asset.script_hash == audio.expected_hash(item)
     assert asset.voices["instructions"] == CASTING["instructions"]
 
 

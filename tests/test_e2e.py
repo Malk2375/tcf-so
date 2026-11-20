@@ -136,16 +136,26 @@ def run_co(page, label):
     assert page.locator("audio").count() == 2  # un seul lecteur, plus le préchargement
     assert page.locator("audio[controls]").count() == 0  # ni pause ni barre de déplacement
     answered = 0
+    reading_seen = False
     while True:
         state = player_state(page)
         if state["phase"] == "instructions":
             break
-        listening = state["phase"] == "co" and state["coPhase"] in {"listening", "answering"}
+        if state["coPhase"] == "reading" and not reading_seen:
+            # Temps de lecture (8.5) : décompte visible, l'enregistrement n'a pas commencé.
+            expect(page.get_by_text("L'enregistrement commence dans")).to_be_visible()
+            reading_seen = page.evaluate(
+                "() => document.querySelector('audio').paused"
+                " || !document.querySelector('audio').src.includes('/audio/')"
+            )
+        active = {"reading", "listening", "answering"}
+        listening = state["phase"] == "co" and state["coPhase"] in active
         selected = page.locator("section:visible button.option[aria-pressed='true']")
         if listening and not selected.count():
             choose_first_option(page)
             answered += 1
         page.wait_for_timeout(150)
+    assert reading_seen, f"{label} : temps de lecture jamais affiché"
     return answered
 
 
@@ -200,7 +210,10 @@ def run_qcm(page, label, section):
 @pytest.mark.parametrize("size", VIEWPORTS.values(), ids=VIEWPORTS.keys())
 def test_player_end_to_end(browser, live_server, candidate, size):
     test = make_dev_test("rapide", rng=random.Random(4))
-    FormatSection.objects.filter(format=test.format, section="CO").update(answer_window_seconds=1)
+    # Temps courts pour que le test reste rapide : 1 s de réponse, 2 s de lecture.
+    FormatSection.objects.filter(format=test.format, section="CO").update(
+        answer_window_seconds=1, read_before_seconds=2
+    )
     attempt = services.create_attempt(candidate, test)
     label = "×".join(map(str, size))
     context = open_context(browser, live_server, candidate, size)
@@ -351,6 +364,7 @@ def screens(transactional_db, formats):
     from django.contrib.auth import get_user_model
 
     from advice.services import advice_for
+    from bank.ambiences import ensure_fake_ambiences
     from bank.devtest import make_dev_draft
     from tests.test_advice import complete
 
@@ -360,6 +374,9 @@ def screens(transactional_db, formats):
     # Deux tests à passer : la liste du mode montre aussi ses boutons « Commencer » (8.1 bis).
     for seed in (61, 62):
         make_dev_test("rapide", rng=random.Random(seed))
+    # Entraînement moyen : une ligne par épreuve, chacune avec son bouton (8.1 ter).
+    make_dev_test("moyen", rng=random.Random(63))
+    ensure_fake_ambiences()
     advice = advice_for(attempts[-1])
     assert advice is not None
     draft = make_dev_draft("rapide", rng=rng, user=admin)
@@ -370,6 +387,8 @@ def screens(transactional_db, formats):
             "accueil (déconnecté)": None,
             "tableau de bord": "/dashboard/",
             "liste d'un mode": "/modes/rapide/",
+            "liste par épreuve": "/modes/moyen/",
+            "crédits sonores": "/credits/",
             "historique": "/history/",
             "résultats": f"/attempts/{attempts[-1].pk}/results/",
             "correction": f"/attempts/{attempts[-1].pk}/review/",
@@ -385,6 +404,7 @@ def screens(transactional_db, formats):
             "bo relecture": f"/bo/tests/{draft.pk}/",
             "bo modifier": f"/bo/tests/{draft.pk}/items/{item.pk}/edit/",
             "bo voix": "/bo/voices/",
+            "bo bruits de fond": "/bo/ambiences/",
             "bo consommation": "/bo/usage/",
             "bo comptes": "/bo/users/",
         },
@@ -419,6 +439,9 @@ def test_every_screen_fits_and_is_readable(browser, live_server, screens, size):
         if name == "liste d'un mode":
             starts = page.locator("li[data-state=to_pass] button", has_text="Commencer")
             assert starts.count() == 2, f"{label} : boutons Commencer de la liste"
+        if name == "liste par épreuve":
+            parts = page.locator("li[data-part-state=to_pass] button", has_text="Commencer")
+            assert parts.count() == 3, f"{label} : boutons des épreuves"
         assert_fits(page, f"{label}, {name}")
         assert_contrast(page, f"{label}, {name}")
     assert_keyboard_focus_visible(page, f"{label}, comptes")
@@ -460,7 +483,7 @@ def co_item_id(page):
 def test_co_validate_button(browser, live_server, candidate, allowed):
     test = make_dev_test("rapide", rng=random.Random(5))
     FormatSection.objects.filter(format=test.format, section="CO").update(
-        answer_window_seconds=60, allow_early_next=allowed
+        answer_window_seconds=60, allow_early_next=allowed, read_before_seconds=0
     )
     attempt = services.create_attempt(candidate, test)
     context = open_context(browser, live_server, candidate, VIEWPORTS["390x844"])
@@ -492,4 +515,50 @@ def test_co_validate_button(browser, live_server, candidate, allowed):
     )
     answer = attempt.answers.get(test_item_id=first)
     assert answer.selected_index == 0  # le choix est enregistré avant le passage
+    context.close()
+
+
+# Envoi des réponses retardé de 1,5 s : la réponse part avant la fin du décompte (1 s) mais arrive
+# après. Sans attente côté lecteur, `co/next` passerait d'abord et la réponse serait refusée.
+SLOW_ANSWERS = """
+(() => {
+  const realFetch = window.fetch;
+  window.fetch = (url, options) => {
+    if (String(url).endsWith("/answers") && options && options.method === "POST") {
+      return new Promise((resolve) => setTimeout(resolve, 1500)).then(() =>
+        realFetch(url, options),
+      );
+    }
+    return realFetch(url, options);
+  };
+})();
+"""
+
+
+def test_last_second_co_answer_is_kept(browser, live_server, candidate):
+    test = make_dev_test("rapide", rng=random.Random(5))
+    FormatSection.objects.filter(format=test.format, section="CO").update(
+        answer_window_seconds=1, read_before_seconds=0
+    )
+    attempt = services.create_attempt(candidate, test)
+    context = open_context(browser, live_server, candidate, VIEWPORTS["390x844"])
+    context.add_init_script(SLOW_ANSWERS)
+    page = context.new_page()
+    page.goto(f"{live_server.url}/attempts/{attempt.pk}/")
+    wait_phase(page, ["instructions"])
+    page.get_by_role("button", name="Commencer l'épreuve").click()
+    page.wait_for_function(
+        """() => Alpine.$data(
+                   document.querySelector('[x-data^="player"]')).coPhase === 'answering'""",
+        timeout=15000,
+    )
+    first = co_item_id(page)
+    choose_first_option(page)  # pendant la dernière seconde du décompte
+    page.wait_for_function(
+        """(first) => { const d = Alpine.$data(document.querySelector('[x-data^="player"]'));
+                        return d.coItem && d.coItem.test_item_id !== first; }""",
+        arg=first,
+        timeout=10000,
+    )
+    assert attempt.answers.get(test_item_id=first).selected_index == 0
     context.close()

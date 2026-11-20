@@ -51,7 +51,7 @@
         </p>
       </template>
       <div class="card">
-        <p class="text-sm font-medium text-blue-900" x-text="section ? `Épreuve ${section.order} sur ${sections.length}` : ''"></p>
+        <p class="text-sm font-medium text-blue-900" x-text="sectionHeading"></p>
         <h1 id="consignes-titre" class="mt-1 text-2xl font-bold" x-text="section && section.label"></h1>
         <p class="mt-2 text-slate-700">
           <span x-text="section && section.n_items"></span> questions ·
@@ -62,7 +62,8 @@
           <div>
             <ul class="mt-4 list-disc space-y-2 pl-5 text-slate-800">
               <li>Chaque document est diffusé <strong>une seule fois</strong>, sans pause ni retour en arrière.</li>
-              <li>Lisez la question et les options pendant l'écoute. Pour certaines questions, les options sont lues à voix haute : seules les lettres A à D s'affichent.</li>
+              <li x-show="section.read_before_seconds">Avant chaque document, vous avez <strong x-text="`${section.read_before_seconds} secondes`"></strong> pour lire la question et les options ; l'enregistrement démarre ensuite de lui-même. Vous pouvez déjà choisir une réponse.</li>
+              <li>Pour certaines questions, les options sont lues à voix haute : seules les lettres A à D s'affichent, et l'enregistrement démarre tout de suite.</li>
               <li>Après l'écoute, vous avez <strong x-text="`${section.answer_window_seconds} secondes`"></strong> pour répondre. Vous pouvez changer d'avis jusqu'à la fin du décompte ; la question suivante arrive ensuite d'elle-même.</li>
               <li>Clavier : touches A à D (ou 1 à 4).</li>
             </ul>
@@ -106,6 +107,10 @@
                 <button type="button" class="btn btn-primary mt-3 w-full" @click="resumeAudio()">Reprendre l'écoute</button>
               </div>
             </template>
+            <div x-show="coPhase === 'reading'" role="timer">
+              <p class="font-medium text-blue-900">Lisez la question et les options.</p>
+              <p class="mt-1 text-slate-800">L'enregistrement commence dans <span class="tabular-nums font-semibold" x-text="countdownSeconds"></span> s.</p>
+            </div>
             <p x-show="coPhase === 'listening'" class="flex items-center gap-2 font-medium text-blue-900">
               <span class="inline-block size-3 animate-pulse rounded-full bg-blue-700" aria-hidden="true"></span>
               Écoute en cours…

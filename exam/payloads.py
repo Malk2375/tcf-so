@@ -4,7 +4,7 @@ Liste blanche de champs : ni `correct_index`, ni `is_correct`, ni `explanation`,
 de l'item ne quittent le serveur tant que le passage n'est pas terminé.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.urls import reverse
 from django.utils import timezone
@@ -50,6 +50,7 @@ def section_summary(attempt_section: AttemptSection) -> dict:
         "auto_advance": fs.auto_advance,
         "allow_early_next": fs.allow_early_next,
         "answer_window_seconds": fs.answer_window_seconds,
+        "read_before_seconds": fs.read_before_seconds,
         "deadline_at": iso(attempt_section.deadline_at),
         "n_answered": answered,
     }
@@ -95,6 +96,7 @@ def _co_item(attempt_section: AttemptSection, answer: Answer) -> dict:
     )
     next_audio = getattr(following.item, "audio", None) if following else None
     audio_letters = item.options_mode == item.OptionsMode.AUDIO_LETTERS
+    read = services.co_read_seconds(test_item, fs)
     return {
         "test_item_id": test_item.pk,
         "position": test_item.position,
@@ -105,8 +107,11 @@ def _co_item(attempt_section: AttemptSection, answer: Answer) -> dict:
         "audio_url": audio.file.url if audio else None,
         "audio_duration_ms": round(services.co_item_seconds(test_item) * 1000),
         "answer_window_seconds": fs.answer_window_seconds,
+        # Temps de lecture avant l'audio (4.2, 8.5) ; le décompte reprend après un rechargement.
+        "read_before_seconds": read,
+        "reading_ends_at": iso(answer.first_seen_at + timedelta(seconds=read)),
         "first_seen_at": iso(answer.first_seen_at),
-        "closes_at": iso(services.co_item_limit(answer, fs.answer_window_seconds)),
+        "closes_at": iso(services.co_item_limit(answer, fs)),
         "audio_starts": answer.audio_starts,
         "can_play_audio": answer.audio_starts < services.MAX_AUDIO_STARTS,
         "next_audio_url": next_audio.file.url if next_audio else None,

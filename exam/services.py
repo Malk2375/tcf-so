@@ -5,13 +5,14 @@ qui applique les échéances (clôture paresseuse, sans tâche de fond).
 """
 
 import functools
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
 from django.db import transaction
 from django.utils import timezone
 
 from bank.content import estimated_seconds
-from bank.models import FormatSection, Test, TestItem
+from bank.models import FormatSection, Item, Test, TestItem
 from exam import scoring
 from exam.models import Answer, Attempt, AttemptSection
 
@@ -46,12 +47,60 @@ def in_progress_attempt(user) -> Attempt | None:
     return attempt
 
 
-def completed_test_ids(user, exam_format=None) -> set[int]:
-    """Tests que l'utilisateur a terminés : ils ne lui sont plus proposés (8.1)."""
-    attempts = Attempt.objects.filter(user=user, status=Attempt.Status.COMPLETED)
+@dataclass
+class TestProgress:
+    """Où en est un utilisateur sur un test : passage complet terminé, ou épreuves terminées une
+    par une (8.1 ter). Premier passage `completed` de chaque sorte ; un abandon ne compte pas."""
+
+    n_sections: int
+    full: Attempt | None = None
+    parts: dict = field(default_factory=dict)  # épreuve → premier passage terminé
+
+    @property
+    def passed(self) -> bool:
+        """Test « passé » : terminé en entier, ou ses trois épreuves terminées séparément."""
+        return self.full is not None or len(self.parts) >= self.n_sections
+
+    @property
+    def touched(self) -> bool:
+        """Au moins une épreuve terminée : le test complet n'est plus proposé."""
+        return self.full is not None or bool(self.parts)
+
+    def section_done(self, section: str) -> bool:
+        return self.full is not None or section in self.parts
+
+
+def test_progress(user, exam_format=None) -> dict[int, TestProgress]:
+    attempts = (
+        Attempt.objects.filter(user=user, status=Attempt.Status.COMPLETED)
+        .select_related("test__format")
+        .order_by("finished_at", "pk")
+    )
     if exam_format is not None:
         attempts = attempts.filter(test__format=exam_format)
-    return set(attempts.values_list("test_id", flat=True))
+    progress: dict[int, TestProgress] = {}
+    sections: dict[int, int] = {}
+    for attempt in attempts:
+        format_id = attempt.test.format_id
+        if format_id not in sections:
+            sections[format_id] = FormatSection.objects.filter(format_id=format_id).count()
+        entry = progress.setdefault(attempt.test_id, TestProgress(n_sections=sections[format_id]))
+        if attempt.scope == Attempt.Scope.FULL:
+            entry.full = entry.full or attempt
+        else:
+            entry.parts.setdefault(attempt.scope, attempt)
+    return progress
+
+
+def completed_test_ids(user, exam_format=None) -> set[int]:
+    """Tests que l'utilisateur a passés (en entier, ou épreuve par épreuve) : ils ne lui sont
+    plus proposés (8.1)."""
+    return {pk for pk, p in test_progress(user, exam_format).items() if p.passed}
+
+
+def touched_test_ids(user, exam_format=None) -> set[int]:
+    """Tests dont au moins une épreuve est terminée : le bouton de la carte ne les lance plus."""
+    return {pk for pk, p in test_progress(user, exam_format).items() if p.touched}
 
 
 def published_tests(exam_format):
@@ -63,10 +112,11 @@ def published_tests(exam_format):
 
 def proposed_test(user, exam_format) -> Test | None:
     """Le test publié de ce mode au plus petit numéro public que l'utilisateur n'a pas terminé
-    (un passage abandonné ne compte pas) ; None s'il les a tous passés ou s'il n'y en a aucun.
+    (un passage abandonné ne compte pas), et dont aucune épreuve n'est faite (8.1 ter) ; None s'il
+    n'y en a plus.
     C'est le test que lance le bouton de la carte ; la liste du mode permet d'en choisir un autre
     (8.1)."""
-    done = completed_test_ids(user, exam_format)
+    done = touched_test_ids(user, exam_format)
     return published_tests(exam_format).exclude(pk__in=done).first()
 
 
@@ -82,6 +132,19 @@ def co_item_seconds(test_item: TestItem) -> float:
     return estimated_seconds(item.audio_script)
 
 
+def co_read_seconds(test_item: TestItem, fs: FormatSection) -> int:
+    """Temps de lecture avant l'audio (4.2) : seulement si les options sont écrites ; 0 pour
+    `audio_letters`. Géré par le lecteur : aucune régénération, y compris des tests publiés."""
+    if test_item.item.options_mode == Item.OptionsMode.AUDIO_LETTERS:
+        return 0
+    return fs.read_before_seconds or 0
+
+
+def co_item_total(test_item: TestItem, fs: FormatSection) -> float:
+    """Temps de lecture + audio + temps de réponse d'un item de CO."""
+    return co_read_seconds(test_item, fs) + co_item_seconds(test_item) + fs.answer_window_seconds
+
+
 def format_section(attempt_section: AttemptSection) -> FormatSection:
     return attempt_section.attempt.test.format.sections.get(section=attempt_section.section)
 
@@ -94,38 +157,56 @@ def section_items(attempt_section: AttemptSection):
     )
 
 
-def co_duration_seconds(test: Test, answer_window: int) -> float:
-    """Durée de l'épreuve de CO : somme (audio + temps de réponse) des items (4.2)."""
+def co_duration_seconds(test: Test, fs: FormatSection) -> float:
+    """Durée de l'épreuve de CO : somme (lecture + audio + temps de réponse) des items (4.2)."""
     items = TestItem.objects.filter(test=test, section="CO").select_related("item", "item__audio")
-    return sum(co_item_seconds(t) + answer_window for t in items)
+    return sum(co_item_total(t, fs) for t in items)
 
 
 def section_duration_seconds(test: Test, fs: FormatSection) -> float:
     if fs.section == "CO":
-        return co_duration_seconds(test, fs.answer_window_seconds)
+        return co_duration_seconds(test, fs)
     return fs.duration_seconds
 
 
 # --- Création ------------------------------------------------------------------------------------
 
 
-def create_attempt(user, test: Test, now: datetime | None = None) -> Attempt:
-    """Nouveau passage. Un test ne se passe qu'une fois (8.1), pour tous les comptes."""
+def create_attempt(
+    user, test: Test, now: datetime | None = None, scope: str = Attempt.Scope.FULL
+) -> Attempt:
+    """Nouveau passage, complet ou d'une seule épreuve (8.1 ter). Un test ne se passe qu'une
+    fois, et chacune de ses épreuves aussi, pour tous les comptes (8.1)."""
+    exam_format = test.format
+    sections = list(exam_format.sections.order_by("order"))
+    if scope != Attempt.Scope.FULL:
+        if not exam_format.allow_part_attempts or scope not in {fs.section for fs in sections}:
+            raise AttemptError("part_not_allowed", "Épreuve seule impossible pour ce mode.")
+        sections = [fs for fs in sections if fs.section == scope]
+    progress = test_progress(user).get(test.pk)
+    if progress is not None:
+        if scope == Attempt.Scope.FULL and progress.passed:
+            raise AttemptError("test_already_completed", exam_format.names.already_done)
+        if scope == Attempt.Scope.FULL and progress.touched:
+            raise AttemptError("test_partly_done", exam_format.names.partly_done)
+        if scope != Attempt.Scope.FULL and progress.section_done(scope):
+            raise AttemptError("section_already_completed", SECTION_ALREADY_DONE)
     if in_progress_attempt(user):
         raise AttemptError("attempt_in_progress", "Un passage est déjà en cours.")
-    if test.pk in completed_test_ids(user):
-        raise AttemptError("test_already_completed", test.format.names.already_done)
     now = now or timezone.now()
-    sections = list(test.format.sections.order_by("order"))
     total = sum(section_duration_seconds(test, fs) for fs in sections)
     with transaction.atomic():
-        return _create_attempt(user, test, sections, now, total)
+        return _create_attempt(user, test, sections, now, total, scope)
 
 
-def _create_attempt(user, test, sections, now, total) -> Attempt:
+SECTION_ALREADY_DONE = "Vous avez déjà passé cette épreuve."
+
+
+def _create_attempt(user, test, sections, now, total, scope=Attempt.Scope.FULL) -> Attempt:
     attempt = Attempt.objects.create(
         user=user,
         test=test,
+        scope=scope,
         started_at=now,
         expires_at=now + timedelta(seconds=total) + EXPIRY_MARGIN,
     )
@@ -157,9 +238,10 @@ def refresh(attempt: Attempt, now: datetime | None = None) -> Attempt:
     return attempt
 
 
-def co_item_limit(answer: Answer, answer_window: int) -> datetime:
-    """Instant où l'item de CO courant est clos d'office."""
-    seconds = co_item_seconds(answer.test_item) + answer_window
+def co_item_limit(answer: Answer, fs: FormatSection) -> datetime:
+    """Instant où l'item de CO courant est clos d'office : lecture + audio + temps de réponse
+    + 30 s après sa première apparition (8.4)."""
+    seconds = co_item_total(answer.test_item, fs)
     return answer.first_seen_at + timedelta(seconds=seconds) + CO_ITEM_GRACE
 
 
@@ -180,10 +262,10 @@ def current_co_answer(attempt_section: AttemptSection) -> Answer | None:
 def _expire_co_items(attempt_section: AttemptSection, now: datetime) -> None:
     """Clôt les items de CO dépassés. L'épreuve continue sans l'utilisateur : chaque item suivant
     est réputé ouvert à l'instant où le précédent a été clos."""
-    window = format_section(attempt_section).answer_window_seconds
+    fs = format_section(attempt_section)
     while attempt_section.status == AttemptSection.Status.IN_PROGRESS:
         answer = current_co_answer(attempt_section)
-        limit = co_item_limit(answer, window)
+        limit = co_item_limit(answer, fs)
         if now <= limit:
             return
         _advance_co(attempt_section, limit)
@@ -207,8 +289,8 @@ def _advance_co(attempt_section: AttemptSection, at: datetime) -> None:
 
 
 def co_remaining_seconds(attempt_section: AttemptSection, items) -> float:
-    window = format_section(attempt_section).answer_window_seconds
-    return sum(co_item_seconds(t) + window for t in items)
+    fs = format_section(attempt_section)
+    return sum(co_item_total(t, fs) for t in items)
 
 
 def close_section(attempt_section: AttemptSection, at: datetime) -> None:
@@ -255,9 +337,13 @@ def complete_attempt(attempt: Attempt, at: datetime) -> None:
         attempt_section.save(update_fields=["n_correct", "score", "level"])
         scores.append(attempt_section.score)
 
-    attempt.global_score = scoring.global_score(scores)
-    attempt.global_level = scoring.level_for(attempt.global_score)
-    attempt.level_low, attempt.level_high = scoring.level_range(attempt.global_score, attempt.mode)
+    if not attempt.is_part:
+        attempt.global_score = scoring.global_score(scores)
+        attempt.global_level = scoring.level_for(attempt.global_score)
+        attempt.level_low, attempt.level_high = scoring.level_range(
+            attempt.global_score, attempt.mode
+        )
+    # Épreuve seule (8.1 ter) : score et niveau de l'épreuve, pas de score global.
     attempt.status = Attempt.Status.COMPLETED
     attempt.finished_at = at
     attempt.save()

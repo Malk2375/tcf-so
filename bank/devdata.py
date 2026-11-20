@@ -84,6 +84,12 @@ def fake_item(slot: dict, rng: random.Random) -> dict:
     if section == "CO":
         low, high = slot["target"]["audio_seconds"]
         item["audio_script"] = _script(rng, subtype, (low + high) / 2)
+        # Lieu, canal et accent de l'emplacement (7.5.2), quand le brief les donne.
+        for key in ("setting", "channel"):
+            if key in slot:
+                item["audio_script"][key] = slot[key]
+        if slot.get("accent") == "fr-CA":
+            item["audio_script"]["speakers"]["F1"]["accent"] = "fr-CA"
         if subtype == QUESTION_REPONSE:
             item["question"] = QUESTION_REPONSE_TEXT
     else:

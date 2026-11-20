@@ -11,7 +11,13 @@
       "stimulus_text": null,
       "audio_script": {
         "style": "annonce en gare, ton neutre et clair",
-        "speakers": { "F1": { "gender": "F" } },
+        "setting": "gare",
+        "channel": "haut_parleur",
+        "speakers": {
+          "F1": {
+            "gender": "F"
+          }
+        },
         "lines": [
           {
             "speaker": "F1",
@@ -29,7 +35,10 @@
       "correct_index": 1,
       "options_mode": "text",
       "explanation": "L'annonce dit que le train « partira avec vingt-cinq minutes de retard » : le départ est retardé. La destination reste Lyon, le train n'est pas supprimé et il n'est pas question de guichet.",
-      "tags": { "skill": "explicite", "theme": "transports" }
+      "tags": {
+        "skill": "explicite",
+        "theme": "transports"
+      }
     },
     {
       "slot": 12,
@@ -39,7 +48,12 @@
       "stimulus_text": "Quand j'étais enfant, nous ___ tous les étés chez mes grands-parents, à la campagne.",
       "audio_script": null,
       "question": "",
-      "options": ["sommes allés", "irons", "allons", "allions"],
+      "options": [
+        "sommes allés",
+        "irons",
+        "allons",
+        "allions"
+      ],
       "correct_index": 3,
       "options_mode": "text",
       "explanation": "« Quand j'étais enfant » et « tous les étés » décrivent une habitude dans le passé : il faut l'imparfait, « allions ». Le passé composé « sommes allés » désignerait un seul voyage ; « irons » est un futur et « allons » un présent.",
@@ -57,11 +71,19 @@
       "stimulus_text": "BOULANGERIE MARTIN\nOuvert du mardi au samedi, de 7 h à 19 h 30.\nFermé le dimanche et le lundi.\nPain chaud toute la journée !",
       "audio_script": null,
       "question": "Quel jour la boulangerie est-elle fermée ?",
-      "options": ["Le mardi.", "Le samedi.", "Le lundi.", "Le vendredi."],
+      "options": [
+        "Le mardi.",
+        "Le samedi.",
+        "Le lundi.",
+        "Le vendredi."
+      ],
       "correct_index": 2,
       "options_mode": "text",
       "explanation": "L'affiche indique « Fermé le dimanche et le lundi ». Le mardi, le vendredi et le samedi font partie des jours d'ouverture, « du mardi au samedi ».",
-      "tags": { "skill": "explicite", "theme": "commerces" }
+      "tags": {
+        "skill": "explicite",
+        "theme": "commerces"
+      }
     }
   ]
 }

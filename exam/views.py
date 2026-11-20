@@ -35,8 +35,11 @@ def _overviews(user, current) -> list:
 @login_required
 def dashboard(request):
     current = services.in_progress_attempt(request.user)
+    # Le niveau global ne vient que des passages complets (8.1 ter).
     last = (
-        Attempt.objects.filter(user=request.user, status=Attempt.Status.COMPLETED)
+        Attempt.objects.filter(
+            user=request.user, status=Attempt.Status.COMPLETED, scope=Attempt.Scope.FULL
+        )
         .select_related("test__format")
         .first()
     )
@@ -70,8 +73,14 @@ def attempt_create(request):
       (brouillon, archivé, inexistant) donne 404 ; un test déjà terminé, 409 ;
     - `mode` : bouton de la carte du tableau de bord, qui lance le prochain test non passé.
 
+    `scope` (avec `test`) : `CO`, `MSL` ou `CE` pour une seule épreuve (8.1 ter) ; 404 pour un
+    format qui ne le permet pas, 409 si l'épreuve ou le test est déjà passé.
+
     Un autre passage en cours renvoie au tableau de bord, qui propose de le reprendre ou de
     l'abandonner. `create_attempt` revérifie : une requête forgée ne contourne rien."""
+    scope = request.POST.get("scope") or Attempt.Scope.FULL
+    if scope not in Attempt.Scope.values:
+        raise Http404
     test_id = request.POST.get("test")
     if test_id:
         if not test_id.isdigit():
@@ -83,25 +92,34 @@ def attempt_create(request):
             format__is_active=True,
         )
         exam_format = test.format
-        if test.pk in services.completed_test_ids(request.user):
-            return _refused(request, exam_format.names.already_done, exam_format)
+    elif scope != Attempt.Scope.FULL:
+        raise Http404
     else:
         exam_format = get_object_or_404(ExamFormat, mode=request.POST.get("mode"), is_active=True)
         names = exam_format.names
         test = services.proposed_test(request.user, exam_format)
         if test is None:
-            if services.published_tests(exam_format).exists():
+            published = services.published_tests(exam_format)
+            if published.exclude(pk__in=services.completed_test_ids(request.user)).exists():
+                return _refused(request, names.partly_done, exam_format)
+            if published.exists():
                 return _refused(request, names.already_done, exam_format)
             messages.error(request, f"Aucun {names.noun} n'est disponible pour ce mode.")
             return redirect("dashboard")
     try:
-        attempt = services.create_attempt(request.user, test)
+        attempt = services.create_attempt(request.user, test, scope=scope)
     except AttemptError as exc:
-        if exc.code == "test_already_completed":
+        if exc.code == "part_not_allowed":
+            raise Http404 from exc
+        if exc.code in REFUSALS:
             return _refused(request, exc.message, exam_format)
         messages.error(request, "Un passage est déjà en cours : reprenez-le ou abandonnez-le.")
         return redirect("dashboard")
     return redirect("attempt_player", pk=attempt.pk)
+
+
+# Refus d'un test ou d'une épreuve déjà passés (8.1, 8.1 ter) : HTTP 409.
+REFUSALS = {"test_already_completed", "test_partly_done", "section_already_completed"}
 
 
 def _refused(request, message: str, exam_format):

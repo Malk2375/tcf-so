@@ -29,6 +29,14 @@ class ModeNames:
         return f"Vous avez déjà passé {self.this}."
 
     @property
+    def partly_done(self) -> str:
+        """Test complet refusé : une épreuve est déjà faite (8.1 ter)."""
+        return (
+            f"Vous avez déjà passé une épreuve de {self.this} : "
+            "passez les autres épreuves une par une, depuis la liste."
+        )
+
+    @property
     def see_all(self) -> str:
         return f"Voir les {self.nouns}"
 

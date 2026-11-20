@@ -1,0 +1,26 @@
+{% if error %}
+  <p class="text-sm text-red-700" role="alert">{{ error }}</p>
+{% else %}
+  <ul class="space-y-3" data-trials="{{ trials|length }}">
+    {% for trial in trials %}
+      <li class="rounded-md bg-slate-50 p-3">
+        <p class="text-sm font-medium">
+          {% if trial.snr_db is None %}
+            Carillon avant une annonce au haut-parleur
+          {% else %}
+            {{ trial.channel_label }} · niveaux {{ trial.snr_label }} · voix {{ trial.snr_db|floatformat:0 }} dB au-dessus du bruit
+          {% endif %}
+        </p>
+        <p class="text-sm text-slate-600">
+          Sonie de la voix : {{ trial.speech_lufs|floatformat:1|default:"—" }} LUFS
+          {% if trial.noise_lufs is not None %}
+            · du bruit : {{ trial.noise_lufs|floatformat:1 }} LUFS · écart mesuré : {{ trial.measured_snr|floatformat:1 }} dB
+          {% endif %}
+        </p>
+        <audio controls preload="none" src="{{ trial.url }}" class="mt-2 w-full max-w-md"
+               aria-label="Essai {{ trial.channel }} {{ trial.snr_label }}"></audio>
+      </li>
+    {% endfor %}
+  </ul>
+  <p class="mt-2 text-xs text-slate-500">Réglage fin du son : {{ clip.gain_db|floatformat:1 }} dB (positif : bruit plus fort).</p>
+{% endif %}

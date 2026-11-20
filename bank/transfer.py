@@ -36,7 +36,9 @@ ITEM_FIELDS = [
     "content_hash",
     "status",
 ]
-AUDIO_FIELDS = ["duration_ms", "engine", "voices", "script_hash", "chars_billed"]
+AUDIO_FIELDS = ["duration_ms", "engine", "voices", "script_hash", "chars_billed", "mix"]
+# Valeurs des champs absents des archives plus anciennes.
+AUDIO_DEFAULTS = {"mix": {}}
 
 
 class TransferError(Exception):
@@ -223,4 +225,8 @@ def _create(entry: dict, brief_data: dict | None, archive, written: list[str]) -
                 saved = default_storage.save(name, ContentFile(archive.read(f"media/{name}")))
                 written.append(saved)
                 name = saved
-            AudioAsset.objects.create(item=item, file=name, **{f: audio[f] for f in AUDIO_FIELDS})
+            AudioAsset.objects.create(
+                item=item,
+                file=name,
+                **{f: audio.get(f, AUDIO_DEFAULTS.get(f)) for f in AUDIO_FIELDS},
+            )

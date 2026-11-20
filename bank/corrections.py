@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from django.db import transaction
 from django.utils import timezone
 
+from bank.audio import base_hash
 from bank.content import (
     content_hash,
     doc_length,
@@ -169,7 +170,7 @@ def _replace(item: Item, data: dict) -> list[str]:
     Renvoie les fichiers audio à supprimer s'ils ne servent plus."""
     removed = []
     asset = AudioAsset.objects.filter(item=item).first()
-    if asset is not None and asset.script_hash != script_hash(data):
+    if asset is not None and base_hash(asset) != script_hash(data):
         removed.append(asset.file.name)
         asset.delete()
     item.level = data["level"]

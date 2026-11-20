@@ -182,6 +182,15 @@ def usage(request):
 
 # --- Voix (7.2) ---------------------------------------------------------------------------------
 
+# Listes de la distribution : genre et langue des voix qui y entrent.
+CASTING_KEYS = {
+    "F": ("F", "fr-FR"),
+    "M": ("M", "fr-FR"),
+    "F_CA": ("F", "fr-CA"),
+    "M_CA": ("M", "fr-CA"),
+}
+MIN_QUEBEC_VOICES_PER_GENDER = 2
+
 
 def _voices():
     try:
@@ -196,19 +205,28 @@ def _save_casting(request, voice_list) -> list[str]:
     cast = [
         name for name in request.POST.getlist("cast") if name in by_name and name != instructions
     ]
-    casting = {
-        "instructions": instructions,
-        "F": [name for name in cast if by_name[name].gender == "F"],
-        "M": [name for name in cast if by_name[name].gender == "M"],
-    }
+    casting = {"instructions": instructions}
+    for key, (gender, language) in CASTING_KEYS.items():
+        casting[key] = [
+            name
+            for name in cast
+            if by_name[name].gender == gender and by_name[name].language == language
+        ]
     errors = []
-    if instructions not in by_name:
-        errors.append("Choisissez la voix des consignes.")
+    if instructions not in by_name or by_name[instructions].language != "fr-FR":
+        errors.append("Choisissez la voix des consignes (voix française).")
     for gender, label in (("F", "féminines"), ("M", "masculines")):
         if len(casting[gender]) < MIN_VOICES_PER_GENDER:
             errors.append(
                 f"Choisissez au moins {MIN_VOICES_PER_GENDER} voix {label} pour les documents "
                 "(un document peut avoir trois locuteurs du même genre)."
+            )
+    quebec = {voice.gender for voice in voice_list if voice.language == "fr-CA"}
+    for gender, label in (("F", "féminines"), ("M", "masculines")):
+        if gender in quebec and len(casting[f"{gender}_CA"]) < MIN_QUEBEC_VOICES_PER_GENDER:
+            errors.append(
+                f"Choisissez au moins {MIN_QUEBEC_VOICES_PER_GENDER} voix québécoises {label} "
+                "(3 de préférence)."
             )
     if not errors:
         site = SiteSettings.load()
@@ -235,8 +253,16 @@ def voices(request):
         "instructions": request.POST.get("instructions") if errors else casting.get("instructions"),
         "cast": set(request.POST.getlist("cast"))
         if errors
-        else set(casting.get("F", [])) | set(casting.get("M", [])),
-        "counts": {gender: len(casting.get(gender, [])) for gender in ("F", "M")},
+        else {name for key in CASTING_KEYS for name in casting.get(key, [])},
+        "counts": {key: len(casting.get(key, [])) for key in CASTING_KEYS},
+        "blocks": [
+            (language, title, [v for v in voice_list if v.language == language])
+            for language, title in (
+                ("fr-FR", "Voix françaises (fr-FR)"),
+                ("fr-CA", "Voix québécoises (fr-CA)"),
+            )
+        ],
+        "min_quebec": MIN_QUEBEC_VOICES_PER_GENDER,
         "provider": settings.TTS_PROVIDER,
         "sample_text": SAMPLE_TEXT,
         "min_per_gender": MIN_VOICES_PER_GENDER,

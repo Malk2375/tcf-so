@@ -23,3 +23,7 @@ staticfiles/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Bruits de fond d'origine (SPEC 7.5.4) : jamais dans le dépôt ; le manifeste reste suivi.
+/assets/sound/*
+!/assets/sound/ambiences.json

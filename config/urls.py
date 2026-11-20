@@ -16,6 +16,7 @@ urlpatterns = [
     path("sw.js", pwa.service_worker, name="service_worker"),
     path("offline/", pwa.offline, name="offline"),
     path("install/", pwa.install_help, name="install_help"),
+    path("credits/", views.credits, name="credits"),
     path("accounts/", include(account_urlpatterns)),
     path("accounts/", include("allauth.urls")),
     path("profile/", include(profile_urlpatterns)),

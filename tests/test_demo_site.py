@@ -210,6 +210,28 @@ def test_unlock_launcher():
         assert fragment in text
 
 
+def test_sound_import_launcher():
+    """importer_sons.cmd : import de assets/sound sur la démonstration ou le site réel (7.5.4)."""
+    raw = (ROOT / "importer_sons.cmd").read_bytes()
+    assert b"\r\n" in raw and b"\n" not in raw.replace(b"\r\n", b"")
+    text = raw.decode("ascii")
+    for fragment in (
+        'set "DATABASE_URL=sqlite:///data/demo.sqlite3"',
+        'set "MEDIA_ROOT=data/demo-media"',
+        'set "TTS_PROVIDER=fake"',
+        'set "DATABASE_URL="',
+        r"import_ambiences_folder assets\sound",
+    ):
+        assert fragment in text
+
+
+def test_demo_has_fake_ambiences_and_two_medium_trainings():
+    from bank.management.commands import reset_demo
+
+    assert reset_demo.DEMO_TESTS.count("moyen") == 2
+    assert "ensure_fake_ambiences()" in Path(reset_demo.__file__).read_text(encoding="utf-8")
+
+
 def test_demo_and_real_sites_keep_separate_caches():
     """Les compteurs de connexion de la démonstration ne touchent pas ceux du site réel."""
     import config.settings as project_settings

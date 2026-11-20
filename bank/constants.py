@@ -131,3 +131,117 @@ def expected_options_mode(section: str, level: str, subtype: str) -> str:
     if section == "CO" and subtype == QUESTION_REPONSE and level in AUDIO_LETTERS_LEVELS:
         return "audio_letters"
     return "text"
+
+
+# --- Lieux, canaux et accents de la CO (7.5) -----------------------------------------------------
+
+SETTINGS = [
+    "aucun",
+    "gare",
+    "train",
+    "aeroport",
+    "metro_bus",
+    "rue",
+    "cafe_restaurant",
+    "magasin",
+    "marche",
+    "bureau",
+    "maison",
+    "ecole",
+    "lieu_public",
+    "exterieur",
+    "salle_conference",
+]
+SETTING_LABELS = {
+    "aucun": "Aucun",
+    "gare": "Gare",
+    "train": "Train",
+    "aeroport": "Aéroport",
+    "metro_bus": "Métro, bus",
+    "rue": "Rue",
+    "cafe_restaurant": "Café, restaurant",
+    "magasin": "Magasin",
+    "marche": "Marché",
+    "bureau": "Bureau",
+    "maison": "Maison",
+    "ecole": "École",
+    "lieu_public": "Lieu public (musée, mairie, piscine…)",
+    "exterieur": "Extérieur",
+    "salle_conference": "Salle de conférence",
+}
+CHANNELS = ["direct", "haut_parleur", "telephone", "radio"]
+CHANNEL_LABELS = {
+    "direct": "Direct",
+    "haut_parleur": "Haut-parleur",
+    "telephone": "Téléphone",
+    "radio": "Radio",
+}
+ACCENTS = ["fr-FR", "fr-CA"]
+DEFAULT_SETTING, DEFAULT_CHANNEL, DEFAULT_ACCENT = "aucun", "direct", "fr-FR"
+CHIME = "carillon"
+# Catégories de la bibliothèque sonore : les lieux (sauf « aucun ») et le carillon.
+AMBIENCE_CATEGORIES = [s for s in SETTINGS if s != DEFAULT_SETTING] + [CHIME]
+AMBIENCE_LABELS = {**SETTING_LABELS, CHIME: "Carillon"}
+
+# Combinaisons permises par sous-type : canal → lieux (7.5.1).
+SOUND_COMBINATIONS = {
+    "question_reponse": {
+        "direct": ["aucun", "maison", "bureau", "magasin", "cafe_restaurant", "rue"]
+    },
+    "annonce": {
+        "haut_parleur": [
+            "gare",
+            "aeroport",
+            "train",
+            "metro_bus",
+            "magasin",
+            "ecole",
+            "lieu_public",
+        ],
+        "radio": ["aucun"],
+    },
+    "message_vocal": {"telephone": ["aucun", "rue", "gare", "cafe_restaurant"]},
+    "dialogue": {
+        "direct": [
+            "maison",
+            "bureau",
+            "cafe_restaurant",
+            "rue",
+            "magasin",
+            "train",
+            "gare",
+            "marche",
+            "ecole",
+            "lieu_public",
+            "exterieur",
+        ],
+        "telephone": ["aucun"],
+    },
+    "interview": {
+        "radio": ["aucun"],
+        "direct": ["rue", "marche", "exterieur", "salle_conference"],
+    },
+    "emission_radio": {"radio": ["aucun"]},
+    "debat": {"radio": ["aucun"]},
+    "expose": {"direct": ["salle_conference"]},
+}
+# Sous-types où un locuteur peut avoir l'accent québécois.
+ACCENT_SUBTYPES = ["message_vocal", "dialogue", "interview", "emission_radio", "debat", "expose"]
+# Lieux où une annonce au haut-parleur commence par un carillon (7.5.3).
+CHIME_SETTINGS = ["gare", "aeroport", "train", "metro_bus", "magasin"]
+
+
+def allowed_combinations(subtype: str) -> list[tuple[str, str]]:
+    """(canal, lieu) permis pour un sous-type de CO."""
+    table = SOUND_COMBINATIONS.get(subtype, {})
+    return [(channel, setting) for channel, settings in table.items() for setting in settings]
+
+
+def script_sound(audio_script: dict | None) -> tuple[str, str]:
+    """(lieu, canal) d'un script, valeurs par défaut comprises."""
+    script = audio_script or {}
+    return script.get("setting", DEFAULT_SETTING), script.get("channel", DEFAULT_CHANNEL)
+
+
+def speaker_accent(speaker: dict) -> str:
+    return speaker.get("accent", DEFAULT_ACCENT)

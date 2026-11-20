@@ -380,11 +380,23 @@ def test_voices_page_lists_voices_plays_sample_and_saves_casting(staff_client, d
 
     women = ["fr-FR-Chirp3-HD-Kore", "fr-FR-Chirp3-HD-Leda", "fr-FR-Chirp3-HD-Gacrux"]
     men = ["fr-FR-Chirp3-HD-Puck", "fr-FR-Chirp3-HD-Orus", "fr-FR-Chirp3-HD-Iapetus"]
+    women_ca = ["fr-CA-Chirp3-HD-Kore", "fr-CA-Chirp3-HD-Zephyr"]
+    men_ca = ["fr-CA-Chirp3-HD-Charon", "fr-CA-Chirp3-HD-Fenrir", "fr-CA-Chirp3-HD-Orus"]
+    # Sans voix québécoises : refusé (au moins 2 par genre, 7.2).
     data = {"instructions": "fr-FR-Chirp3-HD-Aoede", "cast": women + men}
+    html = staff_client.post(url("voices"), data).content.decode()
+    assert "au moins 2 voix québécoises féminines" in html
+    data["cast"] = women + men + women_ca + men_ca
     response = staff_client.post(url("voices"), data)
     assert response.status_code == 302
     casting = SiteSettings.load().tts_casting
-    assert casting == {"instructions": "fr-FR-Chirp3-HD-Aoede", "F": women, "M": men}
+    assert casting == {
+        "instructions": "fr-FR-Chirp3-HD-Aoede",
+        "F": women,
+        "M": men,
+        "F_CA": women_ca,
+        "M_CA": men_ca,
+    }
 
 
 def test_casting_needs_three_voices_per_gender(staff_client, db):

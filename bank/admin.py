@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from bank.models import (
+    AmbienceClip,
     AudioAsset,
     Brief,
     ExamFormat,
@@ -19,7 +20,8 @@ class FormatSectionInline(admin.TabularInline):
 
 @admin.register(ExamFormat)
 class ExamFormatAdmin(admin.ModelAdmin):
-    list_display = ["code", "mode", "label", "is_active"]
+    list_display = ["code", "mode", "label", "is_active", "allow_part_attempts"]
+    list_editable = ["allow_part_attempts"]
     inlines = [FormatSectionInline]
 
 
@@ -59,3 +61,10 @@ class ImportBatchAdmin(admin.ModelAdmin):
 class AudioAssetAdmin(admin.ModelAdmin):
     list_display = ["item", "engine", "duration_ms", "chars_billed", "created_at"]
     raw_id_fields = ["item"]
+
+
+@admin.register(AmbienceClip)
+class AmbienceClipAdmin(admin.ModelAdmin):
+    list_display = ["title", "license", "is_active", "gain_db", "duration_ms", "is_fake"]
+    list_filter = ["license", "is_active", "is_fake"]
+    search_fields = ["title", "author", "source_url"]

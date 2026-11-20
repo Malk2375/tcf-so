@@ -8,6 +8,8 @@
 document.addEventListener("alpine:init", () => {
   const LETTERS = ["A", "B", "C", "D"];
   const RETRY_MS = 5000;
+  // Attente maximale d'une réponse en cours d'envoi avant de clore une question de CO.
+  const ANSWER_WAIT_MS = 3000;
   // Délai de démarrage automatique des consignes de MSL et de CE en mode réel (8.2).
   const AUTO_START_MS = 30000;
 
@@ -41,7 +43,7 @@ document.addEventListener("alpine:init", () => {
     // Compréhension orale
     audioUnlocked: false,
     coItem: null,
-    coPhase: "idle", // ready | listening | answering | sending
+    coPhase: "idle", // reading | ready | listening | answering | sending
     coShownAt: 0,
     countdownEnd: 0,
     answerInFlight: null,
@@ -242,6 +244,14 @@ document.addEventListener("alpine:init", () => {
         this.config.mode === "reel" && section.section !== "CO" ? Date.now() + AUTO_START_MS : null;
     },
 
+    get sectionHeading() {
+      if (!this.section) return "";
+      // Épreuve passée seule (8.1 ter) : une seule épreuve dans le passage.
+      if (this.sections.length === 1) return "Épreuve seule";
+      const position = this.sections.findIndex((s) => s.order === this.section.order) + 1;
+      return `Épreuve ${position} sur ${this.sections.length}`;
+    },
+
     get previousSection() {
       if (!this.section) return null;
       return this.sections.find((s) => s.order === this.section.order - 1) || null;
@@ -306,6 +316,24 @@ document.addEventListener("alpine:init", () => {
       this.coShownAt = Date.now();
       this.audioReported = false;
       this.preloadNext(item.next_audio_url);
+      // Temps de lecture (8.5) : calculé depuis la première apparition de la question, il reprend
+      // là où il en était après un rechargement. Pas de bouton pour l'écourter.
+      const readingEnd = this.readingEnd(item);
+      if (readingEnd > Date.now()) {
+        this.coPhase = "reading";
+        this.countdownEnd = readingEnd;
+        return;
+      }
+      this.afterReading();
+    },
+
+    readingEnd(item) {
+      const end = Date.parse(item.reading_ends_at) - this.offset;
+      return Number.isNaN(end) ? 0 : end;
+    },
+
+    afterReading() {
+      const item = this.coItem;
       if (!item.audio_url) return this.startCountdown(item.answer_window_seconds);
       if (!item.can_play_audio) {
         // Audio déjà relancé une fois : seul le décompte reprend.
@@ -321,10 +349,7 @@ document.addEventListener("alpine:init", () => {
       this.audioUnlocked = false;
       this.coPhase = "ready";
       const nominal =
-        Date.parse(item.first_seen_at) -
-        this.offset +
-        item.audio_duration_ms +
-        item.answer_window_seconds * 1000;
+        this.readingEnd(item) + item.audio_duration_ms + item.answer_window_seconds * 1000;
       let end = Math.max(nominal, Date.now() + item.answer_window_seconds * 1000);
       const closesAt = Date.parse(item.closes_at) - this.offset;
       if (!Number.isNaN(closesAt)) end = Math.min(end, closesAt);
@@ -422,6 +447,15 @@ document.addEventListener("alpine:init", () => {
     async nextCoItem() {
       const closing = this.coItem;
       this.coPhase = "sending";
+      // Un choix fait à la dernière seconde est enregistré avant de clore la question : sinon le
+      // serveur pourrait recevoir `co/next` d'abord et refuser la réponse (plus l'item courant).
+      // Attente bornée : hors ligne, la réponse reste dans la file d'attente.
+      if (this.answerInFlight) {
+        await Promise.race([
+          this.answerInFlight,
+          new Promise((resolve) => setTimeout(resolve, ANSWER_WAIT_MS)),
+        ]);
+      }
       try {
         const session = await this.request("POST", this.config.urls.coNext, {
           test_item_id: closing.test_item_id,
@@ -440,7 +474,9 @@ document.addEventListener("alpine:init", () => {
     },
 
     canAnswer() {
-      if (this.phase === "co") return ["listening", "answering", "ready"].includes(this.coPhase);
+      if (this.phase === "co") {
+        return ["reading", "listening", "answering", "ready"].includes(this.coPhase);
+      }
       return this.phase === "qcm" && !this.finishing;
     },
 
@@ -532,6 +568,9 @@ document.addEventListener("alpine:init", () => {
       this.now = Date.now();
       if (this.phase === "instructions" && this.autoStartAt && this.now >= this.autoStartAt) {
         this.start(this.section, false);
+      }
+      if (this.phase === "co" && this.coPhase === "reading" && this.now >= this.countdownEnd) {
+        this.afterReading();
       }
       const counting = this.coPhase === "answering" || this.coPhase === "ready";
       if (this.phase === "co" && counting && this.now >= this.countdownEnd) {

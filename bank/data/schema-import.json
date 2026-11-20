@@ -108,6 +108,13 @@
       "required": ["style", "speakers", "lines"],
       "properties": {
         "style": { "type": "string", "minLength": 1 },
+        "setting": {
+          "enum": [
+            "aucun", "gare", "train", "aeroport", "metro_bus", "rue", "cafe_restaurant", "magasin",
+            "marche", "bureau", "maison", "ecole", "lieu_public", "exterieur", "salle_conference"
+          ]
+        },
+        "channel": { "enum": ["direct", "haut_parleur", "telephone", "radio"] },
         "speakers": {
           "type": "object",
           "minProperties": 1,
@@ -116,7 +123,10 @@
             "type": "object",
             "additionalProperties": false,
             "required": ["gender"],
-            "properties": { "gender": { "enum": ["F", "M"] } }
+            "properties": {
+              "gender": { "enum": ["F", "M"] },
+              "accent": { "enum": ["fr-FR", "fr-CA"] }
+            }
           }
         },
         "lines": {

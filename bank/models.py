@@ -30,6 +30,8 @@ class ExamFormat(models.Model):
     mode = models.CharField(max_length=10, choices=Mode.choices, unique=True)
     label = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
+    # Passer une seule épreuve d'un test (8.1 ter) ; vrai pour l'entraînement moyen.
+    allow_part_attempts = models.BooleanField("épreuve seule permise", default=False)
     # Dernier numéro public attribué dans ce mode : un numéro public n'est jamais réutilisé,
     # même après la suppression d'un test archivé.
     last_public_number = models.PositiveIntegerField(default=0)
@@ -58,6 +60,11 @@ class ExamFormat(models.Model):
     def duration_seconds(self) -> int:
         return sum(s.duration_seconds for s in self.sections.all())
 
+    @property
+    def duration_minutes(self) -> int:
+        """Minutes entières (SPEC 4.1 : 28, 52 et 103 min)."""
+        return self.duration_seconds // 60
+
 
 class FormatSection(models.Model):
     format = models.ForeignKey(ExamFormat, on_delete=models.CASCADE, related_name="sections")
@@ -71,6 +78,8 @@ class FormatSection(models.Model):
     # CO : bouton « Valider » pour passer avant la fin du temps de réponse (4.2, 8.5).
     allow_early_next = models.BooleanField(default=False)
     answer_window_seconds = models.PositiveSmallIntegerField(null=True, blank=True)
+    # CO : temps de lecture avant l'audio des items à options écrites (4.2) ; nul hors CO.
+    read_before_seconds = models.PositiveSmallIntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -97,6 +106,8 @@ class FormatSection(models.Model):
             raise ValidationError({"answer_window_seconds": "Obligatoire en CO."})
         if self.section != Section.CO and self.answer_window_seconds is not None:
             raise ValidationError({"answer_window_seconds": "Réservé à la CO."})
+        if self.section != Section.CO and self.read_before_seconds is not None:
+            raise ValidationError({"read_before_seconds": "Réservé à la CO."})
 
 
 class Brief(models.Model):
@@ -212,6 +223,8 @@ class AudioAsset(models.Model):
     voices = models.JSONField(default=dict)
     script_hash = models.CharField(max_length=64)
     chars_billed = models.PositiveIntegerField(default=0)
+    # Ce qui a servi à l'assemblage (7.5.3) : lieu, canal, accents, clip, rapport voix / bruit…
+    mix = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -300,3 +313,45 @@ class TestItem(models.Model):
 
     def __str__(self):
         return f"{self.test} — {self.section} {self.position}"
+
+
+class AmbienceClip(models.Model):
+    """Bruit de fond ou carillon de la bibliothèque sonore (7.5.4)."""
+
+    class License(models.TextChoices):
+        CC0 = "CC0", "CC0"
+        CC_BY = "CC-BY", "CC BY"
+        CC_BY_NC = "CC-BY-NC", "CC BY-NC"
+
+    categories = models.JSONField(default=list)
+    # Seulement l'extrait retenu, en FLAC mono 24 kHz.
+    file = models.FileField(max_length=200)
+    source_name = models.CharField("fichier d'origine", max_length=255, blank=True)
+    # Empreinte du fichier d'origine : même fichier et même découpe → même clip.
+    source_sha256 = models.CharField(max_length=64, blank=True)
+    source_start_ms = models.PositiveIntegerField(null=True, blank=True)
+    source_end_ms = models.PositiveIntegerField(null=True, blank=True)
+    duration_ms = models.PositiveIntegerField(default=0)
+    # Sonie de l'extrait (LUFS), mesurée à l'enregistrement.
+    loudness_lufs = models.FloatField(null=True, blank=True)
+    gain_db = models.FloatField("réglage fin (dB)", default=0)
+    title = models.CharField("titre", max_length=200)
+    author = models.CharField("auteur", max_length=200, blank=True)
+    source_url = models.URLField("adresse de la page source", max_length=500)
+    license = models.CharField("licence", max_length=10, choices=License.choices)
+    is_active = models.BooleanField("actif", default=True)
+    is_fake = models.BooleanField("factice", default=False)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "bruit de fond"
+        verbose_name_plural = "bruits de fond"
+        ordering = ["title", "id"]
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def duration_seconds(self) -> float:
+        return self.duration_ms / 1000

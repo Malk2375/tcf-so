@@ -16,7 +16,16 @@ class Level(models.TextChoices):
     C2 = "C2"
 
 
+class Scope(models.TextChoices):
+    FULL = "full", "Test complet"
+    CO = "CO", "Compréhension orale"
+    MSL = "MSL", "Maîtrise des structures de la langue"
+    CE = "CE", "Compréhension écrite"
+
+
 class Attempt(models.Model):
+    Scope = Scope
+
     class Status(models.TextChoices):
         IN_PROGRESS = "in_progress", "En cours"
         COMPLETED = "completed", "Terminé"
@@ -26,6 +35,8 @@ class Attempt(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="attempts"
     )
     test = models.ForeignKey(Test, on_delete=models.PROTECT, related_name="attempts")
+    # Test complet, ou une seule épreuve (8.1 ter).
+    scope = models.CharField(max_length=4, choices=Scope.choices, default=Scope.FULL)
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.IN_PROGRESS)
     started_at = models.DateTimeField()
     finished_at = models.DateTimeField(null=True, blank=True)
@@ -54,6 +65,35 @@ class Attempt(models.Model):
     @property
     def mode(self) -> str:
         return self.test.format.mode
+
+    @property
+    def is_part(self) -> bool:
+        """Passage d'une seule épreuve (8.1 ter) : pas de score global."""
+        return self.scope != Scope.FULL
+
+    @property
+    def scope_label(self) -> str:
+        """« compréhension orale » pour un passage d'épreuve ; vide pour un test complet."""
+        return "" if not self.is_part else Scope(self.scope).label.lower()
+
+    @property
+    def display_label(self) -> str:
+        """Historique : « Entraînement moyen, Entraînement 2 — compréhension orale »."""
+        label = f"{self.test.format.names.name}, {self.test.public_label}"
+        return f"{label} — {self.scope_label}" if self.is_part else label
+
+    def _part_section(self):
+        return self.sections.first() if self.is_part else None
+
+    @property
+    def part_score(self) -> int | None:
+        section = self._part_section()
+        return section.score if section else None
+
+    @property
+    def part_level(self) -> str:
+        section = self._part_section()
+        return section.get_level_display() if section and section.level else ""
 
     @property
     def level_range(self) -> str:

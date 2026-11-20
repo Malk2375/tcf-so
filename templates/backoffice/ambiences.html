@@ -1,0 +1,99 @@
+{% extends "backoffice/base.html" %}
+{% load l10n %}
+{% block head_title %}Bruits de fond · Back-office{% endblock %}
+{% block bo_content %}
+<h1 class="text-2xl font-bold sm:text-3xl">Bruits de fond</h1>
+<p class="mt-3 max-w-2xl text-slate-700">
+  Sons d'ambiance placés sous les documents de compréhension orale, selon leur lieu, et carillons des annonces.
+  Licences acceptées : CC0, CC BY et CC BY-NC (les deux dernières s'affichent sur la page
+  <a href="{% url 'credits' %}" class="link">Crédits sonores</a>). La voix doit rester parfaitement compréhensible :
+  réglez chaque son à l'oreille avec « Essayer ».
+</p>
+
+{% if missing %}
+  <div class="mt-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-amber-950" role="status">
+    <p class="font-medium">Lieux sans bruit de fond actif ({{ missing|length }}) :</p>
+    <p class="mt-1 text-sm">{{ missing|join:", " }}. Leurs documents seront générés sans bruit de fond.</p>
+  </div>
+{% endif %}
+
+{% for section in sections %}
+  <section class="mt-8" aria-labelledby="cat-{{ section.code }}">
+    <h2 id="cat-{{ section.code }}" class="text-lg font-semibold">
+      {{ section.label }}
+      <span class="text-sm font-normal text-slate-600">· {{ section.clips|length }} son{{ section.clips|length|pluralize }}</span>
+    </h2>
+    {% if section.missing %}
+      <p class="mt-1 text-sm text-amber-800">Aucun son actif dans cette catégorie.</p>
+    {% endif %}
+    {% if section.clips %}
+      <ul class="mt-2 divide-y divide-slate-200 rounded-md border border-slate-200 bg-white">
+        {% for clip in section.clips %}
+          <li id="clip-{{ clip.pk }}" class="px-4 py-3" data-clip="{{ clip.pk }}">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div class="min-w-0">
+                <p class="font-medium break-words">{{ clip.title }}{% if clip.is_fake %} <span class="rounded bg-slate-100 px-2 py-0.5 text-sm font-normal text-slate-700">factice</span>{% endif %}</p>
+                <p class="text-sm text-slate-600 break-words">
+                  {{ clip.author|default:"auteur inconnu" }} · {{ clip.get_license_display }} ·
+                  {{ clip.duration_seconds|floatformat:1 }} s
+                  {% if clip.loudness_lufs is not None %}· sonie {{ clip.loudness_lufs|floatformat:1 }} LUFS{% endif %}
+                  {% if clip.source_start_ms is not None or clip.source_end_ms is not None %}· extrait de {{ clip.source_name }}{% endif %}
+                </p>
+                <p class="text-sm"><a href="{{ clip.source_url }}" class="link break-all" rel="noopener" target="_blank">Page source</a></p>
+                {% if clip.notes %}<p class="mt-1 text-sm text-slate-700">{{ clip.notes }}</p>{% endif %}
+              </div>
+              <audio controls preload="none" src="{{ clip.file.url }}" class="w-full max-w-xs" aria-label="Écouter {{ clip.title }}"></audio>
+            </div>
+            <div class="mt-3 flex flex-wrap items-end gap-x-4 gap-y-2">
+              <form method="post" action="{% url 'backoffice:ambience_update' clip.pk %}" class="flex items-center">
+                {% csrf_token %}
+                <label class="flex min-h-11 items-center gap-2">
+                  <input type="checkbox" name="is_active" class="size-5 accent-blue-800" {% if clip.is_active %}checked{% endif %}
+                         onchange="this.form.submit()">
+                  Actif
+                </label>
+                <noscript><button type="submit" class="btn btn-secondary ml-2">Enregistrer</button></noscript>
+              </form>
+              <form method="post" action="{% url 'backoffice:ambience_trial' clip.pk %}" class="flex flex-wrap items-end gap-2"
+                    hx-post="{% url 'backoffice:ambience_trial' clip.pk %}" hx-target="#essai-{{ clip.pk }}" hx-swap="innerHTML"
+                    hx-indicator="#attente-{{ clip.pk }}">
+                {% csrf_token %}
+                <label class="block text-sm">
+                  <span class="block font-medium">Réglage fin (dB)</span>
+                  {% localize off %}
+                  <input type="number" name="gain_db" value="{{ clip.gain_db }}" step="0.5" min="{{ gain_range.0 }}" max="{{ gain_range.1 }}"
+                         class="mt-1 block min-h-11 w-28 rounded-md border border-slate-300 px-3 py-2 text-base">
+                  {% endlocalize %}
+                </label>
+                <button type="submit" class="btn btn-primary">Essayer</button>
+                <span id="attente-{{ clip.pk }}" class="htmx-indicator text-sm text-slate-600">Mixage en cours…</span>
+              </form>
+              <form method="post" action="{% url 'backoffice:ambience_update' clip.pk %}"
+                    x-data @submit="if (!confirm('Supprimer ce son de la bibliothèque ?')) $event.preventDefault()">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <button type="submit" class="btn btn-secondary">Supprimer</button>
+              </form>
+            </div>
+            <div id="essai-{{ clip.pk }}" class="mt-3"></div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+{% endfor %}
+
+<section class="mt-10" aria-labelledby="envoi-titre">
+  <h2 id="envoi-titre" class="text-xl font-semibold">Ajouter un son</h2>
+  <p class="mt-1 max-w-2xl text-sm text-slate-600">
+    Seul l'extrait choisi (début et fin, en secondes ; vides = fichier entier) est gardé, converti en FLAC mono.
+    Un extrait de moins de 15 secondes sera bouclé avec un fondu enchaîné. Pour importer tout un dossier,
+    utilisez la commande <code>import_ambiences_folder</code> (voir le README).
+  </p>
+  <form method="post" enctype="multipart/form-data" class="form-stack card mt-4 max-w-xl space-y-5">
+    {% csrf_token %}
+    {% include "includes/form_fields.html" %}
+    <button type="submit" class="btn btn-primary w-full sm:w-auto">Ajouter</button>
+  </form>
+</section>
+{% endblock %}

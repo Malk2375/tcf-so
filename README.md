@@ -52,6 +52,8 @@ Ses textes sont faits de pseudo-mots : ils ont la bonne longueur, pas de sens.
 6. « Générer l'audio du test » (en haut de la page, dans le bilan) : un seul clic ; la page enchaîne la synthèse des questions de CO avec une barre de progression.
    Fermer la page n'est pas grave : un nouveau clic reprend là où la synthèse s'était arrêtée, sans rien refaire.
    La génération est refusée si le test ne tient pas dans le quota du mois (95 % du quota gratuit).
+   Avant de commencer, l'écran liste les lieux demandés sans bruit de fond actif : ces documents seront générés sans bruit de fond.
+   Chaque réplique synthétisée est gardée en cache (`tts_cache/`) : refaire un mixage (autre bruit, autre niveau) ne consomme aucun caractère.
    Un script modifié rend son audio « périmé » : « Régénérer cet audio », présent sous une question dès que son audio existe, refait cet item seul.
    « Approuver les N questions sans alerte » (dans le bilan, avec confirmation) approuve d'un coup les questions
    en brouillon où le relecteur est d'accord, sans doute ni avertissement ; les autres se traitent une par une.
@@ -60,9 +62,24 @@ Ses textes sont faits de pseudo-mots : ils ont la bonne longueur, pas de sens.
    La publication donne au test son **numéro public** (« Test 1 », « Test 2 »… par mode, jamais réutilisé), seul montré
    aux utilisateurs ; le back-office affiche les deux (« test n° 4 · publié comme Test 2 »).
 
-Autres pages : `/bo/` (stock, quota vocal du mois, dépense API, derniers imports), `/bo/voices/` (écoute des voix,
-distribution), `/bo/usage/` (journal des consommations). `uv run python manage.py tts_list_voices` affiche les voix
+Autres pages : `/bo/` (stock, quota vocal du mois, dépense API, derniers imports), `/bo/voices/` (écoute des voix
+françaises et québécoises, distribution), `/bo/ambiences/` (bruits de fond : envoi, écoute, « Essayer »),
+`/bo/usage/` (journal des consommations). `uv run python manage.py tts_list_voices` affiche les voix `fr-FR` et `fr-CA`
 du fournisseur configuré.
+
+**Bruits de fond, canaux et voix québécoises.** Le brief donne à chaque emplacement de CO un lieu (`setting` : gare, train,
+café…) et un canal (`channel` : direct, haut-parleur, téléphone, radio), et à quelques emplacements un accent québécois
+(`accent_quotas` des réglages du site : 1, 2 et 4 par mode ; 0 désactive). À la génération : voix québécoise pour un locuteur
+`fr-CA`, traitement de la voix selon le canal, carillon avant une annonce au haut-parleur, bip avant un message vocal,
+bruit de fond du lieu sous les répliques seulement (jamais sous la question ni les options), réglé par le rapport voix / bruit
+`ambience_snr_db` (20 dB de A1 à B1, 16 dB de B2 à C2) mesuré sur l'extrait utilisé, puis corrigé par le réglage fin du son.
+Un fichier d'import sans ces champs s'importe et se génère exactement comme avant ; l'audio d'un test publié n'est jamais touché.
+Les sons viennent de `/bo/ambiences/` (licences CC0, CC BY, CC BY-NC ; 150 Mo au plus ; début et fin facultatifs)
+ou du dossier `assets/sound/` avec son manifeste `ambiences.json` : double-cliquez sur `importer_sons.cmd`
+(ou `uv run python manage.py import_ambiences_folder assets\sound` pour la base réelle). Une entrée dont la licence vaut
+encore `A_VERIFIER` est refusée ; relancer ne crée pas de doublon. Les fichiers audio de `assets/sound/` ne vont pas
+dans le dépôt git (seul le manifeste est suivi). La page publique `/credits/` (« Crédits sonores », en bas de chaque page)
+liste les sons actifs et leurs licences. La démonstration utilise des bruits factices (bruit rose ou brun, carillon).
 
 Le schéma utilisé par l'application est `bank/data/schema-import.json`, copie de `docs/schema-import.json`.
 Les exemples de `docs/exemples/` sont recopiés dans `tests/fixtures/`. Un test signale toute différence
@@ -74,8 +91,18 @@ Sur le tableau de bord, choisir un mode puis « Commencer » : la plateforme lan
 pas encore terminé. Pour en choisir un autre, ouvrir la liste du mode : chaque test à passer a son bouton « Commencer ».
 Le lecteur enchaîne les consignes et les trois épreuves (CO, MSL, CE), puis affiche
 les résultats, la correction (`/attempts/<id>/review/`) et l'historique (`/history/`).
-En compréhension orale, pas de passage anticipé : chaque question se termine à la fin de son décompte. L'option
+En compréhension orale, chaque document à options écrites commence par 15 secondes de lecture (« L'enregistrement
+commence dans 15 s ») ; les options lues à voix haute (lettres A à D) démarrent tout de suite. Le temps de lecture vaut
+pour tous les tests, publiés compris, sans régénérer l'audio (`read_before_seconds` dans l'admin, par mode).
+Pas de passage anticipé : chaque question se termine à la fin de son décompte. L'option
 `allow_early_next` d'une épreuve (bouton « Valider », désactivé partout) reste disponible dans l'admin Django.
+
+**Une seule épreuve** (entraînement moyen ; réglage `allow_part_attempts` du format dans l'admin) : sur la liste du mode,
+chaque entraînement a un bouton « Test complet » tant qu'aucune épreuve n'est faite, puis une ligne par épreuve avec
+son bouton « Commencer ». Chaque épreuve ne se passe qu'une fois ; un entraînement dont les trois épreuves sont faites,
+ensemble ou séparément, est « passé » et compte pour les conseils. Résultats d'une épreuve seule : score et niveau
+de l'épreuve, sans score global. Quand plus aucun entraînement n'est entier, le bouton de la carte devient
+« Voir les épreuves à passer ».
 
 Les échéances sont tenues par le serveur. Un passage interrompu se reprend depuis le tableau de bord ;
 il est abandonné d'office 30 minutes après la durée prévue du test.
@@ -92,12 +119,14 @@ et le compte à utiliser. Pour arrêter un site, fermer sa fenêtre.
 | `demarrer.cmd` | Site réel | <http://localhost:8000> | `data/db.sqlite3` | ceux de `.env` (payants si configurés) |
 | `telephone.cmd` | Démonstration, depuis un téléphone | `https://….trycloudflare.com` (affichée) | `data/demo.sqlite3` | factices, toujours |
 | `debloquer.cmd` | Débloque la connexion d'un compte (démonstration ou site réel, au choix) | — | selon le choix | — |
+| `importer_sons.cmd` | Importe les bruits de fond de `assets/sound/` (démonstration ou site réel, au choix) | — | selon le choix | — |
 
 **Une seule fois :** dans PowerShell, depuis le dossier du projet, `uv sync` (installe les dépendances).
 
 **`demo.cmd`** crée la base de démonstration la première fois (`reset_demo` : formats d'examen, tests factices,
 compte **admin@demo.test**, mot de passe **demo-tcf-2026**, et compte **candidat@demo.test**, même mot de passe,
-qui a déjà passé les trois entraînements rapides avec des erreurs sur les pronoms), met sa structure à jour, lance le site sur le port 8001 et ouvre
+qui a déjà passé les trois entraînements rapides avec des erreurs sur les pronoms ; deux entraînements moyens à passer
+en entier ou épreuve par épreuve ; un bruit de fond factice par lieu), met sa structure à jour, lance le site sur le port 8001 et ouvre
 le navigateur. Chaque page affiche un bandeau orange « DÉMONSTRATION ». Ses cookies portent d'autres noms que ceux
 du site réel : on peut être connecté aux deux en même temps. Même si `.env` contient des clés, la démonstration
 n'appelle jamais Google ni Claude, et ses fichiers audio vont dans `data/demo-media`.
@@ -136,8 +165,8 @@ le refait avec Google. Les synthèses factices sont journalisées mais ne compte
 le numéro du test. Impossible pour un test publié (l'archiver d'abord) ou passé par un compte non administrateur ;
 le message nomme alors le ou les comptes en cause.
 
-**Modes** : « Entraînement rapide » (24 questions, 26 min), « Entraînement moyen » (46 questions, 48 min) et
-« Test en conditions réelles » (91 questions, 95 min). Les utilisateurs voient « Entraînement 1, 2… » ou « Test 1, 2… » ;
+**Modes** : « Entraînement rapide » (24 questions, 28 min), « Entraînement moyen » (46 questions, 52 min) et
+« Test en conditions réelles » (91 questions, 103 min), temps de lecture en CO compris. Les utilisateurs voient « Entraînement 1, 2… » ou « Test 1, 2… » ;
 le back-office garde « test n° … ». Chaque carte du tableau de bord mène à la liste du mode (`/modes/rapide/` …),
 rangée dans l'ordre de mise en ligne : date, score et niveau des tests passés, avec leurs liens « Résultats »
 et « Correction » (même après archivage). Chaque test à passer y a son propre bouton « Commencer » ; celui de la carte
@@ -155,7 +184,7 @@ le back-office (Comptes), ou double-clic sur `debloquer.cmd` (choisir D ou R, pu
 Les compteurs sont des fichiers dans `data/cache/` (`data/demo-cache/` pour la démonstration).
 
 **Conseils personnalisés** (`/advice/`) : disponibles après 3 entraînements rapides distincts, ou 2 moyens, ou 1 test en
-conditions réelles (terminés).
+conditions réelles (terminés ; un entraînement moyen compte quand ses trois épreuves sont faites, ensemble ou séparément).
 Ils sont rédigés à l'ouverture de la page de résultats : de 0 à 3 conseils, seulement sur des difficultés nettes,
 sans aucun pourcentage. Sans difficulté nette, un résumé seul. Avec `LLM_PROVIDER=fake`, ils viennent des modèles
 de secours (`advice/fallbacks/fallbacks.json`). Les anciens conseils (objectif, plan de la semaine) restent affichés
@@ -172,8 +201,10 @@ sur Android, iPhone et ordinateur. Un téléphone n'installe l'application que d
 **Mise en ligne.** Les fichiers de production sont dans `deploy/` ; le pas-à-pas est `docs/DEPLOIEMENT.md`.
 Les tests publiés sur l'ordinateur passent sur le serveur sans régénérer l'audio : `uv run python manage.py export_tests`
 (dans PowerShell, base réelle) crée `tests_<date>.zip`, que `import_tests` recrée sur le serveur (section 8 du pas-à-pas).
+Les MP3 contiennent déjà leur mixage. Pour produire des tests sur le serveur, la bibliothèque de bruits de fond se transfère
+de même : `export_ambiences` (crée `ambiences_<date>.zip`) puis `import_ambiences <archive>`.
 
-**Vérifier tous les tests automatiques :** `uv run pytest` (aucun appel réseau, `.env` est ignoré ; environ 5 minutes).
+**Vérifier tous les tests automatiques :** `uv run pytest` (aucun appel réseau, `.env` est ignoré ; environ 8 minutes).
 Les tests de bout en bout pilotent Chromium : la première fois, `uv run playwright install chromium`
 (sans lui, ces tests sont ignorés avec un message). Les icônes se régénèrent avec
 `uv run python scripts/make_icons.py` à partir de `assets/icons/icon.svg`.

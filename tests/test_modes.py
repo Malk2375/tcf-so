@@ -147,10 +147,10 @@ def test_card_shows_name_and_duration_together_and_counts(user_client, user, for
     make_dev_test("rapide", rng=random.Random(2))
     complete(user, first)
     html = user_client.get(reverse("dashboard")).content.decode()
-    # Même élément, donc même taille de police ; durées inchangées (26, 48, 95 min).
-    assert re.search(r"<h3[^>]*>Entraînement rapide · 26 min</h3>", html)
-    assert re.search(r"<h3[^>]*>Entraînement moyen · 48 min</h3>", html)
-    assert re.search(r"<h3[^>]*>Test en conditions réelles · 95 min</h3>", html)
+    # Même élément, donc même taille de police ; durées avec la lecture en CO (28, 52, 103 min).
+    assert re.search(r"<h3[^>]*>Entraînement rapide · 28 min</h3>", html)
+    assert re.search(r"<h3[^>]*>Entraînement moyen · 52 min</h3>", html)
+    assert re.search(r"<h3[^>]*>Test en conditions réelles · 103 min</h3>", html)
     assert "1 passé · 1 à passer" in html
     assert reverse("mode_tests", args=["rapide"]) in html and "Voir les entraînements" in html
 
@@ -323,7 +323,7 @@ def test_all_done_message_and_reel_wording(user_client, user, formats):
     test = make_dev_test("reel", rng=random.Random(7))
     finished(user, test, days=1)
     html = user_client.get(reverse("mode_tests", args=["reel"])).content.decode()
-    assert "Test en conditions réelles · 95 min" in html
+    assert "Test en conditions réelles · 103 min" in html
     assert "Vous avez passé le seul test en conditions réelles disponible." in html
     assert "Commencer" not in html and start_buttons(html) == []
     assert "Test 1" in html

@@ -273,14 +273,15 @@ def level_breaks(rows: list[Row]) -> list[dict]:
 
 
 def msl_level(attempts: list[Attempt]) -> str | None:
-    """Niveau MSL estimé : celui de l'épreuve de MSL du dernier passage retenu ; « A1 non
-    atteint » compte comme A1."""
-    if not attempts:
-        return None
-    section = attempts[0].sections.filter(section="MSL").first()
-    if section is None or not section.level:
-        return None
-    return "A1" if section.level == Level.BELOW_A1 else section.level
+    """Niveau MSL estimé : celui de l'épreuve de MSL du dernier passage retenu qui en a une ;
+    « A1 non atteint » compte comme A1."""
+    # Le dernier passage retenu peut être une épreuve seule sans MSL (8.1 ter) : on prend le
+    # plus récent qui a une épreuve de MSL notée.
+    for attempt in attempts:
+        section = attempt.sections.filter(section="MSL").first()
+        if section is not None and section.level:
+            return "A1" if section.level == Level.BELOW_A1 else section.level
+    return None
 
 
 def msl_families(rows: list[Row], estimated_level: str | None) -> list[dict]:

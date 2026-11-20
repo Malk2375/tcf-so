@@ -94,7 +94,10 @@
     <div class="mx-auto max-w-5xl px-4 py-5 text-sm text-slate-600">
       <p>Plateforme d'entraînement personnelle et non commerciale au TCF tout public sur ordinateur.</p>
       <p class="mt-1">Estimation non officielle. Questions générées par IA.</p>
-      <p class="mt-1"><a href="{% url 'install_help' %}" class="link inline-flex min-h-11 items-center">Installer l'application sur votre téléphone</a></p>
+      <p class="mt-1 flex flex-wrap gap-x-5">
+        <a href="{% url 'install_help' %}" class="link inline-flex min-h-11 items-center">Installer l'application sur votre téléphone</a>
+        <a href="{% url 'credits' %}" class="link inline-flex min-h-11 items-center">Crédits sonores</a>
+      </p>
     </div>
   </footer>
   {% endblock footer %}

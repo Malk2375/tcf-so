@@ -6,6 +6,10 @@ from bank.constants import LEVELS
 from bank.models import ExamFormat, FormatSection
 
 CO_ANSWER_WINDOW_SECONDS = 12
+# Temps de lecture avant l'audio d'un item de CO à options écrites (4.2).
+CO_READ_BEFORE_SECONDS = 15
+# Modes où l'on peut passer une seule épreuve (8.1 ter) ; modifiable dans /admin/.
+PART_ATTEMPT_MODES = {"moyen"}
 
 # Code, mode, libellé, puis par épreuve :
 # (épreuve, ordre, items, durée en secondes, répartition A1→C2).
@@ -15,7 +19,7 @@ FORMATS = [
         "rapide",
         "Entraînement rapide",
         [
-            ("CO", 1, 9, 480, [1, 2, 2, 2, 1, 1]),
+            ("CO", 1, 9, 615, [1, 2, 2, 2, 1, 1]),
             ("MSL", 2, 6, 300, [1, 1, 1, 1, 1, 1]),
             ("CE", 3, 9, 780, [1, 2, 2, 2, 1, 1]),
         ],
@@ -25,7 +29,7 @@ FORMATS = [
         "moyen",
         "Entraînement moyen",
         [
-            ("CO", 1, 17, 900, [3, 3, 3, 3, 3, 2]),
+            ("CO", 1, 17, 1155, [3, 3, 3, 3, 3, 2]),
             ("MSL", 2, 12, 540, [2, 2, 2, 2, 2, 2]),
             ("CE", 3, 17, 1440, [3, 3, 3, 3, 3, 2]),
         ],
@@ -35,7 +39,7 @@ FORMATS = [
         "reel",
         "Test en conditions réelles",
         [
-            ("CO", 1, 34, 1740, [5, 6, 6, 6, 6, 5]),
+            ("CO", 1, 34, 2250, [5, 6, 6, 6, 6, 5]),
             ("MSL", 2, 23, 1080, [4, 4, 4, 4, 4, 3]),
             ("CE", 3, 34, 2880, [5, 6, 6, 6, 6, 5]),
         ],
@@ -49,7 +53,15 @@ def seed_formats() -> list[ExamFormat]:
     formats = []
     for code, mode, label, sections in FORMATS:
         exam_format, _ = ExamFormat.objects.update_or_create(
-            code=code, defaults={"mode": mode, "label": label, "is_active": True}
+            code=code,
+            defaults={"mode": mode, "label": label, "is_active": True},
+            # Réglage de l'admin : seed_formats ne le remet pas à sa valeur de départ.
+            create_defaults={
+                "mode": mode,
+                "label": label,
+                "is_active": True,
+                "allow_part_attempts": mode in PART_ATTEMPT_MODES,
+            },
         )
         for section, order, n_items, duration, distribution in sections:
             is_co = section == "CO"
@@ -64,6 +76,7 @@ def seed_formats() -> list[ExamFormat]:
                 auto_advance=is_co,
                 allow_early_next=False,  # option gardée, désactivée (4.2, 19)
                 answer_window_seconds=CO_ANSWER_WINDOW_SECONDS if is_co else None,
+                read_before_seconds=CO_READ_BEFORE_SECONDS if is_co else None,
             )
             format_section.full_clean(exclude=["format"], validate_unique=False)
             FormatSection.objects.update_or_create(
@@ -80,6 +93,7 @@ def seed_formats() -> list[ExamFormat]:
                         "auto_advance",
                         "allow_early_next",
                         "answer_window_seconds",
+                        "read_before_seconds",
                     ]
                 },
             )

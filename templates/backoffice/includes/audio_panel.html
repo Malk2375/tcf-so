@@ -10,6 +10,12 @@
         Reste à synthétiser : <span class="font-semibold">{{ progress.pending_chars|floatformat:"g" }}</span> caractères ;
         quota restant ce mois-ci : <span class="font-semibold">{{ progress.remaining_quota|floatformat:"g" }}</span>.
       </p>
+      {% if progress.missing_settings %}
+        <p class="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950" data-missing-settings>
+          Lieux sans bruit de fond actif : {{ progress.missing_settings|join:", " }}. Ces documents seront générés sans bruit de fond
+          (le reste du traitement s'applique). <a href="{% url 'backoffice:ambiences' %}" class="link">Bibliothèque des bruits de fond</a>
+        </p>
+      {% endif %}
     {% endif %}
   {% else %}
     <p class="text-slate-700">Ce test n'a pas de question de compréhension orale.</p>

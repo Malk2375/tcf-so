@@ -110,12 +110,17 @@ def tts_chars(item: dict) -> int:
     return sum(len(text) for text in spoken_texts(item))
 
 
-def script_hash(item: dict) -> str:
-    """Empreinte de tout ce qui compose l'audio : un changement rend l'audio périmé."""
+def script_hash(item: dict, mix: dict | None = None) -> str:
+    """Empreinte de tout ce qui compose l'audio : un changement rend l'audio périmé.
+
+    `mix` : clips et rapport voix / bruit choisis (7.5.3), seulement pour un item qui a un lieu,
+    un canal ou un accent ; sans eux, l'empreinte est celle d'avant la révision."""
     payload = {
         "audio_script": item.get("audio_script"),
         "spoken": spoken_texts(item),
     }
+    if mix:
+        payload["mix"] = mix
     raw = json.dumps(payload, ensure_ascii=False, sort_keys=True)
     return hashlib.sha256(raw.encode()).hexdigest()
 

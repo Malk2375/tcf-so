@@ -11,6 +11,7 @@ from django.db import IntegrityError, transaction
 from rapidfuzz import fuzz, process
 
 from bank.constants import (
+    ACCENT_SUBTYPES,
     CORRECT_LENGTH_EXCESS,
     CORRECT_LENGTH_MIN_CHARS,
     CORRECT_LONGEST_SHARE,
@@ -26,7 +27,10 @@ from bank.constants import (
     QUESTION_REPONSE,
     QUESTION_REPONSE_TEXT,
     SKILLS,
+    allowed_combinations,
     expected_options_mode,
+    script_sound,
+    speaker_accent,
     subtypes_for,
 )
 from bank.content import (
@@ -194,6 +198,8 @@ def _check_slots(parsed: _Parsed, report: ImportReport) -> None:
                 file,
                 slot,
             )
+        if item["section"] == "CO" and item.get("audio_script"):
+            _check_sound_slot(item, expected, report)
         point = item["tags"].get("language_point")
         if expected.get("language_point") and point != expected["language_point"]:
             report.warning(
@@ -201,6 +207,51 @@ def _check_slots(parsed: _Parsed, report: ImportReport) -> None:
                 file,
                 slot,
             )
+
+
+def _check_sound_slot(item: dict, expected: dict, report: ImportReport) -> None:
+    """Avertissements (7.5.2) : lieu, canal ou accent différent de l'emplacement ; emplacement
+    québécois sans locuteur québécois. Les briefs d'avant la révision n'ont pas ces champs."""
+    file, slot = item["_file"], item["slot"]
+    setting, channel = script_sound(item["audio_script"])
+    declared = "setting" in item["audio_script"] or "channel" in item["audio_script"]
+    if declared and "setting" in expected and setting != expected["setting"]:
+        report.warning(
+            f"Lieu « {setting} » au lieu de « {expected['setting']} » (brief).", file, slot
+        )
+    if declared and "channel" in expected and channel != expected["channel"]:
+        report.warning(
+            f"Canal « {channel} » au lieu de « {expected['channel']} » (brief).", file, slot
+        )
+    accents = {speaker_accent(s) for s in item["audio_script"].get("speakers", {}).values()}
+    if expected.get("accent") == "fr-CA" and "fr-CA" not in accents:
+        report.warning("Emplacement québécois (fr-CA) sans locuteur fr-CA.", file, slot)
+    elif "fr-CA" in accents and expected.get("accent") != "fr-CA" and "setting" in expected:
+        report.warning(
+            "Locuteur fr-CA sur un emplacement sans accent québécois (brief).", file, slot
+        )
+
+
+def _check_sound(item: dict, report: ImportReport) -> None:
+    """Règle 12 (7.5.1) : combinaison lieu / canal permise pour le sous-type ; pas d'accent
+    québécois sur une annonce ni sur une question-réponse."""
+    file, slot, subtype = item["_file"], item["slot"], item["subtype"]
+    script = item["audio_script"]
+    setting, channel = script_sound(script)
+    allowed = allowed_combinations(subtype)
+    # Sans lieu ni canal, l'item s'importe et se génère comme avant la révision (7.5.1).
+    declared = "setting" in script or "channel" in script
+    if declared and allowed and (channel, setting) not in allowed:
+        permitted = ", ".join(f"{c} / {s}" for c, s in allowed)
+        report.error(
+            f"Lieu « {setting} » et canal « {channel} » impossibles pour « {subtype} ». "
+            f"Combinaisons permises (canal / lieu) : {permitted}.",
+            file,
+            slot,
+        )
+    accents = {speaker_accent(s) for s in script.get("speakers", {}).values()}
+    if "fr-CA" in accents and subtype not in ACCENT_SUBTYPES:
+        report.error(f"Accent fr-CA interdit pour le sous-type « {subtype} ».", file, slot)
 
 
 def _check_counts(parsed: _Parsed, report: ImportReport) -> None:
@@ -268,6 +319,7 @@ def _check_item(item: dict, report: ImportReport) -> None:
             undeclared = sorted({line["speaker"] for line in script["lines"]} - set(speakers))
             if undeclared:
                 report.error(f"Locuteur non déclaré : {', '.join(undeclared)}.", file, slot)
+            _check_sound(item, report)
     elif item.get("audio_script"):
         report.error("Script audio réservé à la CO.", file, slot)
 

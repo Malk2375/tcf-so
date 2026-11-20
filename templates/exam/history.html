@@ -44,12 +44,16 @@
       {% for attempt in attempts %}
         <li class="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p class="font-medium">{{ attempt.test.format.label }}, {{ attempt.test.public_label }}</p>
+            <p class="font-medium">{{ attempt.display_label }}</p>
             <p class="text-sm text-slate-600">{{ attempt.started_at|date:"j F Y à H:i" }}</p>
           </div>
           {% if attempt.status == "completed" %}
             <div class="flex flex-wrap items-center gap-x-4">
-              <span class="font-semibold text-blue-900">{{ attempt.level_range }} · {{ attempt.global_score }}</span>
+              {% if attempt.is_part %}
+                <span class="font-semibold text-blue-900">{{ attempt.part_level }} · {{ attempt.part_score }}</span>
+              {% else %}
+                <span class="font-semibold text-blue-900">{{ attempt.level_range }} · {{ attempt.global_score }}</span>
+              {% endif %}
               <a href="{% url 'attempt_results' attempt.pk %}" class="link inline-flex min-h-11 items-center">Résultats</a>
               <a href="{% url 'attempt_review' attempt.pk %}" class="link inline-flex min-h-11 items-center">Correction</a>
             </div>
