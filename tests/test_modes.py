@@ -235,6 +235,74 @@ def test_start_always_launches_the_smallest_public_number_not_passed(user_client
     assert ">Reprendre<" in html
 
 
+def start_buttons(html):
+    """Identifiants des tests que la liste propose de lancer, dans l'ordre."""
+    return [int(pk) for pk in re.findall(r'name="test" value="(\d+)"', html)]
+
+
+def test_each_test_to_pass_has_its_own_start_button(user_client, user, formats):
+    tests = [make_dev_test("rapide", rng=random.Random(i)) for i in range(3)]
+    html = user_client.get(reverse("mode_tests", args=["rapide"])).content.decode()
+    assert start_buttons(html) == [t.pk for t in tests]
+    assert 'name="mode"' not in html  # plus de bouton global en tête de la liste
+    response = user_client.post(reverse("attempt_create"), {"test": tests[2].pk})
+    attempt = Attempt.objects.get(user=user, status=Attempt.Status.IN_PROGRESS)
+    assert attempt.test == tests[2]  # Entraînement 3, pas le prochain
+    assert response["Location"] == reverse("attempt_player", args=[attempt.pk])
+    # La carte du tableau de bord garde son bouton, qui lance le prochain test.
+    services.abandon(attempt)
+    dashboard = user_client.get(reverse("dashboard")).content.decode()
+    assert 'name="mode" value="rapide"' in dashboard
+    user_client.post(reverse("attempt_create"), {"mode": "rapide"})
+    current = Attempt.objects.get(user=user, status=Attempt.Status.IN_PROGRESS)
+    assert current.test == tests[0]
+
+
+def test_passed_and_archived_tests_have_no_start_button(user_client, user, formats):
+    passed, archived_done, to_pass, archived = (
+        make_dev_test("rapide", rng=random.Random(i)) for i in range(4)
+    )
+    finished(user, passed, days=2)
+    finished(user, archived_done, days=1)
+    archive(archived_done)
+    archive(archived)
+    html = user_client.get(reverse("mode_tests", args=["rapide"])).content.decode()
+    assert start_buttons(html) == [to_pass.pk]
+    assert [state for state, _ in rows_of(html)] == ["passed", "passed", "to_pass"]
+
+
+@pytest.mark.parametrize("staff", [False, True])
+def test_forged_requests_are_refused(client, formats, staff):
+    user = get_user_model().objects.create_user("x", "x@example.com", PASSWORD, is_staff=staff)
+    client.force_login(user)
+    passed, archived = (make_dev_test("rapide", rng=random.Random(i)) for i in range(2))
+    finished(user, passed, days=1)
+    archive(archived)
+    draft = Test.objects.create(format=formats["rapide"], number=99)
+    response = client.post(reverse("attempt_create"), {"test": passed.pk})
+    assert response.status_code == 409
+    assert "Vous avez déjà passé cet entraînement." in response.content.decode()
+    for value in (archived.pk, draft.pk, 999999, "abc", "-1"):
+        assert client.post(reverse("attempt_create"), {"test": value}).status_code == 404, value
+    assert not Attempt.objects.filter(status=Attempt.Status.IN_PROGRESS).exists()
+
+
+def test_start_while_another_pass_is_in_progress(user_client, user, formats):
+    first, second = (make_dev_test("rapide", rng=random.Random(i)) for i in range(2))
+    reel = make_dev_test("reel", rng=random.Random(5))
+    current = services.create_attempt(user, reel)
+    html = user_client.get(reverse("mode_tests", args=["rapide"])).content.decode()
+    assert start_buttons(html) == [first.pk, second.pk]
+    assert "Un autre passage est en cours" in html
+    response = user_client.post(reverse("attempt_create"), {"test": second.pk}, follow=True)
+    assert response.redirect_chain[-1][0] == reverse("dashboard")
+    page = response.content.decode()
+    assert "reprenez-le ou abandonnez-le" in page
+    assert reverse("attempt_player", args=[current.pk]) in page
+    assert reverse("attempt_abandon", args=[current.pk]) in page
+    assert list(Attempt.objects.filter(user=user)) == [current]
+
+
 def test_passed_test_stays_viewable_after_archiving(user_client, user, formats):
     test = make_dev_test("rapide", rng=random.Random(5))
     make_dev_test("rapide", rng=random.Random(6))
@@ -257,7 +325,7 @@ def test_all_done_message_and_reel_wording(user_client, user, formats):
     html = user_client.get(reverse("mode_tests", args=["reel"])).content.decode()
     assert "Test en conditions réelles · 95 min" in html
     assert "Vous avez passé le seul test en conditions réelles disponible." in html
-    assert "Commencer" not in html
+    assert "Commencer" not in html and start_buttons(html) == []
     assert "Test 1" in html
 
 

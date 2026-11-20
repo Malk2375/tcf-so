@@ -70,8 +70,9 @@ quand `docs/` est présent : après une modification de `docs/`, recopier les fi
 
 ## Passer un test
 
-Sur le tableau de bord, choisir un mode puis « Commencer » : la plateforme propose le plus ancien test publié
-pas encore terminé. Le lecteur enchaîne les consignes et les trois épreuves (CO, MSL, CE), puis affiche
+Sur le tableau de bord, choisir un mode puis « Commencer » : la plateforme lance le plus ancien test publié
+pas encore terminé. Pour en choisir un autre, ouvrir la liste du mode : chaque test à passer a son bouton « Commencer ».
+Le lecteur enchaîne les consignes et les trois épreuves (CO, MSL, CE), puis affiche
 les résultats, la correction (`/attempts/<id>/review/`) et l'historique (`/history/`).
 En compréhension orale, pas de passage anticipé : chaque question se termine à la fin de son décompte. L'option
 `allow_early_next` d'une épreuve (bouton « Valider », désactivé partout) reste disponible dans l'admin Django.
@@ -139,7 +140,9 @@ le message nomme alors le ou les comptes en cause.
 « Test en conditions réelles » (91 questions, 95 min). Les utilisateurs voient « Entraînement 1, 2… » ou « Test 1, 2… » ;
 le back-office garde « test n° … ». Chaque carte du tableau de bord mène à la liste du mode (`/modes/rapide/` …),
 rangée dans l'ordre de mise en ligne : date, score et niveau des tests passés, avec leurs liens « Résultats »
-et « Correction » (même après archivage). « Commencer » lance toujours le prochain test non passé.
+et « Correction » (même après archivage). Chaque test à passer y a son propre bouton « Commencer » ; celui de la carte
+lance le prochain test non passé (marqué « prochain » dans la liste). Un test déjà passé, en brouillon ou archivé
+ne se lance pas, même par une requête forgée.
 
 **Un test ne se passe qu'une fois**, pour tous les comptes. Un test terminé n'est plus proposé ; quand tous les tests
 d'un mode sont passés, la carte du mode le dit. Pour qu'un compte repasse un test, supprimez son passage dans

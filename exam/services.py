@@ -64,7 +64,8 @@ def published_tests(exam_format):
 def proposed_test(user, exam_format) -> Test | None:
     """Le test publié de ce mode au plus petit numéro public que l'utilisateur n'a pas terminé
     (un passage abandonné ne compte pas) ; None s'il les a tous passés ou s'il n'y en a aucun.
-    L'utilisateur ne choisit pas : les tests se passent dans l'ordre (8.1)."""
+    C'est le test que lance le bouton de la carte ; la liste du mode permet d'en choisir un autre
+    (8.1)."""
     done = completed_test_ids(user, exam_format)
     return published_tests(exam_format).exclude(pk__in=done).first()
 

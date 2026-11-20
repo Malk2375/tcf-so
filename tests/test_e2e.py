@@ -357,6 +357,9 @@ def screens(transactional_db, formats):
     admin = get_user_model().objects.create_superuser("chef", "chef@example.com", PASSWORD)
     rng = random.Random(6)
     attempts = [complete(admin, make_dev_test("rapide", rng=rng), minutes=i) for i in range(3)]
+    # Deux tests à passer : la liste du mode montre aussi ses boutons « Commencer » (8.1 bis).
+    for seed in (61, 62):
+        make_dev_test("rapide", rng=random.Random(seed))
     advice = advice_for(attempts[-1])
     assert advice is not None
     draft = make_dev_draft("rapide", rng=rng, user=admin)
@@ -413,6 +416,9 @@ def test_every_screen_fits_and_is_readable(browser, live_server, screens, size):
         response = page.goto(live_server.url + path)
         assert response.ok, f"{name} : HTTP {response.status}"
         page.wait_for_load_state("networkidle")
+        if name == "liste d'un mode":
+            starts = page.locator("li[data-state=to_pass] button", has_text="Commencer")
+            assert starts.count() == 2, f"{label} : boutons Commencer de la liste"
         assert_fits(page, f"{label}, {name}")
         assert_contrast(page, f"{label}, {name}")
     assert_keyboard_focus_visible(page, f"{label}, comptes")

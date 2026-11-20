@@ -4,7 +4,15 @@
 <p><a href="{% url 'dashboard' %}" class="link inline-flex min-h-11 items-center">← Tableau de bord</a></p>
 <h1 class="text-2xl font-bold sm:text-3xl">{{ mode.names.name }} · {{ mode.minutes }} min</h1>
 <p class="mt-1 text-slate-700">{{ mode.questions }} questions · {{ mode.passed }} passé{% if mode.passed > 1 %}s{% endif %} · {{ mode.remaining }} à passer</p>
-<div class="mt-4">{% include "exam/includes/mode_action.html" %}</div>
+{# Pas de bouton global : chaque test à passer a le sien (SPEC 8.1 bis). #}
+{% if mode.all_done %}
+  <p class="mt-3 text-slate-700">{{ mode.all_done }}</p>
+{% endif %}
+{% if mode.other_current %}
+  <p class="mt-3 text-sm text-slate-700">
+    Un autre passage est en cours : <a href="{% url 'dashboard' %}" class="link inline-flex min-h-11 items-center">le reprendre ou l'abandonner</a>
+  </p>
+{% endif %}
 
 <section class="mt-8" aria-labelledby="liste-titre">
   <h2 id="liste-titre" class="text-xl font-semibold">Les {{ mode.names.nouns }}, dans l'ordre</h2>
@@ -34,6 +42,13 @@
             </div>
           {% elif row.state == "in_progress" %}
             <a href="{% url 'attempt_player' row.attempt.pk %}" class="link inline-flex min-h-11 items-center">Reprendre</a>
+          {% else %}
+            <form method="post" action="{% url 'attempt_create' %}">
+              {% csrf_token %}
+              <input type="hidden" name="test" value="{{ row.test.pk }}">
+              <button type="submit" class="btn {% if row.is_next %}btn-primary{% else %}btn-secondary{% endif %} w-full sm:w-auto"
+                      aria-label="Commencer {{ row.test.public_label }}">Commencer</button>
+            </form>
           {% endif %}
         </li>
       {% endfor %}

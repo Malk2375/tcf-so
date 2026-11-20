@@ -3,6 +3,7 @@ from fractions import Fraction
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.templatetags.static import static
 from django.urls import reverse
@@ -11,7 +12,7 @@ from django.views.decorators.http import require_POST
 from advice.eligibility import remaining_message
 from advice.models import Advice
 from bank.constants import LEVELS, SECTION_LABELS
-from bank.models import ExamFormat
+from bank.models import ExamFormat, Test
 from exam import services
 from exam.charts import score_chart
 from exam.models import Answer, Attempt
@@ -63,17 +64,36 @@ def mode_tests(request, mode):
 @login_required
 @require_POST
 def attempt_create(request):
-    """Lance le prochain test non passé de ce mode. Un test déjà terminé est refusé (409,
-    section 8.1), même par une requête forgée : le serveur choisit le test, et `create_attempt`
-    vérifie."""
-    exam_format = get_object_or_404(ExamFormat, mode=request.POST.get("mode"), is_active=True)
-    names = exam_format.names
-    test = services.proposed_test(request.user, exam_format)
-    if test is None:
-        if services.published_tests(exam_format).exists():
-            return _refused(request, names.already_done, exam_format)
-        messages.error(request, f"Aucun {names.noun} n'est disponible pour ce mode.")
-        return redirect("dashboard")
+    """Lance un test (SPEC 8.1). Deux formes :
+
+    - `test` : identifiant du test choisi sur la liste du mode. Un test qui n'est pas publié
+      (brouillon, archivé, inexistant) donne 404 ; un test déjà terminé, 409 ;
+    - `mode` : bouton de la carte du tableau de bord, qui lance le prochain test non passé.
+
+    Un autre passage en cours renvoie au tableau de bord, qui propose de le reprendre ou de
+    l'abandonner. `create_attempt` revérifie : une requête forgée ne contourne rien."""
+    test_id = request.POST.get("test")
+    if test_id:
+        if not test_id.isdigit():
+            raise Http404
+        test = get_object_or_404(
+            Test.objects.select_related("format"),
+            pk=int(test_id),
+            status=Test.Status.PUBLISHED,
+            format__is_active=True,
+        )
+        exam_format = test.format
+        if test.pk in services.completed_test_ids(request.user):
+            return _refused(request, exam_format.names.already_done, exam_format)
+    else:
+        exam_format = get_object_or_404(ExamFormat, mode=request.POST.get("mode"), is_active=True)
+        names = exam_format.names
+        test = services.proposed_test(request.user, exam_format)
+        if test is None:
+            if services.published_tests(exam_format).exists():
+                return _refused(request, names.already_done, exam_format)
+            messages.error(request, f"Aucun {names.noun} n'est disponible pour ce mode.")
+            return redirect("dashboard")
     try:
         attempt = services.create_attempt(request.user, test)
     except AttemptError as exc:
